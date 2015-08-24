@@ -38,7 +38,6 @@ void selection_menu()
 
 void loop() 
 {
-  selection_menu();
   switch (menu_var1) {
     case 77:
     case 109:  
@@ -54,6 +53,8 @@ void loop()
       calibrate_sensor();
       selection_menu();
       break;
+    default:
+      selection_menu();
 }
   
 
@@ -192,6 +193,10 @@ void serialEvent()
       if(menu_var1==77||menu_var1==109)
       {
         cont_high = cont_low = Serial.parseInt();
+        if(cont_high<0)
+        {
+          menu_var1=-1;
+        }
         percent_high = Serial.parseInt();
         if (Serial.read()=='\n') 
         {
