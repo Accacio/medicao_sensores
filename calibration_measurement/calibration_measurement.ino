@@ -212,47 +212,48 @@ void serialEvent()
    }        
 }
 
-int get_
 
-void get_pot_value(int x)
+void get_pot_value(int angle)
 {
   float values[9]; 
-
+  int ascending=0;
+  int descending=0;
   int register_vpot[5];
   for(int i=0;i<5;i++)
   {
     readSensors(values);
     register_vpot[i] = values[2];
   }
-  
-  while (true)
-  {
-    int ascending=0;
-    int descending=0;
+  while (ascending!=5||descending!=5)
+  { 
+    servooldg.write(angle);
+    ascending=0;
+    descending=0;
     readSensors(values);
     for(int i=0;i<5;i++)
     {      
-      ascending+=register_vpot[i]>values[2];
-      descending+=register_vpot[i]<values[2];
-    }
-    if(ascending==5||descending==5)
-    {
-      break;
-    }
-    
+      ascending+=values[2]>register_vpot[i];
+      descending+=values[2]<register_vpot[i];
+    }    
     for(int i=1;i<5;i++)
     {      
       register_vpot[i-1]=register_vpot[i];
     }
     register_vpot[4]=values[2];
   }
+  Serial.println("Value to ");
+  Serial.print(angle);
+  Serial.print("º is :");
+  Serial.print(values[2]);
 }
 
 
 
 void calibrate_pot()
 {
-  Serial.print("");
+  get_pot_value(0);
+  get_pot_value(90);
+  get_pot_value(180);  
 }
 
 void calibrate_sensor()
