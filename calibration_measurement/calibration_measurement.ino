@@ -1,4 +1,10 @@
- #define NUM_READS 100
+#define NUM_READS 100
+#define VPOT_IN A11
+#define VREF_IN A10
+#define VIM_IN A12
+#define POTREF_IN A13
+
+
 #include<Servo.h>
 int cont_high=0;
 int cont_low=0;
@@ -72,10 +78,10 @@ void readSensors(float returnval[9]){
    int vecvalue_potref[NUM_READS];
       
    for(int i=0;i<NUM_READS;i++){
-     vecvalue_vref[i] = analogRead(A10);
-     vecvalue_vpot[i] = analogRead(A11);
-     vecvalue_vim[i] = analogRead(A12);
-     vecvalue_potref[i] = analogRead(A13);
+     vecvalue_vref[i] = analogRead(VREF_IN);
+     vecvalue_vpot[i] = analogRead(VPOT_IN);
+     vecvalue_vim[i] = analogRead(VIM_IN);
+     vecvalue_potref[i] = analogRead(POTREF_IN);
      delayMicroseconds(10);     
     }
 
@@ -206,9 +212,47 @@ void serialEvent()
    }        
 }
 
+int get_
+
+void get_pot_value(int x)
+{
+  float values[9]; 
+
+  int register_vpot[5];
+  for(int i=0;i<5;i++)
+  {
+    readSensors(values);
+    register_vpot[i] = values[2];
+  }
+  
+  while (true)
+  {
+    int ascending=0;
+    int descending=0;
+    readSensors(values);
+    for(int i=0;i<5;i++)
+    {      
+      ascending+=register_vpot[i]>values[2];
+      descending+=register_vpot[i]<values[2];
+    }
+    if(ascending==5||descending==5)
+    {
+      break;
+    }
+    
+    for(int i=1;i<5;i++)
+    {      
+      register_vpot[i-1]=register_vpot[i];
+    }
+    register_vpot[4]=values[2];
+  }
+}
+
+
+
 void calibrate_pot()
 {
-  Serial.print("Just Calibrated Pot\n");
+  Serial.print("");
 }
 
 void calibrate_sensor()
