@@ -208,7 +208,7 @@ void serialEvent()
 
 void calibrate_pot()
 {
-  Serial.print("Just Calibrated Pot\n");
+  Serial.print("Just Calibrated fasdasdas Pot\n");
 }
 
 void calibrate_sensor()
