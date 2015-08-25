@@ -223,12 +223,12 @@ void get_pot_value(int angle)
   {
     readSensors(values);
     register_vpot[i] = values[2];
-    delay(10);
-    
   }
+  
   while (true)
   { 
     servooldg.write(angle);
+    delay(10);
     ascending=0;
     descending=0;
     readSensors(values);
