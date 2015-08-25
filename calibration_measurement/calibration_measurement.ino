@@ -1,4 +1,4 @@
-#define NUM_READS 100
+ #define NUM_READS 100
 #include<Servo.h>
 int cont_high=0;
 int cont_low=0;
