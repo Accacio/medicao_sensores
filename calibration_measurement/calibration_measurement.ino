@@ -51,7 +51,7 @@ void loop()
       break;
     case 80:
     case 112: 
-      calibrate_pot(); 
+      calibrate_pot(5); 
       selection_menu();
       break;
     case 83:
@@ -225,10 +225,9 @@ void get_pot_value(int angle)
     register_vpot[i] = values[2];
   }
   
-  while (true)
-  { 
+  do{ 
     servooldg.write(angle);
-    delay(10);
+    delay(200);
     ascending=0;
     descending=0;
     readSensors(values);
@@ -237,29 +236,35 @@ void get_pot_value(int angle)
       ascending+=values[2]>register_vpot[i];
       descending+=values[2]<register_vpot[i];
     }
-    if(ascending!=5 && descending!=5)
-    {
-      break;
-    }   
+
     for(int i=1;i<5;i++)
     {      
       register_vpot[i-1]=register_vpot[i];
     }
     register_vpot[4]=values[2];
+  }while(ascending==5 || descending==5);
+
+ int measure=0;
+  for(int i=0;i<5;i++){
+    measure+=register_vpot[i];
   }
-  Serial.println("Value to ");
+  measure=measure/5;
+  Serial.print("Measure of ");
   Serial.print(angle);
-  Serial.print("º is :");
-  Serial.print(values[2]);
+  Serial.print("º is: ");
+  Serial.println(measure);
 }
 
 
 
-void calibrate_pot()
+void calibrate_pot(int num_measures)
 {
-  get_pot_value(0);
-  get_pot_value(90);
-  get_pot_value(180);  
+  int fract_angle=180/(num_measures-1);
+  for(int i=0;i<=180;i+=fract_angle){
+    get_pot_value(i);    
+  }
+    
+
 }
 
 void calibrate_sensor()
