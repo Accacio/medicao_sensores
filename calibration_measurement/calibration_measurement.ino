@@ -7,7 +7,7 @@ int flag=0;
 int cont_cycle=0;
 float PWM_value;
 float define_potref=625-30;
-int menu_var1=-1;
+int menu_var=-1;
 
 Servo servooldg;
 
@@ -21,24 +21,24 @@ void setup()
 void selection_menu()
 {
   Serial.println("Press c to Calibration, or m to Measurement");
-  while (menu_var1==-1||(menu_var1!=99 && menu_var1!=67 && menu_var1!=77 && menu_var1!=109))
+  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109))
   {
-    menu_var1=Serial.read();
+    menu_var=Serial.read();
   }
 
-  if (menu_var1==99||menu_var1==67)
+  if (menu_var==99||menu_var==67)
   {
     Serial.println("Press p to calibrate Motor Pot, or s to calibrate Current Sensor");
-    while (menu_var1==-1||(menu_var1!=80 && menu_var1!=112 && menu_var1!=83 && menu_var1!=115))
+    while (menu_var==-1||(menu_var!=80 && menu_var!=112 && menu_var!=83 && menu_var!=115))
     {
-      menu_var1=Serial.read();
+      menu_var=Serial.read();
     }
   }
 }
 
 void loop() 
 {
-  switch (menu_var1) {
+  switch (menu_var) {
     case 77:
     case 109:  
       measurement();  
@@ -190,12 +190,12 @@ void serialEvent()
 {
   while(Serial.available())
   {
-      if(menu_var1==77||menu_var1==109)
+      if(menu_var==77||menu_var==109)
       {
         cont_high = cont_low = Serial.parseInt();
         if(cont_high<0)
         {
-          menu_var1=-1;
+          menu_var=-1;
         }
         percent_high = Serial.parseInt();
         if (Serial.read()=='\n') 
@@ -208,7 +208,7 @@ void serialEvent()
 
 void calibrate_pot()
 {
-  Serial.print("Just Calibrated fasdasdas Pot\n");
+  Serial.print("Just Calibrated Pot\n");
 }
 
 void calibrate_sensor()
