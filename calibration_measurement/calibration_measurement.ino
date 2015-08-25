@@ -233,15 +233,15 @@ void get_pot_value(int angle)
     readSensors(values);
     for(int i=0;i<5;i++)
     {      
-      ascending+=values[2]>register_vpot[i];
-      descending+=values[2]<register_vpot[i];
+      ascending+=values[6]>register_vpot[i];
+      descending+=values[6]<register_vpot[i];
     }
 
     for(int i=1;i<5;i++)
     {      
       register_vpot[i-1]=register_vpot[i];
     }
-    register_vpot[4]=values[2];
+    register_vpot[4]=values[6];
   }while(ascending==5 || descending==5);
 
  int measure=0;
@@ -259,8 +259,8 @@ void get_pot_value(int angle)
 
 void calibrate_pot(int num_measures)
 {
-  int fract_angle=180/(num_measures-1);
-  for(int i=0;i<=180;i+=fract_angle){
+  int fract_angle=179/(num_measures-1);
+  for(int i=0;i<180;i+=fract_angle){
     get_pot_value(i);    
   }
     
