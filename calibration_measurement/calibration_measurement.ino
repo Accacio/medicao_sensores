@@ -3,8 +3,8 @@
 #define VREF_IN A10
 #define VIM_IN A12
 #define POTREF_IN A13
-#define MPOS_DC 34
-#define MPOS_MAX 666
+#define MPOS_DC 33
+#define MPOS_MAX 668
 
 
 #include<Servo.h>
@@ -13,15 +13,15 @@ int cont_low=0;
 int percent_high=0;
 int flag=0;
 int cont_cycle=0;
-float PWM_value;
-float define_potref=625-30;
+float PWM_value=0;
+//float define_potref=625-30;
 int menu_var=-1;
 
 Servo servooldg;
 
 void setup()
 {
-  servooldg.attach(2,20,970); //2065 , 974
+  servooldg.attach(2,20,965); //2065 , 974
   // initialize serial communication at 9600 bits per second:
   Serial.begin(115200);
 }
@@ -53,7 +53,7 @@ void loop()
       break;
     case 80:
     case 112:
-      calibrate_pot(3);
+      calibrate_pot(5);
       selection_menu();
       break;
     case 83:
@@ -151,15 +151,15 @@ cont_cycle++;
 float values[9];
 readSensors(values);
 float vref=1.989*values[1];
-float vpot=(values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC);
+float vpot=100*((values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
 float vim=values[3];
 float potref=values[4];
 
 float vref_mean=1.989*values[5];
-float vpot_mean=(values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC);
+float vpot_mean=100*((values[6]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
 float vim_mean=values[7];
 float potref_mean=values[8];
-
+float pot_raw=values[2];
 //float PWMvalue=(vpot*180)/(1023);
 servooldg.write(PWM_value);
 float im=30*(vim/vref)-15;
@@ -169,6 +169,8 @@ Serial.print(PWM_value);
 Serial.print(',');
 Serial.print(vref);
 Serial.print(',');
+Serial.print(pot_raw);
+Serial.print(',');
 Serial.print(vim);
 Serial.print(',');
 Serial.print(vpot);
@@ -176,6 +178,8 @@ Serial.print(',');
 Serial.print(vref_mean);
 Serial.print(',');
 Serial.print(vim_mean);
+Serial.print(',');
+Serial.print(vpot_mean);
 Serial.print(',');
 if (flag==1)
 {
@@ -246,7 +250,7 @@ void get_pot_value(float angle)
   measure=measure/5;
   Serial.print("Measure of ");
   Serial.print(angle);
-  Serial.print("º is: ");
+  Serial.print("° is: ");
   Serial.println(measure);
 }
 
@@ -254,8 +258,8 @@ void get_pot_value(float angle)
 
 void calibrate_pot(int num_measures)
 {
-  float fract_angle=20/(num_measures-1);
-  for(float i=0;i<11;i+=fract_angle){
+  float fract_angle=180/(num_measures-1);
+  for(float i=0;i<181;i+=fract_angle){
     get_pot_value(i);
   }
 
