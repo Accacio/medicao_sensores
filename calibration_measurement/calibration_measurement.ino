@@ -3,6 +3,8 @@
 #define VREF_IN A10
 #define VIM_IN A12
 #define POTREF_IN A13
+#define MPOS_DC 34
+#define MPOS_MAX 666
 
 
 #include<Servo.h>
@@ -17,9 +19,9 @@ int menu_var=-1;
 
 Servo servooldg;
 
-void setup() 
+void setup()
 {
-  servooldg.attach(2,2065,974); //974
+  servooldg.attach(2,20,970); //2065 , 974
   // initialize serial communication at 9600 bits per second:
   Serial.begin(115200);
 }
@@ -42,16 +44,16 @@ void selection_menu()
   }
 }
 
-void loop() 
+void loop()
 {
   switch (menu_var) {
     case 77:
-    case 109:  
-      measurement();  
+    case 109:
+      measurement();
       break;
     case 80:
-    case 112: 
-      calibrate_pot(5); 
+    case 112:
+      calibrate_pot(3);
       selection_menu();
       break;
     case 83:
@@ -62,9 +64,9 @@ void loop()
     default:
       selection_menu();
 }
-  
 
-  
+
+
 
 
 }
@@ -76,13 +78,13 @@ void readSensors(float returnval[9]){
    int vecvalue_vpot[NUM_READS];
    int vecvalue_vim[NUM_READS];
    int vecvalue_potref[NUM_READS];
-      
+
    for(int i=0;i<NUM_READS;i++){
      vecvalue_vref[i] = analogRead(VREF_IN);
      vecvalue_vpot[i] = analogRead(VPOT_IN);
      vecvalue_vim[i] = analogRead(VIM_IN);
      vecvalue_potref[i] = analogRead(POTREF_IN);
-     delayMicroseconds(10);     
+     delayMicroseconds(10);
     }
 
    returnval[1] = filter(vecvalue_vref); //value for vref
@@ -94,7 +96,7 @@ void readSensors(float returnval[9]){
    returnval[6] = 0;//value for mean of vpot
    returnval[7] = 0;//value for mean of vim
    returnval[8] = 0;//value for mean of potref
-   
+
   for(int i=0;i<NUM_READS;i++){
 
     returnval[5] +=vecvalue_vref[i];
@@ -121,7 +123,7 @@ float filter(int raw_val[]){
                 }
         }
     }
-    
+
     // median of the 20 center values of the array
     float return_filvalue=0;
     int cont=0;
@@ -130,7 +132,7 @@ float filter(int raw_val[]){
       cont++;
    }
    return_filvalue=return_filvalue/20;
-   
+
    return return_filvalue;
 }
 
@@ -145,16 +147,16 @@ if (cont_cycle%(cont_high+cont_low)>=cont_high)
   PWM_value=0;
 }
 cont_cycle++;
-  
-float values[9];  
+
+float values[9];
 readSensors(values);
 float vref=1.989*values[1];
-float vpot=values[2]-30;
+float vpot=(values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC);
 float vim=values[3];
 float potref=values[4];
 
 float vref_mean=1.989*values[5];
-float vpot_mean=values[6];
+float vpot_mean=(values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC);
 float vim_mean=values[7];
 float potref_mean=values[8];
 
@@ -162,9 +164,6 @@ float potref_mean=values[8];
 servooldg.write(PWM_value);
 float im=30*(vim/vref)-15;
 float im_mean=30*((vim_mean)/(vref_mean))-15;
-
-float real_pot=((vpot*vref)/(define_potref*1023))*100;
-float real_pot_mean=((vpot_mean*potref_mean)/(vref_mean*1023)-0.0195)*100;
 
 Serial.print(PWM_value);
 Serial.print(',');
@@ -174,17 +173,13 @@ Serial.print(vim);
 Serial.print(',');
 Serial.print(vpot);
 Serial.print(',');
-Serial.print(real_pot);
-Serial.print(',');
 Serial.print(vref_mean);
 Serial.print(',');
 Serial.print(vim_mean);
 Serial.print(',');
-Serial.print(real_pot_mean);
-Serial.print(',');
 if (flag==1)
 {
-  Serial.print(cont_high);    
+  Serial.print(cont_high);
   Serial.print(',');
   Serial.print(percent_high);
   flag=0;
@@ -192,7 +187,7 @@ if (flag==1)
 Serial.println();
 }
 
-void serialEvent() 
+void serialEvent()
 {
   while(Serial.available())
   {
@@ -204,18 +199,18 @@ void serialEvent()
           menu_var=-1;
         }
         percent_high = Serial.parseInt();
-        if (Serial.read()=='\n') 
+        if (Serial.read()=='\n')
         {
           flag=1;
         }
       }
-   }        
+   }
 }
 
 
-void get_pot_value(int angle)
+void get_pot_value(float angle)
 {
-  float values[9]; 
+  float values[9];
   int ascending=0;
   int descending=0;
   int register_vpot[5];
@@ -224,21 +219,21 @@ void get_pot_value(int angle)
     readSensors(values);
     register_vpot[i] = values[2];
   }
-  
-  do{ 
+
+  do{
     servooldg.write(angle);
     delay(200);
     ascending=0;
     descending=0;
     readSensors(values);
     for(int i=0;i<5;i++)
-    {      
+    {
       ascending+=values[6]>register_vpot[i];
       descending+=values[6]<register_vpot[i];
     }
 
     for(int i=1;i<5;i++)
-    {      
+    {
       register_vpot[i-1]=register_vpot[i];
     }
     register_vpot[4]=values[6];
@@ -259,11 +254,11 @@ void get_pot_value(int angle)
 
 void calibrate_pot(int num_measures)
 {
-  int fract_angle=179/(num_measures-1);
-  for(int i=0;i<180;i+=fract_angle){
-    get_pot_value(i);    
+  float fract_angle=20/(num_measures-1);
+  for(float i=0;i<11;i+=fract_angle){
+    get_pot_value(i);
   }
-    
+
 
 }
 
@@ -271,6 +266,3 @@ void calibrate_sensor()
 {
   Serial.print("Just Calibrated Sensor\n");
 }
-
-
-
