@@ -4,17 +4,18 @@ out=[];%zeros(100,3);
 amostra=[];
 fopen(s);
 pause(10);
-fwrite(s,'g');
+fwrite(s,'m');
 pause(1);
-% aux='150,50';
-% fwrite(s,aux);
-% pause(1);
 out=fscanf(s);
 
+%settings
 cont_high=50;
-percent_high=20;
+percent_high=10;
+xmax=400;
 
 fprintf(s,[num2str(cont_high),',',num2str(percent_high)]);
+pause(1);
+out=fscanf(s);
 
 commas=[];
 
@@ -28,11 +29,11 @@ vpot_mean=[];
 
 
 
-image='arduinoimage.png';
+%image='arduinoimage.png';
 fig=figure
 
 axisx=[];
-xmax=400;
+
 
 %PWM_value
 PWM_value_ymin=0;
@@ -51,7 +52,7 @@ vref_ymax=1060;
 im_ymin=0;
 im_ymax=0.5;
 
-
+sampl_time=0;
 tic
 for i=1:xmax;
 axisx(i,1)=i;
@@ -62,11 +63,11 @@ commas=strfind(out,',');
 PWM_value(i,1)=str2double(out(1:commas(1)-1))*100/180;
 vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
 im(i,1)=str2double(out(commas(2)+1:commas(3)-1))*100/1023;
-vpot(i,1)=str2double(out(commas(3)+1:commas(4)-1))*100;
+vpot(i,1)=str2double(out(commas(3)+1:commas(4)-1));
 vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
 im_mean(i,1)=str2double(out(commas(5)+1:commas(6)-1))*100/1023;
-vpot_mean(i,1)=str2double(out(commas(6)+1:commas(7)))*100;
-
+vpot_mean(i,1)=str2double(out(commas(6)+1:commas(7)-1));
+sampl_time=sampl_time+str2double(out(commas(7)+1:commas(8)-1));
 
 
 %     %plot vref
@@ -102,9 +103,13 @@ vpot_mean(i,1)=str2double(out(commas(6)+1:commas(7)))*100;
     drawnow
 end
 toc
+sampl_time=sampl_time/xmax
+aux='0,0';
+fwrite(s,aux);
+pause(1);
+out=fscanf(s);
 
    
     
 fclose(s);
-
-clear s
+delete(s);

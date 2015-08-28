@@ -8,6 +8,9 @@
 
 
 #include<Servo.h>
+unsigned long t0_time;
+unsigned long t1_time;
+unsigned long t_time;
 int cont_high=0;
 int cont_low=0;
 int percent_high=0;
@@ -22,14 +25,15 @@ Servo servooldg;
 void setup()
 {
   servooldg.attach(2,20,965); //2065 , 974
+  servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
   Serial.begin(115200);
 }
 
 void selection_menu()
 {
-  Serial.println("Press c to Calibration, or m to Measurement, or g for Graphic");
-  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=71 && menu_var!=103))
+  Serial.println("Press c to Calibration, or m to Measurement");
+  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109))
   {
     menu_var=Serial.read();
   }
@@ -41,6 +45,7 @@ void selection_menu()
       menu_var=Serial.read();
     }
   }
+  t0_time=millis();
 }
 
 void loop()
@@ -48,12 +53,8 @@ void loop()
   switch (menu_var) {
     case 77:
     case 109:
-      measurement();
-      break;
-    case 71:
-    case 103:
-      measure_loop();
-      break;  
+    measurement();
+    break;  
     case 80:
     case 112:
       calibrate_pot(5);
@@ -139,18 +140,7 @@ float filter(int raw_val[]){
    return return_filvalue;
 }
 
-void measure_loop(){
-  Serial.println("Enter cycle and percent high");
-  do{
-  serialEvent();
-  }while(percent_high==0);
-//  cont_high=cont_low=150;
-//  percent_high=50;
-  do{
-    measurement();
-  }while(1);
-  
-}
+
 void measurement(){
 
 if (cont_cycle%(cont_high+cont_low)<cont_high)
@@ -165,6 +155,10 @@ cont_cycle++;
 
 float values[9];
 readSensors(values);
+t1_time=millis();
+t_time=t1_time-t0_time;
+t0_time=t1_time;
+
 float vref=1.989*values[1];
 float vpot=100*((values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
 float vim=values[3];
@@ -196,13 +190,15 @@ Serial.print(vim_mean);
 Serial.print(',');
 Serial.print(vpot_mean);
 Serial.print(',');
-if (flag==1)
-{
-  Serial.print(cont_high);
-  Serial.print(',');
-  Serial.print(percent_high);
-  flag=0;
-}
+Serial.print(t_time);
+Serial.print(',');
+//if (flag==1)
+//{
+//  Serial.print(cont_high);
+//  Serial.print(',');
+//  Serial.print(percent_high);
+//  flag=0;
+//}
 Serial.println();
 }
 
@@ -210,23 +206,21 @@ void serialEvent()
 {
   while(Serial.available())
   {
-  Serial.print('p');
-
       if(menu_var==77||menu_var==109||menu_var==71||menu_var==103)
       {
         cont_high = cont_low = Serial.parseInt();
-//        if(cont_high<0)
-//        {
-//          menu_var=-1;
- //       }
+        if(cont_high<0)
+        {
+          menu_var=-1;
+       }
         percent_high = Serial.parseInt();
         if (Serial.read()=='\n')
         {
           flag=1;
         }
-        Serial.print(cont_high);
-        Serial.print(percent_high);
-        Serial.print(flag);
+//        Serial.print(cont_high);
+//        Serial.print(percent_high);
+//        Serial.print(flag);
       }
    }
 }
