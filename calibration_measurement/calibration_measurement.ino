@@ -28,12 +28,11 @@ void setup()
 
 void selection_menu()
 {
-  Serial.println("Press c to Calibration, or m to Measurement");
-  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109))
+  Serial.println("Press c to Calibration, or m to Measurement, or g for Graphic");
+  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=71 && menu_var!=103))
   {
     menu_var=Serial.read();
   }
-
   if (menu_var==99||menu_var==67)
   {
     Serial.println("Press p to calibrate Motor Pot, or s to calibrate Current Sensor");
@@ -51,6 +50,10 @@ void loop()
     case 109:
       measurement();
       break;
+    case 71:
+    case 103:
+      measure_loop();
+      break;  
     case 80:
     case 112:
       calibrate_pot(5);
@@ -136,6 +139,18 @@ float filter(int raw_val[]){
    return return_filvalue;
 }
 
+void measure_loop(){
+  Serial.println("Enter cycle and percent high");
+  do{
+  serialEvent();
+  }while(percent_high==0);
+//  cont_high=cont_low=150;
+//  percent_high=50;
+  do{
+    measurement();
+  }while(1);
+  
+}
 void measurement(){
 
 if (cont_cycle%(cont_high+cont_low)<cont_high)
@@ -169,8 +184,8 @@ Serial.print(PWM_value);
 Serial.print(',');
 Serial.print(vref);
 Serial.print(',');
-Serial.print(pot_raw);
-Serial.print(',');
+//Serial.print(pot_raw);
+//Serial.print(',');
 Serial.print(vim);
 Serial.print(',');
 Serial.print(vpot);
@@ -195,18 +210,23 @@ void serialEvent()
 {
   while(Serial.available())
   {
-      if(menu_var==77||menu_var==109)
+  Serial.print('p');
+
+      if(menu_var==77||menu_var==109||menu_var==71||menu_var==103)
       {
         cont_high = cont_low = Serial.parseInt();
-        if(cont_high<0)
-        {
-          menu_var=-1;
-        }
+//        if(cont_high<0)
+//        {
+//          menu_var=-1;
+ //       }
         percent_high = Serial.parseInt();
         if (Serial.read()=='\n')
         {
           flag=1;
         }
+        Serial.print(cont_high);
+        Serial.print(percent_high);
+        Serial.print(flag);
       }
    }
 }

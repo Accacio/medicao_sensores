@@ -1,9 +1,15 @@
-s=serial('com3');
-s.Baudrate=115200
+s=serial('com4','Baudrate',115200);
+%s.Baudrate=115200
 out=[];%zeros(100,3);
 amostra=[];
 fopen(s);
+pause(10);
+fwrite(s,'g');
 pause(1);
+% aux='150,50';
+% fwrite(s,aux);
+% pause(1);
+out=fscanf(s);
 
 cont_high=50;
 percent_high=20;
