@@ -3,8 +3,8 @@
 #define VREF_IN A10
 #define VIM_IN A12
 #define POTREF_IN A13
-#define MPOS_DC 33
-#define MPOS_MAX 668
+#define MPOS_DC 30
+#define MPOS_MAX 625 //668
 
 
 #include<Servo.h>
@@ -24,7 +24,7 @@ Servo servooldg;
 
 void setup()
 {
-  servooldg.attach(2,20,965); //2065 , 974
+  servooldg.attach(2,20,970); //20, 965
   servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
   Serial.begin(115200);

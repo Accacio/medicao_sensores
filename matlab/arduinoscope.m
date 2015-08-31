@@ -1,4 +1,10 @@
-s=serial('com4','Baudrate',115200);
+%settings
+cont_high=400;
+percent_high=100;
+xmax=2000;
+Port_com='com4';
+
+s=serial(Port_com,'Baudrate',115200);
 %s.Baudrate=115200
 out=[];%zeros(100,3);
 amostra=[];
@@ -8,10 +14,7 @@ fwrite(s,'m');
 pause(1);
 out=fscanf(s);
 
-%settings
-cont_high=50;
-percent_high=10;
-xmax=400;
+
 
 fprintf(s,[num2str(cont_high),',',num2str(percent_high)]);
 pause(1);
@@ -30,7 +33,7 @@ vpot_mean=[];
 
 
 %image='arduinoimage.png';
-fig=figure
+fig=figure;
 
 axisx=[];
 
@@ -53,6 +56,7 @@ im_ymin=0;
 im_ymax=0.5;
 
 sampl_time=0;
+
 tic
 for i=1:xmax;
 axisx(i,1)=i;
@@ -104,6 +108,8 @@ sampl_time=sampl_time+str2double(out(commas(7)+1:commas(8)-1));
 end
 toc
 sampl_time=sampl_time/xmax
+t=0:sampl_time/1000:(xmax*sampl_time-sampl_time)/1000;
+input_sample=PWM_value;
 aux='0,0';
 fwrite(s,aux);
 pause(1);
