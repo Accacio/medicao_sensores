@@ -226,10 +226,16 @@ do{
   t_time=t1_time-t0_time;
 }while(t_time<const_time);
 t0_time=t1_time;
-}while(1);
+
+if (Serial.available())
+{
+  serialEvent();
+}
+}while(menu_var>0);
+
 }
 
-/*void serialEvent()
+void serialEvent()
 {
   while(Serial.available())
   {
@@ -251,7 +257,7 @@ t0_time=t1_time;
       }
    }
 }
-*/
+
 
 void get_pot_value(float angle)
 {
