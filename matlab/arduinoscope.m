@@ -1,27 +1,26 @@
 %settings
 cont_high=400;
 percent_high=100;
-xmax=2000;
+xmax=1000;
 Port_com='com4';
 
 s=serial(Port_com,'Baudrate',115200);
-%s.Baudrate=115200
-out=[];%zeros(100,3);
+
+out=[];
 amostra=[];
 fopen(s);
-pause(10);
-fwrite(s,'m');
-pause(1);
-out=fscanf(s);
+%pause(10);
+%fwrite(s,'m');
+%pause(1);
+%out=fscanf(s);
 
 
 
-fprintf(s,[num2str(cont_high),',',num2str(percent_high)]);
-pause(1);
-out=fscanf(s);
+%fprintf(s,[num2str(cont_high),',',num2str(percent_high)]);
+%pause(1);
+%out=fscanf(s)
 
 commas=[];
-
 PWM_value=[];
 vref=[];
 im=[];
@@ -30,11 +29,8 @@ vref_mean=[];
 im_mean=[];
 vpot_mean=[];
 
-
-
 %image='arduinoimage.png';
 fig=figure;
-
 axisx=[];
 
 
@@ -56,6 +52,11 @@ im_ymin=0;
 im_ymax=0.5;
 
 sampl_time=0;
+commas_error=0;
+
+out=fscanf(s)
+fwrite(s,'m');
+pause(1);
 
 tic
 for i=1:xmax;
@@ -64,15 +65,27 @@ axisx(i,1)=i;
 %for j=1:3
 out=fscanf(s);
 commas=strfind(out,',');
-PWM_value(i,1)=str2double(out(1:commas(1)-1))*100/180;
-vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
-im(i,1)=str2double(out(commas(2)+1:commas(3)-1))*100/1023;
-vpot(i,1)=str2double(out(commas(3)+1:commas(4)-1));
-vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
-im_mean(i,1)=str2double(out(commas(5)+1:commas(6)-1))*100/1023;
-vpot_mean(i,1)=str2double(out(commas(6)+1:commas(7)-1));
-sampl_time=sampl_time+str2double(out(commas(7)+1:commas(8)-1));
+if numel(commas)<4
+PWM_value(i,1)=PWM_value(i-1,1);
+%vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
+%im(i,1)=str2double(out(commas(2)+1:commas(3)-1))*100/1023;
+vpot(i,1)=vpot(i-1,1);
+%vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
+%im_mean(i,1)=str2double(out(commas(5)+1:commas(6)-1))*100/1023;
+vpot_mean(i,1)=vpot_mean(i-1,1);
+sampl_time=sampl_time+sampl_time/i-1;
 
+commas_error=commas_error+1;
+else
+PWM_value(i,1)=str2double(out(1:commas(1)-1))*100/180;
+%vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
+%im(i,1)=str2double(out(commas(2)+1:commas(3)-1))*100/1023;
+vpot(i,1)=str2double(out(commas(1)+1:commas(2)-1));
+%vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
+%im_mean(i,1)=str2double(out(commas(5)+1:commas(6)-1))*100/1023;
+vpot_mean(i,1)=str2double(out(commas(2)+1:commas(3)-1));
+sampl_time=sampl_time+str2double(out(commas(3)+1:commas(4)-1));
+end
 
 %     %plot vref
 %     subplot(3,1,1)
@@ -98,16 +111,17 @@ sampl_time=sampl_time+str2double(out(commas(7)+1:commas(8)-1));
     axis([0 xmax PWM_value_ymin PWM_value_ymax]);
     hold on
     
-    %plot im
-    subplot(3,1,3)
-    plot(axisx(end-1*sign(end-1):end),im(end-1*sign(end-1):end),'LineWidth',2)
-    hold on
-    plot(axisx(end-1*sign(end-1):end),im_mean(end-1*sign(end-1):end),'r','LineWidth',2)
-    axis([0 xmax im_ymin im_ymax]);
+%     %plot im
+%     subplot(3,1,3)
+%     plot(axisx(end-1*sign(end-1):end),im(end-1*sign(end-1):end),'LineWidth',2)
+%     hold on
+%     plot(axisx(end-1*sign(end-1):end),im_mean(end-1*sign(end-1):end),'r','LineWidth',2)
+%     axis([0 xmax im_ymin im_ymax]);
     drawnow
 end
 toc
 sampl_time=sampl_time/xmax
+commas_error
 t=0:sampl_time/1000:(xmax*sampl_time-sampl_time)/1000;
 input_sample=PWM_value;
 aux='0,0';
@@ -119,3 +133,17 @@ out=fscanf(s);
     
 fclose(s);
 delete(s);
+
+
+%another posibility for ploting point by point
+% 2) create a single line object
+% h = plot(x(1),y(1),'bo') ;
+% for i=2:length(x),
+%   pause
+%   xd = get(h,'xdata') ;
+%   yd = get(h,'ydata') ;
+%   set(h,'xdata',[xd(:) ; x(i)],'ydata',[yd(:) ; y(i)]) ;
+% end
+% 
+% take a look at <set> and <get> and graphic handles ...
+

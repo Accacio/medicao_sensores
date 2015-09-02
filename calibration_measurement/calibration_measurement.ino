@@ -3,20 +3,23 @@
 #define VREF_IN A10
 #define VIM_IN A12
 #define POTREF_IN A13
-#define MPOS_DC 30
-#define MPOS_MAX 625 //668
+#define MPOS_DC 32
+#define MPOS_MAX 620 //668
+#define PI 3.14
+#define const_time 100
 
 
 #include<Servo.h>
 unsigned long t0_time;
 unsigned long t1_time;
 unsigned long t_time;
-int cont_high=0;
+const int cont_high=100;
 int cont_low=0;
-int percent_high=0;
+const int percent_high=100;
 int flag=0;
 int cont_cycle=0;
 float PWM_value=0;
+int comparador=5;
 //float define_potref=625-30;
 int menu_var=-1;
 
@@ -54,7 +57,7 @@ void loop()
     case 77:
     case 109:
     measurement();
-    break;  
+    break;
     case 80:
     case 112:
       calibrate_pot(5);
@@ -140,69 +143,93 @@ float filter(int raw_val[]){
    return return_filvalue;
 }
 
+void square_wave()
+{
+  if (cont_cycle%(cont_high+cont_low)<cont_high)
+  {
+    PWM_value=1.8*percent_high;
+  }
+  if (cont_cycle%(cont_high+cont_low)>=cont_high)
+  {
+    PWM_value=0;
+  }
+}
+
+void sine_wave()
+{
+  if (cont_high==0)
+  {
+    PWM_value=0;
+  }
+  else
+  {
+    PWM_value=(1.8/2)*percent_high*(1-cos(cont_cycle*PI/cont_high));
+  }
+}
 
 void measurement(){
+float values[9];
+float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean;
 
-if (cont_cycle%(cont_high+cont_low)<cont_high)
-{
-  PWM_value=1.8*percent_high;
-}
-if (cont_cycle%(cont_high+cont_low)>=cont_high)
-{
-  PWM_value=0;
-}
+do{
+  servooldg.write(0);
+  delay(100);
+  readSensors(values);
+}while(values[6]>MPOS_DC);
+
+cont_cycle=0;
+t0_time=millis();
+
+do{
+//square_wave();
+sine_wave();
+servooldg.write(PWM_value);
 cont_cycle++;
 
-float values[9];
 readSensors(values);
-t1_time=millis();
-t_time=t1_time-t0_time;
-t0_time=t1_time;
+// Conversion from bits to values
+vref=1.989*values[1];
+vpot=100*((values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+vim=values[3];
+potref=values[4];
+vref_mean=1.989*values[5];
+vpot_mean=100*((values[6]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+vim_mean=values[7];
+potref_mean=values[8];
+pot_raw=values[2];
+im=30*(vim/vref)-15;
+im_mean=30*((vim_mean)/(vref_mean))-15;
 
-float vref=1.989*values[1];
-float vpot=100*((values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-float vim=values[3];
-float potref=values[4];
-
-float vref_mean=1.989*values[5];
-float vpot_mean=100*((values[6]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-float vim_mean=values[7];
-float potref_mean=values[8];
-float pot_raw=values[2];
-//float PWMvalue=(vpot*180)/(1023);
-servooldg.write(PWM_value);
-float im=30*(vim/vref)-15;
-float im_mean=30*((vim_mean)/(vref_mean))-15;
-
+//Sending information over serial
 Serial.print(PWM_value);
 Serial.print(',');
-Serial.print(vref);
-Serial.print(',');
+//Serial.print(vref);
+//Serial.print(',');
 //Serial.print(pot_raw);
 //Serial.print(',');
-Serial.print(vim);
-Serial.print(',');
+//Serial.print(vim);
+//Serial.print(',');
 Serial.print(vpot);
 Serial.print(',');
-Serial.print(vref_mean);
-Serial.print(',');
-Serial.print(vim_mean);
-Serial.print(',');
+//Serial.print(vref_mean);
+//Serial.print(',');
+//Serial.print(vim_mean);
+//Serial.print(',');
 Serial.print(vpot_mean);
 Serial.print(',');
 Serial.print(t_time);
-Serial.print(',');
-//if (flag==1)
-//{
-//  Serial.print(cont_high);
-//  Serial.print(',');
-//  Serial.print(percent_high);
-//  flag=0;
-//}
-Serial.println();
+Serial.println(',');
+
+do{
+  delayMicroseconds(500);
+  t1_time=millis();
+  t_time=t1_time-t0_time;
+}while(t_time<const_time);
+t0_time=t1_time;
+}while(1);
 }
 
-void serialEvent()
+/*void serialEvent()
 {
   while(Serial.available())
   {
@@ -224,18 +251,19 @@ void serialEvent()
       }
    }
 }
-
+*/
 
 void get_pot_value(float angle)
 {
   float values[9];
   int ascending=0;
   int descending=0;
-  int register_vpot[5];
-  for(int i=0;i<5;i++)
+  int equal=0;
+  int register_vpot[comparador];
+  for(int i=0;i<comparador;i++)
   {
     readSensors(values);
-    register_vpot[i] = values[2];
+    register_vpot[i] = values[6];
   }
 
   do{
@@ -244,24 +272,32 @@ void get_pot_value(float angle)
     ascending=0;
     descending=0;
     readSensors(values);
-    for(int i=0;i<5;i++)
+    int aux=values[6];
+    for(int i=0;i<comparador;i++)
     {
-      ascending+=values[6]>register_vpot[i];
-      descending+=values[6]<register_vpot[i];
+
+      ascending+=aux>register_vpot[i];
+      descending+=aux<register_vpot[i];
     }
 
-    for(int i=1;i<5;i++)
+    for(int i=1;i<comparador;i++)
     {
       register_vpot[i-1]=register_vpot[i];
     }
-    register_vpot[4]=values[6];
-  }while(ascending==5 || descending==5);
+    register_vpot[comparador-1]=values[6];
+  }while(ascending==comparador || descending==comparador);
+  for(int i=0;i<comparador;i++)
+  {
+    readSensors(values);
+    register_vpot[i] = values[6];
+    delayMicroseconds(10);
+  }
 
  int measure=0;
-  for(int i=0;i<5;i++){
+  for(int i=0;i<comparador;i++){
     measure+=register_vpot[i];
   }
-  measure=measure/5;
+  measure=measure/comparador;
   Serial.print("Measure of ");
   Serial.print(angle);
   Serial.print("° is: ");
