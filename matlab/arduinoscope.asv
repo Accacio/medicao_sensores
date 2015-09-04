@@ -1,7 +1,7 @@
 %settings
 cont_high=400;
 percent_high=100;
-xmax=1500;
+xmax=1000;
 Port_com='com4';
 
 s=serial(Port_com,'Baudrate',115200);

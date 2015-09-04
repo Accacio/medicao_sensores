@@ -3,8 +3,8 @@
 #define VREF_IN A10
 #define VIM_IN A12
 #define POTREF_IN A13
-#define MPOS_DC 32
-#define MPOS_MAX 620 //668
+#define MPOS_DC 30
+#define MPOS_MAX 624 //668
 #define PI 3.14
 #define const_time 100
 
@@ -13,21 +13,21 @@
 unsigned long t0_time;
 unsigned long t1_time;
 unsigned long t_time;
-const int cont_high=100;
+int cont_high=100;
 int cont_low=0;
-const int percent_high=100;
+int percent_high=100;
 int flag=0;
 int cont_cycle=0;
+int cont_frvar=0;
 float PWM_value=0;
 int comparador=5;
-//float define_potref=625-30;
 int menu_var=-1;
 
 Servo servooldg;
 
 void setup()
 {
-  servooldg.attach(2,20,970); //20, 965
+  servooldg.attach(2,31,970); //20, 965
   servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
   Serial.begin(115200);
@@ -48,7 +48,6 @@ void selection_menu()
       menu_var=Serial.read();
     }
   }
-  t0_time=millis();
 }
 
 void loop()
@@ -167,6 +166,22 @@ void sine_wave()
   }
 }
 
+void sine_wave_fqvar()
+{
+  if (cont_high==0)
+  {
+    PWM_value=0;
+  }
+  else
+  {
+    PWM_value=(1.8/2)*percent_high*(1-cos(cont_cycle*PI/cont_high));
+    if(cont_frvar>=2*cont_high){
+      cont_high=cont_high/2;
+      cont_frvar=0;
+    }
+  }
+}
+
 void measurement(){
 float values[9];
 float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean;
@@ -178,13 +193,17 @@ do{
 }while(values[6]>MPOS_DC);
 
 cont_cycle=0;
+cont_frvar=0;
 t0_time=millis();
 
 do{
 //square_wave();
-sine_wave();
+//sine_wave();
+sine_wave_fqvar();
+
 servooldg.write(PWM_value);
 cont_cycle++;
+cont_frvar++;
 
 readSensors(values);
 // Conversion from bits to values
