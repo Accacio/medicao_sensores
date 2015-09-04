@@ -3,8 +3,8 @@
 #define VREF_IN A10
 #define VIM_IN A12
 #define POTREF_IN A13
-#define MPOS_DC 30
-#define MPOS_MAX 624 //668
+#define MPOS_DC 29
+#define MPOS_MAX 604 //668
 #define PI 3.14
 #define const_time 100
 
@@ -27,7 +27,7 @@ Servo servooldg;
 
 void setup()
 {
-  servooldg.attach(2,31,970); //20, 965
+  servooldg.attach(2,MPOS_DC,970); //20, 965
   servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
   Serial.begin(115200);
@@ -188,18 +188,19 @@ float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_
 
 do{
   servooldg.write(0);
-  delay(100);
+  delay(10);
   readSensors(values);
-}while(values[6]>MPOS_DC);
+//  Serial.println(values[6]);
+}while(values[6]>MPOS_DC+1);
 
 cont_cycle=0;
 cont_frvar=0;
 t0_time=millis();
 
 do{
-//square_wave();
+square_wave();
 //sine_wave();
-sine_wave_fqvar();
+//sine_wave_fqvar();
 
 servooldg.write(PWM_value);
 cont_cycle++;
@@ -333,6 +334,8 @@ void get_pot_value(float angle)
 
 void calibrate_pot(int num_measures)
 {
+  servooldg.write(0);
+  delay(200);
   float fract_angle=180/(num_measures-1);
   for(float i=0;i<181;i+=fract_angle){
     get_pot_value(i);
