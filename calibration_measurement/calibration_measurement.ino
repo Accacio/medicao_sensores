@@ -5,6 +5,7 @@
 #define POTREF_IN A13
 #define MPOS_DC 29
 #define MPOS_MAX 604 //668
+#define CURRENTSENSOR_DC 97
 #define PI 3.14
 #define const_time 100
 
@@ -27,6 +28,8 @@ Servo servooldg;
 
 void setup()
 {
+
+  analogReference(INTERNAL1V1);
   servooldg.attach(2,MPOS_DC,970); //20, 965
   servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
@@ -85,13 +88,24 @@ void readSensors(float returnval[9]){
    int vecvalue_vim[NUM_READS];
    int vecvalue_potref[NUM_READS];
 
-   for(int i=0;i<NUM_READS;i++){
+
+   for(int i=0;i<NUM_READS;i++)
+   {
      vecvalue_vref[i] = analogRead(VREF_IN);
      vecvalue_vpot[i] = analogRead(VPOT_IN);
-     vecvalue_vim[i] = analogRead(VIM_IN);
      vecvalue_potref[i] = analogRead(POTREF_IN);
      delayMicroseconds(10);
+
     }
+
+
+    for(int i=0;i<NUM_READS;i++)
+    {
+      vecvalue_vim[i] = analogRead(VIM_IN);
+      delayMicroseconds(10);
+     }
+
+
 
    returnval[1] = filter(vecvalue_vref); //value for vref
    returnval[2] = filter(vecvalue_vpot); //value for vpot
@@ -209,15 +223,15 @@ cont_frvar++;
 readSensors(values);
 // Conversion from bits to values
 vref=1.989*values[1];
-vpot=100*((values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-vim=values[3];
-potref=values[4];
-vref_mean=1.989*values[5];
+ vpot=100*((values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+vim=(values[3]*(1.1/1023)-0.1)*(30/5)-15;
+ potref=values[4];
+ vref_mean=1.989*values[5];
 vpot_mean=100*((values[6]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-vim_mean=values[7];
+ vim_mean=(values[7]*(1.1/1023)-0.1)*(30/5)-15;
 potref_mean=values[8];
-pot_raw=values[2];
-im=30*(vim/vref)-15;
+ pot_raw=values[2];
+ im=30*(vim/vref)-15;
 im_mean=30*((vim_mean)/(vref_mean))-15;
 
 //Sending information over serial
@@ -326,7 +340,7 @@ void get_pot_value(float angle)
   measure=measure/comparador;
   Serial.print("Measure of ");
   Serial.print(angle);
-  Serial.print("° is: ");
+  Serial.print("degrees is: ");
   Serial.println(measure);
 }
 
@@ -346,5 +360,18 @@ void calibrate_pot(int num_measures)
 
 void calibrate_sensor()
 {
-  Serial.print("Just Calibrated Sensor\n");
+  float values[9];
+  float current_mean;
+  float current_filtered;
+  while(true)
+  {
+
+  readSensors(values);
+  current_filtered=(values[3]*(1100/1023)-97)/0.167;
+  current_mean=(values[7]*(1100/1023)-97)/0.167;
+  Serial.print("Filtered Measure of Current Sensor is ");
+  Serial.println(current_filtered);
+  Serial.print("Mean Measure of Current Sensor is ");
+  Serial.println(current_mean);
+  }
 }
