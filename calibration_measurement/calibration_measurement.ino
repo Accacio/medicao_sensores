@@ -29,7 +29,7 @@ Servo servooldg;
 void setup()
 {
 
-  analogReference(INTERNAL1V1);
+//  analogReference(INTERNAL1V1);
   servooldg.attach(2,MPOS_DC,970); //20, 965
   servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
@@ -80,7 +80,7 @@ void loop()
 
 }
 
-void readSensors(float returnval[9]){
+void readSensors(int returnval[9]){
    // read multiple values of three sensors at same time and sort them to take the mode
 
    int vecvalue_vref[NUM_READS];
@@ -94,40 +94,34 @@ void readSensors(float returnval[9]){
      vecvalue_vref[i] = analogRead(VREF_IN);
      vecvalue_vpot[i] = analogRead(VPOT_IN);
      vecvalue_potref[i] = analogRead(POTREF_IN);
+     vecvalue_vim[i] = analogRead(VIM_IN);
      delayMicroseconds(10);
 
     }
 
-
-    for(int i=0;i<NUM_READS;i++)
-    {
-      vecvalue_vim[i] = analogRead(VIM_IN);
-      delayMicroseconds(10);
-     }
-
-
-
-   returnval[1] = filter(vecvalue_vref); //value for vref
-   returnval[2] = filter(vecvalue_vpot); //value for vpot
-   returnval[3] = filter(vecvalue_vim); //value for vim
-   returnval[4] = filter(vecvalue_potref); //value for potref
+   returnval[1] = int(filter(vecvalue_vref)+0.5); //value for vref
+   returnval[2] = int(filter(vecvalue_vpot)+0.5); //value for vpot
+   returnval[3] = int(filter(vecvalue_vim)+0.5); //value for vim
+   returnval[4] = int(filter(vecvalue_potref)+0.5); //value for potref
 
    returnval[5] = 0;//value for mean of vref
    returnval[6] = 0;//value for mean of vpot
    returnval[7] = 0;//value for mean of vim
    returnval[8] = 0;//value for mean of potref
 
+   float aux_val[9];
+
   for(int i=0;i<NUM_READS;i++){
 
-    returnval[5] +=vecvalue_vref[i];
-    returnval[6] +=vecvalue_vpot[i];
-    returnval[7] +=vecvalue_vim[i];
-    returnval[8] +=vecvalue_potref[i];
+    aux_val[5] +=vecvalue_vref[i];
+    aux_val[6] +=vecvalue_vpot[i];
+    aux_val[7] +=vecvalue_vim[i];
+    aux_val[8] +=vecvalue_potref[i];
   }
-    returnval[5] =returnval[5]/NUM_READS;
-    returnval[6] =returnval[6]/NUM_READS;
-    returnval[7] =returnval[7]/NUM_READS;
-    returnval[8] =returnval[8]/NUM_READS;
+    returnval[5] =int(aux_val[5]/NUM_READS+0.5);
+    returnval[6] =int(aux_val[6]/NUM_READS+0.5);
+    returnval[7] =int(aux_val[7]/NUM_READS+0.5);
+    returnval[8] =int(aux_val[8]/NUM_READS+0.5);
 
    //return returnval;
 }
@@ -197,7 +191,7 @@ void sine_wave_fqvar()
 }
 
 void measurement(){
-float values[9];
+int values[9];
 float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean;
 
 do{
@@ -295,7 +289,7 @@ void serialEvent()
 
 void get_pot_value(float angle)
 {
-  float values[9];
+  int values[9];
   int ascending=0;
   int descending=0;
   int equal=0;
@@ -360,18 +354,24 @@ void calibrate_pot(int num_measures)
 
 void calibrate_sensor()
 {
-  float values[9];
+  int values[9];
   float current_mean;
   float current_filtered;
   while(true)
   {
 
   readSensors(values);
-  current_filtered=(values[3]*(1100/1023)-97)/0.167;
-  current_mean=(values[7]*(1100/1023)-97)/0.167;
-  Serial.print("Filtered Measure of Current Sensor is ");
-  Serial.println(current_filtered);
-  Serial.print("Mean Measure of Current Sensor is ");
+  current_filtered=((values[3]-110)*(5000/(5.6*1023.00)))/0.167;
+  current_mean=((values[7]-110)*(5000/(5.6*1023.00)))/0.167;
+ // Serial.print("Filtered Measure of Current Sensor is ");
+  Serial.print(values[3]);
+  Serial.print(",");
+  Serial.print(values[7]);
+  Serial.print(",");
+  Serial.print(current_filtered);
+  Serial.print(",");
+
+  //Serial.print("Mean Measure of Current Sensor is ");
   Serial.println(current_mean);
   }
 }
