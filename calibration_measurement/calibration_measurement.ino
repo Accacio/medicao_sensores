@@ -219,15 +219,13 @@ readSensors(values);
 // Conversion from bits to values
 vref=1.989*values[1];
 vpot=100*((values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-vim=((values[3]-110)*(5000/(5.6*1023.00)))/0.167;
+im=((values[3]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
 potref=values[4];
 vref_mean=1.989*values[5];
 vpot_mean=100*((values[6]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-vim_mean=((values[7]-110)*(5000/(5.6*1023.00)))/0.167;
+im_mean=((values[7]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
 potref_mean=values[8];
 pot_raw=values[2];
-im=30*(vim/vref)-15;
-im_mean=30*((vim_mean)/(vref_mean))-15;
 
 //Sending information over serial
 Serial.print(PWM_value);
@@ -236,15 +234,15 @@ Serial.print(',');
 //Serial.print(',');
 //Serial.print(pot_raw);
 //Serial.print(',');
-//Serial.print(vim);
-//Serial.print(',');
 Serial.print(vpot);
 Serial.print(',');
 //Serial.print(vref_mean);
 //Serial.print(',');
-//Serial.print(vim_mean);
-//Serial.print(',');
 Serial.print(vpot_mean);
+Serial.print(',');
+Serial.print(im);
+Serial.print(',');
+Serial.print(im_mean);
 Serial.print(',');
 Serial.print(t_time);
 Serial.println(',');
