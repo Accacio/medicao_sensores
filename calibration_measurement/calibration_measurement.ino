@@ -5,7 +5,8 @@
 #define POTREF_IN A13
 #define MPOS_DC 29
 #define MPOS_MAX 604 //668
-#define CURRENTSENSOR_DC 97
+#define CURRENTBIT_DC 110
+#define CURRENT_GAIN 5.6
 #define PI 3.14
 #define const_time 100
 
@@ -217,15 +218,15 @@ cont_frvar++;
 readSensors(values);
 // Conversion from bits to values
 vref=1.989*values[1];
- vpot=100*((values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-vim=(values[3]*(1.1/1023)-0.1)*(30/5)-15;
- potref=values[4];
- vref_mean=1.989*values[5];
+vpot=100*((values[2]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+vim=((values[3]-110)*(5000/(5.6*1023.00)))/0.167;
+potref=values[4];
+vref_mean=1.989*values[5];
 vpot_mean=100*((values[6]-MPOS_DC)/(MPOS_MAX-MPOS_DC));
- vim_mean=(values[7]*(1.1/1023)-0.1)*(30/5)-15;
+vim_mean=((values[7]-110)*(5000/(5.6*1023.00)))/0.167;
 potref_mean=values[8];
- pot_raw=values[2];
- im=30*(vim/vref)-15;
+pot_raw=values[2];
+im=30*(vim/vref)-15;
 im_mean=30*((vim_mean)/(vref_mean))-15;
 
 //Sending information over serial
