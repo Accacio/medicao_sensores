@@ -1,8 +1,8 @@
 %settings
-cont_high=100;
-percent_high=50;
-xmax=600;
-Port_com='com4';
+cont_high=400;
+percent_high=100;
+xmax=1600;
+Port_com='com3';
 
 s=serial(Port_com,'Baudrate',115200);
 fopen(s);
@@ -42,7 +42,7 @@ vref_ymin=0;
 vref_ymax=1060;
 %im
 im_ymin=0;
-im_ymax=0.5;
+im_ymax=200;
 
 sampl_time=0;
 commas_error=0;
@@ -61,18 +61,18 @@ axisx(i,1)=i;
 %for j=1:3
 out=fscanf(s);
 commas=strfind(out,',');
-%if numel(commas)<6
-%PWM_value(i,1)=PWM_value(i-1,1);
-%%vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
-%%im(i,1)=str2double(out(commas(2)+1:commas(3)-1))*100/1023;
-%vpot(i,1)=vpot(i-1,1);
-%%vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
-%%im_mean(i,1)=str2double(out(commas(5)+1:commas(6)-1))*100/1023;
-%vpot_mean(i,1)=vpot_mean(i-1,1);
-%sampl_time=sampl_time+sampl_time/i-1;
-%
-%commas_error=commas_error+1;
-%else
+if numel(commas)<6
+PWM_value(i,1)=PWM_value(i-1,1);
+%vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
+%im(i,1)=str2double(out(commas(2)+1:commas(3)-1))*100/1023;
+vpot(i,1)=vpot(i-1,1);
+%vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
+%im_mean(i,1)=str2double(out(commas(5)+1:commas(6)-1))*100/1023;
+vpot_mean(i,1)=vpot_mean(i-1,1);
+sampl_time=sampl_time+sampl_time/i-1;
+
+commas_error=commas_error+1;
+else
 PWM_value(i,1)=str2double(out(1:commas(1)-1))*100/180;
 %vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
 vpot(i,1)=str2double(out(commas(1)+1:commas(2)-1));
@@ -81,7 +81,7 @@ vpot_mean(i,1)=str2double(out(commas(2)+1:commas(3)-1));
 im(i,1)=str2double(out(commas(3)+1:commas(4)-1))*100/1023;
 im_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1))*100/1023;
 sampl_time=sampl_time+str2double(out(commas(5)+1:commas(6)-1));
-%end
+end
 
 %     %plot vref
 %     subplot(3,1,1)
@@ -107,12 +107,12 @@ sampl_time=sampl_time+str2double(out(commas(5)+1:commas(6)-1));
     axis([0 xmax PWM_value_ymin PWM_value_ymax]);
     hold on
 
-%     %plot im
-%     subplot(3,1,3)
-%     plot(axisx(end-1*sign(end-1):end),im(end-1*sign(end-1):end),'LineWidth',2)
-%     hold on
-%     plot(axisx(end-1*sign(end-1):end),im_mean(end-1*sign(end-1):end),'r','LineWidth',2)
-%     axis([0 xmax im_ymin im_ymax]);
+    %plot im
+    subplot(3,1,3)
+    plot(axisx(end-1*sign(end-1):end),im(end-1*sign(end-1):end),'LineWidth',2)
+    hold on
+    plot(axisx(end-1*sign(end-1):end),im_mean(end-1*sign(end-1):end),'r','LineWidth',2)
+    axis([0 xmax im_ymin im_ymax]);
     drawnow
 end
 toc
