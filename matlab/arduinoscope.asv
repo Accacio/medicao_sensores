@@ -42,7 +42,7 @@ vref_ymin=0;
 vref_ymax=1060;
 %im
 im_ymin=0;
-im_ymax=1500;
+im_ymax=200;
 
 sampl_time=0;
 commas_error=0;
@@ -78,8 +78,8 @@ PWM_value(i,1)=str2double(out(1:commas(1)-1))*100/180;
 vpot(i,1)=str2double(out(commas(1)+1:commas(2)-1));
 vpot_mean(i,1)=str2double(out(commas(2)+1:commas(3)-1));
 %vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
-im(i,1)=str2double(out(commas(3)+1:commas(4)-1));
-im_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
+im(i,1)=str2double(out(commas(3)+1:commas(4)-1))*100/1023;
+im_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1))*100/1023;
 sampl_time=sampl_time+str2double(out(commas(5)+1:commas(6)-1));
 end
 
@@ -94,9 +94,9 @@ end
   if count_plot==10
     count_plot=0;
     subplot(3,1,1)
-    plot(axisx(end-11*sign(end-11):end),vpot(end-11*sign(end-11):end),'LineWidth',2)
+    plot(axisx(end-9*sign(end-9):end),vpot(end-9*sign(end-9):end),'LineWidth',2)
     hold on
-    plot(axisx(end-11*sign(end-11):end),vpot_mean(end-11*sign(end-11):end),'r','LineWidth',2)
+    plot(axisx(end-9*sign(end-9):end),vpot_mean(end-9*sign(end-9):end),'r','LineWidth',2)
     axis([0 xmax Rp_ymin Rp_ymax]);
 
 %     plot vim
@@ -105,15 +105,15 @@ end
 %     axis([0 xmax vim_ymin vim_ymax]);
 
     subplot(3,1,2)
-    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),'LineWidth',2)
+    plot(axisx(end-9*sign(end-9):end),PWM_value(end-9*sign(end-9):end),'LineWidth',2)
     axis([0 xmax PWM_value_ymin PWM_value_ymax]);
     hold on
 
     %plot im
     subplot(3,1,3)
-    plot(axisx(end-11*sign(end-11):end),im(end-11*sign(end-11):end),'LineWidth',2)
+    plot(axisx(end-10*sign(end-1):end),im(end-9*sign(end-9):end),'LineWidth',2)
     hold on
-    plot(axisx(end-11*sign(end-11):end),im_mean(end-11*sign(end-11):end),'r','LineWidth',2)
+    plot(axisx(end-10*sign(end-1):end),im_mean(end-9*sign(end-9):end),'r','LineWidth',2)
     axis([0 xmax im_ymin im_ymax]);
     drawnow
   else

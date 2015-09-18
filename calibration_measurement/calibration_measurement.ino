@@ -5,7 +5,7 @@
 #define POTREF_IN A13
 #define MPOS_DC 29//29// xxx
 #define MPOS_MAX 617//604 //668
-#define CURRENTBIT_DC 110
+#define CURRENTBIT_DC 109//218//109
 #define CURRENT_GAIN 5.6
 #define PI 3.14
 #define const_time 100
@@ -30,7 +30,7 @@ Servo servooldg;
 void setup()
 {
 
-//  analogReference(INTERNAL1V1);
+//analogReference(INTERNAL2V56);
   servooldg.attach(2,MPOS_DC,970); //20, 965
   servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
@@ -378,8 +378,8 @@ void calibrate_sensor()
   {
 
   readSensors(values_int,values_float);
-  current_filtered=((values_int[3]-110)*(5000/(5.6*1023.00)))/0.167;
-  current_mean=((values_int[7]-110)*(5000/(5.6*1023.00)))/0.167;
+  current_filtered=((values_int[3]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+  current_mean=((values_int[7]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
  // Serial.print("Filtered Measure of Current Sensor is ");
   Serial.print(values_int[3]);
   Serial.print(",");
