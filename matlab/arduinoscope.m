@@ -121,6 +121,15 @@ end
   end
 end
 toc
+
+% Mean of im values
+
+IM=[im(20:170,1) im(220:370,1) im(420:570,1) im(620:770,1) im(820:970,1) im(1020:1170,1) im(1220:1370,1) im(1420:1570,1) im(1620:1770,1) im(1820:1970,1) im(2020:2170,1) im(2220:2370,1)];
+IM_MEAN=[im_mean(20:170,1) im_mean(220:370,1) im_mean(420:570,1) im_mean(620:770,1) im_mean(820:970,1) im_mean(1020:1170,1) im_mean(1220:1370,1) im_mean(1420:1570,1) im_mean(1620:1770,1) im_mean(1820:1970,1) im_mean(2020:2170,1) im_mean(2220:2370,1)];
+Mean_im=sum(IM)/151
+Mean_im_mean=sum(IM_MEAN)/151
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
 data.samp_t=sampl_time/(1000*xmax)
 commas_error
 data.t=0:sampl_time/1000:(xmax*sampl_time)/1000;
