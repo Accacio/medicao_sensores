@@ -1,7 +1,7 @@
 %settings
 cont_high=400;
 percent_high=100;
-xmax=2400;
+xmax=8000; %8000 Para 10 iterações
 Port_com='com3';
 
 s=serial(Port_com,'Baudrate',115200);
@@ -124,12 +124,31 @@ toc
 
 % Mean of im values
 
-IM=[im(20:170,1) im(220:370,1) im(420:570,1) im(620:770,1) im(820:970,1) im(1020:1170,1) im(1220:1370,1) im(1420:1570,1) im(1620:1770,1) im(1820:1970,1) im(2020:2170,1) im(2220:2370,1)];
-IM_MEAN=[im_mean(20:170,1) im_mean(220:370,1) im_mean(420:570,1) im_mean(620:770,1) im_mean(820:970,1) im_mean(1020:1170,1) im_mean(1220:1370,1) im_mean(1420:1570,1) im_mean(1620:1770,1) im_mean(1820:1970,1) im_mean(2020:2170,1) im_mean(2220:2370,1)];
-Mean_im=sum(IM)/151
-Mean_im_mean=sum(IM_MEAN)/151
+iterator=0;
+IM=[];
+IM_MEAN=[];
+IM=[];
+IM_MEAN=[];
+while iterator<xmax;
+    iterator=iterator+cont_high/2;
+    IM=[IM im(iterator-180:iterator-30,1)];
+    IM_MEAN=[IM_MEAN im_mean(iterator-180:iterator-30,1)];
+end
+Mean_im=sum(IM)/151;
+Mean_im_mean=sum(IM_MEAN)/151;
+iterator=5;
+while iterator<=size(Mean_im,2);
+   
+   Mean_im(floor((iterator-1)/4)+1,mod(iterator,4)+4*(mod(iterator,4)==0))=Mean_im(1,iterator);
+   Mean_im(1,iterator)=0;
+   Mean_im_mean(floor((iterator-1)/4)+1,mod(iterator,4)+4*(mod(iterator,4)==0))=Mean_im_mean(1,iterator);
+   Mean_im_mean(1,iterator)=0;
+   iterator=iterator+1;
+end
+clear iterator, IM, IM_MEAN;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 data.samp_t=sampl_time/(1000*xmax)
 commas_error
 data.t=0:sampl_time/1000:(xmax*sampl_time)/1000;
