@@ -122,7 +122,7 @@ void readSensors(int returnval_int[9]){
     aux_val[7] +=vecvalue_vim[i];
     aux_val[8] +=vecvalue_potref[i];
   }
-  
+
     returnval_int[5] =int(aux_val[5]/NUM_READS+0.5);
     returnval_int[6] =int(aux_val[6]/NUM_READS+0.5);
     returnval_int[7] =int(aux_val[7]/NUM_READS+0.5);
@@ -162,9 +162,9 @@ void square_wave()
     PWM_value=1.8*percent_high;
   }
 //  if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
-   if (cont_cycle%(cont_high+cont_low)>=cont_high)
+   if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
   {
-    PWM_value=0;
+    PWM_value=9;
   }
 }
 
@@ -199,12 +199,26 @@ void sine_wave_fqvar()
 void measurement(){
 int values_int[9];
 float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean;
-
+int register_vpot[comparador];
+int equal_mean;
 do{
   servooldg.write(0);
-  delay(10);
+  delay(100);
   readSensors(values_int);
-}while(values_int[6]>MPOS_DC+1);
+  equal_mean=0;
+  for(int i=0;i<comparador;i++)
+  {
+    equal_mean+=register_vpot[i];
+  }
+  equal_mean=equal_mean/comparador;
+
+  for(int i=1;i<comparador;i++)
+  {
+    register_vpot[i-1]=register_vpot[i];
+  }
+  register_vpot[comparador-1]=values_int[2];
+ }while(values_int[2]!=equal_mean);
+
 
 cont_cycle=0;
 cont_frvar=0;
@@ -322,7 +336,7 @@ void get_pot_value(float angle)
     equal_mean=equal_mean/comparador;
 
       Serial.print(values_int[6]);
-      Serial.print('-'); 
+      Serial.print('-');
       Serial.println(equal_mean);
 
 
@@ -336,7 +350,7 @@ void get_pot_value(float angle)
   Serial.print(values_int[6]);
   Serial.print(',');
   Serial.println(equal_mean);
-  
+
   for(int i=0;i<comparador;i++)
   {
     readSensors(values_int);

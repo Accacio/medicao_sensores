@@ -1,6 +1,6 @@
 %settings
 cont_high=400;
-percent_high=100;
+percent_high=95;
 xmax=8000; %8000 Para 10 iterações
 Port_com='com3';
 
