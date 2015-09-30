@@ -7,6 +7,8 @@
 #define MPOS_MAX 619//604 //668
 #define CURRENTBIT_DC 109//218//109
 #define CURRENT_GAIN 5.6
+#define LOADCELL_DC 1.1
+#define LOADCELL_GAIN 220
 #define PI 3.14
 #define const_time 100
 
@@ -46,8 +48,8 @@ void selection_menu()
   }
   if (menu_var==99||menu_var==67)
   {
-    Serial.println("Press p to calibrate Motor Pot, or s to calibrate Current Sensor");
-    while (menu_var==-1||(menu_var!=80 && menu_var!=112 && menu_var!=83 && menu_var!=115))
+    Serial.println("Press l to calibrate Load Cell, p to calibrate Motor Pot, or s to calibrate Current Sensor");
+    while (menu_var==-1||(menu_var!=76 && menu_var!=108 && menu_var!=80 && menu_var!=112 && menu_var!=83 && menu_var!=115))
     {
       menu_var=Serial.read();
     }
@@ -61,6 +63,11 @@ void loop()
     case 109:
     measurement();
     break;
+    case 76:
+    case 108:
+      calibrate_loadcell();
+      selection_menu();
+      break;
     case 80:
     case 112:
       calibrate_pot(5);
@@ -369,6 +376,10 @@ void get_pot_value(float angle)
   Serial.println(measure);
 }
 
+void calibrate_loadcell()
+{
+  Serial.println("Calibrei a celula de carga");
+}
 
 
 void calibrate_pot(int num_measures)
