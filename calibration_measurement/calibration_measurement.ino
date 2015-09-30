@@ -107,32 +107,32 @@ void readSensors(int returnval_int[9]){
     }
 
     returnval_int[1] = int(filter(vecvalue_vref)+0.5); //value for vref
-    returnval_int[2] = int(filter(vecvalue_vpot)+0.5); //value for vpot
-    returnval_int[3] = int(filter(vecvalue_vim)+0.5); //value for vim
-    returnval_int[4] = int(filter(vecvalue_potref)+0.5); //value for potref
+    returnval_int[3] = int(filter(vecvalue_vpot)+0.5); //value for vpot
+    returnval_int[5] = int(filter(vecvalue_vim)+0.5); //value for vim
+    returnval_int[7] = int(filter(vecvalue_potref)+0.5); //value for potref
 
-    returnval_int[5] = 0;//value for mean of vref
-    returnval_int[6] = 0;//value for mean of vpot
-    returnval_int[7] = 0;//value for mean of vim
+    returnval_int[2] = 0;//value for mean of vref
+    returnval_int[4] = 0;//value for mean of vpot
+    returnval_int[6] = 0;//value for mean of vim
     returnval_int[8] = 0;//value for mean of potref
 
     float aux_val[9];
-    aux_val[5] =0;
+    aux_val[2] =0;
+    aux_val[4] =0;
     aux_val[6] =0;
-    aux_val[7] =0;
     aux_val[8] =0;
 
   for(int i=0;i<NUM_READS;i++){
 
-    aux_val[5] +=vecvalue_vref[i];
-    aux_val[6] +=vecvalue_vpot[i];
-    aux_val[7] +=vecvalue_vim[i];
+    aux_val[2] +=vecvalue_vref[i];
+    aux_val[4] +=vecvalue_vpot[i];
+    aux_val[6] +=vecvalue_vim[i];
     aux_val[8] +=vecvalue_potref[i];
   }
 
-    returnval_int[5] =int(aux_val[5]/NUM_READS+0.5);
+    returnval_int[2] =int(aux_val[2]/NUM_READS+0.5);
+    returnval_int[4] =int(aux_val[4]/NUM_READS+0.5);
     returnval_int[6] =int(aux_val[6]/NUM_READS+0.5);
-    returnval_int[7] =int(aux_val[7]/NUM_READS+0.5);
     returnval_int[8] =int(aux_val[8]/NUM_READS+0.5);
 
    //return returnval;
@@ -223,8 +223,8 @@ do{
   {
     register_vpot[i-1]=register_vpot[i];
   }
-  register_vpot[comparador-1]=values_int[2];
- }while(values_int[2]!=equal_mean);
+  register_vpot[comparador-1]=values_int[3];
+}while(values_int[3]!=equal_mean);
 
 
 cont_cycle=0;
@@ -243,14 +243,14 @@ cont_frvar++;
 readSensors(values_int);
 // Conversion from bits to values
 vref=1.989*values_int[1];
-vpot=100*((values_int[2]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-im=((values_int[3]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
-potref=values_int[4];
-vref_mean=1.989*values_int[5];
-vpot_mean=100*((values_int[6]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-im_mean=((values_int[7]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+vpot=100*((values_int[3]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+im=((values_int[5]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+potref=values_int[7];
+vref_mean=1.989*values_int[2];
+vpot_mean=100*((values_int[4]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+im_mean=((values_int[6]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
 potref_mean=values_int[8];
-pot_raw=values_int[2];
+pot_raw=values_int[3];
 
 //Sending information over serial
 Serial.print(PWM_value);
@@ -322,7 +322,7 @@ void get_pot_value(float angle)
   for(int i=0;i<comparador;i++)
   {
     readSensors(values_int);
-    register_vpot[i] = values_int[2];
+    register_vpot[i] = values_int[3];
     delay(20);
   }
 
@@ -333,7 +333,7 @@ void get_pot_value(float angle)
     ascending=0;
     descending=0;
     readSensors(values_int);
-    int aux=values_int[2];
+    int aux=values_int[3];
     for(int i=0;i<comparador;i++)
     {
       equal_mean+=register_vpot[i];
@@ -342,7 +342,7 @@ void get_pot_value(float angle)
     }
     equal_mean=equal_mean/comparador;
 
-      Serial.print(values_int[6]);
+      Serial.print(values_int[4]);
       Serial.print('-');
       Serial.println(equal_mean);
 
@@ -351,17 +351,17 @@ void get_pot_value(float angle)
     {
       register_vpot[i-1]=register_vpot[i];
     }
-    register_vpot[comparador-1]=values_int[2];
-   }while(values_int[2]!=equal_mean);
+    register_vpot[comparador-1]=values_int[3];
+  }while(values_int[3]!=equal_mean);
     //}while(ascending==comparador || descending==comparador);
-  Serial.print(values_int[6]);
+  Serial.print(values_int[4]);
   Serial.print(',');
   Serial.println(equal_mean);
 
   for(int i=0;i<comparador;i++)
   {
     readSensors(values_int);
-    register_vpot[i] = values_int[2];
+    register_vpot[i] = values_int[3];
     delayMicroseconds(10);
   }
 
@@ -403,12 +403,12 @@ void calibrate_sensor()
   {
 
   readSensors(values_int);
-  current_filtered=((values_int[3]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
-  current_mean=((values_int[7]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+  current_filtered=((values_int[5]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+  current_mean=((values_int[6]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
  // Serial.print("Filtered Measure of Current Sensor is ");
-  Serial.print(values_int[3]);
+  Serial.print(values_int[5]);
   Serial.print(",");
-  Serial.print(values_int[7]);
+  Serial.print(values_int[6]);
   Serial.print(",");
   Serial.print(current_filtered);
   Serial.print(",");
