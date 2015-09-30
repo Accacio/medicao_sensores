@@ -3,6 +3,7 @@
 #define VREF_IN A10
 #define VIM_IN A12
 #define POTREF_IN A13
+#define LOADCELL_IN A15
 #define MPOS_DC 32//29// xxx
 #define MPOS_MAX 619//604 //668
 #define CURRENTBIT_DC 109//218//109
@@ -88,13 +89,14 @@ void loop()
 
 }
 
-void readSensors(int returnval_int[9]){
+void readSensors(int returnval_int[11]){
    // read multiple values of three sensors at same time and sort them to take the mode
 
    int vecvalue_vref[NUM_READS];
    int vecvalue_vpot[NUM_READS];
    int vecvalue_vim[NUM_READS];
    int vecvalue_potref[NUM_READS];
+   int vecvalue_vloadcell[NUM_READS];
 
 
    for(int i=0;i<NUM_READS;i++)
@@ -104,23 +106,27 @@ void readSensors(int returnval_int[9]){
      vecvalue_vpot[i] = analogRead(VPOT_IN);
      vecvalue_potref[i] = analogRead(POTREF_IN);
      vecvalue_vim[i] = analogRead(VIM_IN);
+     vecvalue_vloadcell[i] = analogRead(LOADCELL_IN);
     }
 
     returnval_int[1] = int(filter(vecvalue_vref)+0.5); //value for vref
     returnval_int[3] = int(filter(vecvalue_vpot)+0.5); //value for vpot
     returnval_int[5] = int(filter(vecvalue_vim)+0.5); //value for vim
     returnval_int[7] = int(filter(vecvalue_potref)+0.5); //value for potref
+    returnval_int[9] = int(filter(vecvalue_vloadcell)+0.5); //value for load cell
 
     returnval_int[2] = 0;//value for mean of vref
     returnval_int[4] = 0;//value for mean of vpot
     returnval_int[6] = 0;//value for mean of vim
     returnval_int[8] = 0;//value for mean of potref
+    returnval_int[10] = 0;//value for mean of load cell
 
-    float aux_val[9];
+    float aux_val[11];
     aux_val[2] =0;
     aux_val[4] =0;
     aux_val[6] =0;
     aux_val[8] =0;
+    aux_val[10] =0;
 
   for(int i=0;i<NUM_READS;i++){
 
@@ -128,12 +134,14 @@ void readSensors(int returnval_int[9]){
     aux_val[4] +=vecvalue_vpot[i];
     aux_val[6] +=vecvalue_vim[i];
     aux_val[8] +=vecvalue_potref[i];
+    aux_val[10] +=vecvalue_vloadcell[i];
   }
 
     returnval_int[2] =int(aux_val[2]/NUM_READS+0.5);
     returnval_int[4] =int(aux_val[4]/NUM_READS+0.5);
     returnval_int[6] =int(aux_val[6]/NUM_READS+0.5);
     returnval_int[8] =int(aux_val[8]/NUM_READS+0.5);
+    returnval_int[10] =int(aux_val[10]/NUM_READS+0.5);
 
    //return returnval;
 }
@@ -204,7 +212,7 @@ void sine_wave_fqvar()
 }
 
 void measurement(){
-int values_int[9];
+int values_int[11];
 float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean;
 int register_vpot[comparador];
 int equal_mean;
@@ -311,7 +319,7 @@ void serialEvent()
 
 void get_pot_value(float angle)
 {
-  int values_int[9];
+  int values_int[11];
   int equal_mean=0;
   int ascending=0;
   int descending=0;
