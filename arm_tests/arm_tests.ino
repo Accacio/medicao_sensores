@@ -9,6 +9,9 @@
 #define CURRENT_GAIN 5.6
 #define PI 3.14
 #define const_time 100
+#define FULL_OPEN 90
+#define FULL_CLOSE 0
+
 
 
 #include<Servo.h>
@@ -21,7 +24,7 @@ int percent_high=100;
 int flag=0;
 int cont_cycle=0;
 int cont_frvar=0;
-float PWM_value=0;
+float PWM_value=FULL_OPEN;
 int comparador=5;
 int menu_var=-1;
 
@@ -39,8 +42,8 @@ void setup()
 
 void selection_menu()
 {
-  Serial.println("Press c to Calibration, or m to Measurement");
-  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109))
+  Serial.println("Press c to Calibration, a for arm movement, or m to Measurement");
+  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=97 && menu_var!=65))
   {
     menu_var=Serial.read();
   }
@@ -71,6 +74,10 @@ void loop()
       calibrate_sensor();
       selection_menu();
       break;
+    case 97:
+    case 65:
+    arm_movement();
+    break;
     default:
       selection_menu();
 }
@@ -406,3 +413,32 @@ void calibrate_sensor()
   Serial.println(current_mean);
   }
 }
+
+void arm_movement(){
+  int arm_pos;
+  PWM_value=FULL_OPEN;
+  Serial.println("Define the percent of closed arm (value between 0-full_open to 100-full_closed):");
+  PWM_value=FULL_OPEN;
+  servooldg.write(PWM_value);
+  delay(20);
+
+  do{
+  if (Serial.available()){
+    arm_pos= Serial.parseInt();
+    Serial.println(arm_pos);
+    PWM_value=(FULL_OPEN-FULL_CLOSE)*(1-arm_pos/100.00);
+    Serial.println(PWM_value);
+    Serial.println("Enter the percent of closed arm (value between 0 to 100):");
+
+    if(cont_high<0){
+      menu_var=-1;
+     }
+    if (Serial.read()=='\n'){
+      flag=1;
+     }
+  }
+  servooldg.write(PWM_value);
+  delay(20);
+  }while(menu_var>0);
+}
+
