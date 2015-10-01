@@ -8,11 +8,25 @@
 #define MPOS_MAX 619//604 //668
 #define CURRENTBIT_DC 109//218//109
 #define CURRENT_GAIN 5.6
-#define LOADCELL_DC 1.1
+#define LOADCELL_DC 1
 #define LOADCELL_GAIN 220
 #define PI 3.14
 #define const_time 100
 
+enum sensor_array
+{
+  ar_vref=1,
+  ar_vref_mean,
+  ar_vpot,
+  ar_vpot_mean,
+  ar_vim,
+  ar_vim_mean,
+  ar_potref,
+  ar_potref_mean,
+  ar_vloadcell,
+  ar_vloadcell_mean,
+  ar_last,
+};
 
 #include<Servo.h>
 unsigned long t0_time;
@@ -109,39 +123,39 @@ void readSensors(int returnval_int[11]){
      vecvalue_vloadcell[i] = analogRead(LOADCELL_IN);
     }
 
-    returnval_int[1] = int(filter(vecvalue_vref)+0.5); //value for vref
-    returnval_int[3] = int(filter(vecvalue_vpot)+0.5); //value for vpot
-    returnval_int[5] = int(filter(vecvalue_vim)+0.5); //value for vim
-    returnval_int[7] = int(filter(vecvalue_potref)+0.5); //value for potref
-    returnval_int[9] = int(filter(vecvalue_vloadcell)+0.5); //value for load cell
+    returnval_int[ar_vref] = int(filter(vecvalue_vref)+0.5); //value for vref
+    returnval_int[ar_vpot] = int(filter(vecvalue_vpot)+0.5); //value for vpot
+    returnval_int[ar_vim] = int(filter(vecvalue_vim)+0.5); //value for vim
+    returnval_int[ar_potref] = int(filter(vecvalue_potref)+0.5); //value for potref
+    returnval_int[ar_vloadcell] = int(filter(vecvalue_vloadcell)+0.5); //value for load cell
 
-    returnval_int[2] = 0;//value for mean of vref
-    returnval_int[4] = 0;//value for mean of vpot
-    returnval_int[6] = 0;//value for mean of vim
-    returnval_int[8] = 0;//value for mean of potref
-    returnval_int[10] = 0;//value for mean of load cell
+    returnval_int[ar_vref_mean] = 0;//value for mean of vref
+    returnval_int[ar_vpot_mean] = 0;//value for mean of vpot
+    returnval_int[ar_vim_mean] = 0;//value for mean of vim
+    returnval_int[ar_potref_mean] = 0;//value for mean of potref
+    returnval_int[ar_vloadcell_mean] = 0;//value for mean of load cell
 
-    float aux_val[11];
-    aux_val[2] =0;
-    aux_val[4] =0;
-    aux_val[6] =0;
-    aux_val[8] =0;
-    aux_val[10] =0;
+    float aux_val[ar_last];
+    aux_val[ar_vref_mean] =0;
+    aux_val[ar_vpot_mean] =0;
+    aux_val[ar_vim_mean] =0;
+    aux_val[ar_potref_mean] =0;
+    aux_val[ar_vloadcell_mean] =0;
 
   for(int i=0;i<NUM_READS;i++){
 
-    aux_val[2] +=vecvalue_vref[i];
-    aux_val[4] +=vecvalue_vpot[i];
-    aux_val[6] +=vecvalue_vim[i];
-    aux_val[8] +=vecvalue_potref[i];
-    aux_val[10] +=vecvalue_vloadcell[i];
+    aux_val[ar_vref_mean] +=vecvalue_vref[i];
+    aux_val[ar_vpot_mean] +=vecvalue_vpot[i];
+    aux_val[ar_vim_mean] +=vecvalue_vim[i];
+    aux_val[ar_potref_mean] +=vecvalue_potref[i];
+    aux_val[ar_vloadcell_mean] +=vecvalue_vloadcell[i];
   }
 
-    returnval_int[2] =int(aux_val[2]/NUM_READS+0.5);
-    returnval_int[4] =int(aux_val[4]/NUM_READS+0.5);
-    returnval_int[6] =int(aux_val[6]/NUM_READS+0.5);
-    returnval_int[8] =int(aux_val[8]/NUM_READS+0.5);
-    returnval_int[10] =int(aux_val[10]/NUM_READS+0.5);
+    returnval_int[ar_vref_mean] =int(aux_val[ar_vref_mean]/NUM_READS+0.5);
+    returnval_int[ar_vpot_mean] =int(aux_val[ar_vpot_mean]/NUM_READS+0.5);
+    returnval_int[ar_vim_mean] =int(aux_val[ar_vim_mean]/NUM_READS+0.5);
+    returnval_int[ar_potref_mean] =int(aux_val[ar_potref_mean]/NUM_READS+0.5);
+    returnval_int[ar_vloadcell_mean] =int(aux_val[ar_vloadcell_mean]/NUM_READS+0.5);
 
    //return returnval;
 }
@@ -212,8 +226,8 @@ void sine_wave_fqvar()
 }
 
 void measurement(){
-int values_int[11];
-float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean;
+int values_int[ar_last];
+float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean;
 int register_vpot[comparador];
 int equal_mean;
 do{
@@ -231,8 +245,8 @@ do{
   {
     register_vpot[i-1]=register_vpot[i];
   }
-  register_vpot[comparador-1]=values_int[3];
-}while(values_int[3]!=equal_mean);
+  register_vpot[comparador-1]=values_int[ar_vpot];
+}while(values_int[ar_vpot]!=equal_mean);
 
 
 cont_cycle=0;
@@ -250,15 +264,17 @@ cont_frvar++;
 
 readSensors(values_int);
 // Conversion from bits to values
-vref=1.989*values_int[1];
-vpot=100*((values_int[3]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-im=((values_int[5]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
-potref=values_int[7];
-vref_mean=1.989*values_int[2];
-vpot_mean=100*((values_int[4]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-im_mean=((values_int[6]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
-potref_mean=values_int[8];
-pot_raw=values_int[3];
+vref=1.989*values_int[ar_vref];
+vpot=100*((values_int[ar_vpot]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+im=((values_int[ar_vim]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+potref=values_int[ar_potref];
+vref_mean=1.989*values_int[ar_vref_mean];
+vpot_mean=100*((values_int[ar_vpot_mean]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+im_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+potref_mean=values_int[ar_potref_mean];
+pot_raw=values_int[ar_vpot];
+loadcell=(values_int[ar_vloadcell]-LOADCELL_DC)*10;
+loadcell_mean=(values_int[ar_vloadcell_mean]-LOADCELL_DC)*10;
 
 //Sending information over serial
 Serial.print(PWM_value);
@@ -276,6 +292,10 @@ Serial.print(',');
 Serial.print(im);
 Serial.print(',');
 Serial.print(im_mean);
+Serial.print(',');
+Serial.print(loadcell);
+Serial.print(',');
+Serial.print(loadcell_mean);
 Serial.print(',');
 Serial.print(t_time);
 Serial.println(',');
@@ -319,7 +339,7 @@ void serialEvent()
 
 void get_pot_value(float angle)
 {
-  int values_int[11];
+  int values_int[ar_last];
   int equal_mean=0;
   int ascending=0;
   int descending=0;
@@ -330,7 +350,7 @@ void get_pot_value(float angle)
   for(int i=0;i<comparador;i++)
   {
     readSensors(values_int);
-    register_vpot[i] = values_int[3];
+    register_vpot[i] = values_int[ar_vpot];
     delay(20);
   }
 
@@ -341,7 +361,7 @@ void get_pot_value(float angle)
     ascending=0;
     descending=0;
     readSensors(values_int);
-    int aux=values_int[3];
+    int aux=values_int[ar_vpot];
     for(int i=0;i<comparador;i++)
     {
       equal_mean+=register_vpot[i];
@@ -350,7 +370,7 @@ void get_pot_value(float angle)
     }
     equal_mean=equal_mean/comparador;
 
-      Serial.print(values_int[4]);
+      Serial.print(values_int[ar_vpot_mean]);
       Serial.print('-');
       Serial.println(equal_mean);
 
@@ -359,17 +379,17 @@ void get_pot_value(float angle)
     {
       register_vpot[i-1]=register_vpot[i];
     }
-    register_vpot[comparador-1]=values_int[3];
-  }while(values_int[3]!=equal_mean);
+    register_vpot[comparador-1]=values_int[ar_vpot];
+  }while(values_int[ar_vpot]!=equal_mean);
     //}while(ascending==comparador || descending==comparador);
-  Serial.print(values_int[4]);
+  Serial.print(values_int[ar_vpot_mean]);
   Serial.print(',');
   Serial.println(equal_mean);
 
   for(int i=0;i<comparador;i++)
   {
     readSensors(values_int);
-    register_vpot[i] = values_int[3];
+    register_vpot[i] = values_int[ar_vpot];
     delayMicroseconds(10);
   }
 
@@ -404,19 +424,19 @@ void calibrate_pot(int num_measures)
 
 void calibrate_sensor()
 {
-  int values_int[9];
+  int values_int[ar_last];
   float current_mean;
   float current_filtered;
   while(true)
   {
 
   readSensors(values_int);
-  current_filtered=((values_int[5]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
-  current_mean=((values_int[6]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+  current_filtered=((values_int[ar_vim]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+  current_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
  // Serial.print("Filtered Measure of Current Sensor is ");
-  Serial.print(values_int[5]);
+  Serial.print(values_int[ar_vim]);
   Serial.print(",");
-  Serial.print(values_int[6]);
+  Serial.print(values_int[ar_vim_mean]);
   Serial.print(",");
   Serial.print(current_filtered);
   Serial.print(",");

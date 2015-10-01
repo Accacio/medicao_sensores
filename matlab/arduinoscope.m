@@ -44,6 +44,9 @@ vref_ymax=1060;
 im_ymin=0;
 im_ymax=1500;
 
+loadcell_ymin=0;
+loadcell_ymax=6000;
+
 sampl_time=0;
 commas_error=0;
 
@@ -69,6 +72,8 @@ vpot(i,1)=vpot(i-1,1);
 %vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
 %im_mean(i,1)=str2double(out(commas(5)+1:commas(6)-1))*100/1023;
 vpot_mean(i,1)=vpot_mean(i-1,1);
+loadcell(i,1)=loadcell(i-1,1);
+loadcell_mean(i,1)=loadcell_mean(i-1,1);
 sampl_time=sampl_time+sampl_time/i-1;
 
 commas_error=commas_error+1;
@@ -80,7 +85,9 @@ vpot_mean(i,1)=str2double(out(commas(2)+1:commas(3)-1));
 %vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
 im(i,1)=str2double(out(commas(3)+1:commas(4)-1));
 im_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
-sampl_time=sampl_time+str2double(out(commas(5)+1:commas(6)-1));
+loadcell(i,1)=str2double(out(commas(5)+1:commas(6)-1));
+loadcell_mean(i,1)=str2double(out(commas(6)+1:commas(7)-1));
+sampl_time=sampl_time+str2double(out(commas(7)+1:commas(8)-1));
 end
 
 %     %plot vref
@@ -93,7 +100,7 @@ end
     %plot Rp
   if count_plot==10
     count_plot=0;
-    subplot(3,1,1)
+    subplot(2,2,1)
     plot(axisx(end-11*sign(end-11):end),vpot(end-11*sign(end-11):end),'LineWidth',2)
     hold on
     plot(axisx(end-11*sign(end-11):end),vpot_mean(end-11*sign(end-11):end),'r','LineWidth',2)
@@ -104,17 +111,25 @@ end
 %     plot(axisx,vim,'LineWidth',2)
 %     axis([0 xmax vim_ymin vim_ymax]);
 
-    subplot(3,1,2)
+    subplot(2,2,2)
     plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),'LineWidth',2)
     axis([0 xmax PWM_value_ymin PWM_value_ymax]);
     hold on
 
     %plot im
-    subplot(3,1,3)
+    subplot(2,2,3)
     plot(axisx(end-11*sign(end-11):end),im(end-11*sign(end-11):end),'LineWidth',2)
     hold on
     plot(axisx(end-11*sign(end-11):end),im_mean(end-11*sign(end-11):end),'r','LineWidth',2)
     axis([0 xmax im_ymin im_ymax]);
+
+    %plot loadcell
+    subplot(2,2,4)
+    plot(axisx(end-11*sign(end-11):end),loadcell(end-11*sign(end-11):end),'LineWidth',2)
+    hold on
+    plot(axisx(end-11*sign(end-11):end),loadcell_mean(end-11*sign(end-11):end),'r','LineWidth',2)
+    axis([0 xmax loadcell_ymin loadcell_ymax]);
+
     drawnow
   else
   count_plot=count_plot+1;
@@ -138,7 +153,7 @@ Mean_im=sum(IM)/151;
 Mean_im_mean=sum(IM_MEAN)/151;
 iterator=5;
 while iterator<=size(Mean_im,2);
-   
+
    Mean_im(floor((iterator-1)/4)+1,mod(iterator,4)+4*(mod(iterator,4)==0))=Mean_im(1,iterator);
    Mean_im(1,iterator)=0;
    Mean_im_mean(floor((iterator-1)/4)+1,mod(iterator,4)+4*(mod(iterator,4)==0))=Mean_im_mean(1,iterator);
