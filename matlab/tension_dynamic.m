@@ -13,6 +13,7 @@ end
 i=0;
 figure
 hold on
+
 for Dca=Dca_min:(Dca_max-Dca_min)/2:Dca_max
     i=i+1;
     phi_step=30*pi/180;
@@ -28,3 +29,7 @@ for i=1:size(x_dca,2)
     end
 end
 plot(x_dca,y)
+legend(num2str(phi(:)*180/pi))
+title('Arm Clamp Distance vs Force with Dcf Max. Lenght')
+xlabel('Dca_{(m)}')
+ylabel('Force_{(N)}')

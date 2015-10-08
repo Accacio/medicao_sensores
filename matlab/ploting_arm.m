@@ -64,11 +64,13 @@ for i=1:size(elbow_angle,2)
 
 
         hold on
-        plot(arm_plot(1,:),arm_plot(2,:),'-o','LineWidth',3)
-        plot(dca_posx,dca_posy,'xr','MarkerSize',10);
+        plot(arm_plot(1,1:2),arm_plot(2,1:2),'-r','LineWidth',3)
+        plot(arm_plot(1,2:3),arm_plot(2,2:3),'-b','LineWidth',3)
+        plot(arm_plot(1,3:4),arm_plot(2,3:4),'-c','LineWidth',3)
+        plot(dca_posx,dca_posy,'xk','MarkerSize',10);
         plot(dcf_posx,dcf_posy,'xr','MarkerSize',10);
         plot(plot_tensor(1,:),plot_tensor(2,:),'g')
-        plot(Cmf_posx,Cmf_posy,'rs','MarkerSize',10);
+        plot(Cmf_posx,Cmf_posy,'ks','MarkerSize',10);
         plot(Cmh_posx,Cmh_posy,'rs','MarkerSize',10);
 
         xlim([-(La+Lf+2*Lh)/2,(La+Lf+2*Lh)/2]);

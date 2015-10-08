@@ -82,7 +82,7 @@ if(lw>0)
 
     for phi_aux=elbow_min_open:phi_step:elbow_max_open
         i=i+1;
-        phi(i)=phi_aux;
+        phi(i)=phi_aux
         %leg_str(i,1)=num2str(phi(i)*180/pi)
         
         for j=1:Dcf_div
@@ -105,9 +105,14 @@ if(lw>0)
     if(subp_arrow>0 && subp_pos>0)
         subplot(subp_arrow,2,2*(subp_pos-1)+1)
         ploting_arm(shoulder_phi,phi,Dca,Dcf(1,:),x,teta_ac)
+        legend('Arm','Forearm','Hand','Arm Clamp','Forearm Clamp','Tensor','Forearm Weight','Hand + Dist. W. ','Location',[0.15,0.47,0.1,0.1])
+        title('Arm movement')
         subplot(subp_arrow,2,2*(subp_pos-1)+2)
         plot(Dcf',Fcf()')
-    %    legend(leg_str)
+        legend(num2str(phi(:)*180/pi),'Location',[0.95,.5,.001,.001])
+        title(['Forearm Clamp Distance vs Force with Dca = ',num2str(Dca)])
+        xlabel('Dcf_{(m)}')
+        ylabel('Force_{(N)}')
     end
 else
     display('Dca distance is too long')
