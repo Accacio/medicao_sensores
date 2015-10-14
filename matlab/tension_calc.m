@@ -33,11 +33,11 @@ La=0.28;    %arm lenght in mts.
 Lf=0.26;    %forearm length in mts.
 Lh=0.08;    %hand lenght closed in mts.
 Sw=100;     %subject weight in Kg.
-per_fcm=38.96/100;  %percentage center of mass of the forearm
-per_fw=1.6/100;     %percentage weight of the forearm
-per_hcm=82.00/100;  %percentage center of mass of the hand
-per_hw=0.7/100;     %percentage weight of the hand
-Wd_object=1;       % weight distubance in Kg.
+per_fcm=0.682;      %percentage distance center of mass of the forearm + hand based on table http://www.health.uottawa.ca/biomech/csb/Archives/dempster.pdf
+per_fw=0.0220;      %percentage weight of the forearm + hand from elbow on table http://www.health.uottawa.ca/biomech/csb/Archives/dempster.pdf
+per_hcm=0.506;      %percentage center of mass of the hand
+%per_hw=0.7/100;    %percentage weight of the hand
+Wd_object=0;       % weight distubance in Kg.
 g=9.8;      %gravity m/s.
 elbow_min_open=30*pi/180;
 elbow_max_open=150*pi/180;
@@ -56,11 +56,11 @@ phi=0;          % elbow angle in radians.
 max_phi_open=2.1679; %150 degrees
 
 %forearm variables
-Wf=per_fw*Sw;       %weight of the forearm in kg.
-Dfcm=per_fcm*Lf;    %distance of the center of mass in the forearm in mts.
+Wf=per_fw*Sw;           %weight of the forearm + hand in kg.
+Dfcm=per_fcm*(Lf+Lh);   %distance of the center of mass in the forearm + hand in mts.
 
 %disturbance variables
-Wd=per_hw*Sw+Wd_object; % weight of the disturbance included weight of the hand
+Wd=Wd_object;           %weight of the disturbance in Kg.
 Dd=Lf+per_hcm*Lh;       %distance of the disturbance from the elbow
 
 %work lenghts maximums to work
