@@ -273,8 +273,10 @@ vpot_mean=100*((values_int[ar_vpot_mean]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
 im_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
 potref_mean=values_int[ar_potref_mean];
 pot_raw=values_int[ar_vpot];
-loadcell=(values_int[ar_vloadcell]-LOADCELL_DC)*10;
-loadcell_mean=(values_int[ar_vloadcell_mean]-LOADCELL_DC)*10;
+//loadcell=(values_int[ar_vloadcell]-LOADCELL_DC)*10;
+//loadcell_mean=(values_int[ar_vloadcell_mean]-LOADCELL_DC)*10;
+loadcell=values_int[ar_vloadcell];
+loadcell_mean=values_int[ar_vloadcell_mean];
 
 //Sending information over serial
 Serial.print(PWM_value);
