@@ -1,13 +1,14 @@
 
 Dca_max=0.065;   %max value that can reach Dca
-Dca_min=0.005;  %min value that can be reduced Dca
+Dca_min=0.015;  %min value that can be reduced Dca
 Dca_step=0.001; %variation of Dca
+y=0;
 
 i=0;
 for Dca=Dca_min:Dca_step:Dca_max
     i=i+1;
     phi_step=30*pi/180;
-    [Fcf(:,:,i),phi]=tension_calc(Dca,phi_step,10,0,0);
+    [Fcf(:,:,i),phi]=Dcf_sweep(Dca,phi_step,10,0,0);
 end
 
 i=0;
@@ -17,7 +18,7 @@ hold on
 for Dca=Dca_min:(Dca_max-Dca_min)/2:Dca_max
     i=i+1;
     phi_step=30*pi/180;
-    tension_calc(Dca,phi_step,10,3,i);
+    Dcf_sweep(Dca,phi_step,10,3,i);
 end
 hold off
 

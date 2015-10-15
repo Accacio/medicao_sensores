@@ -25,7 +25,7 @@ for i=1:size(elbow_angle,2)
         tensor=tensor_array(j,i);
         t_angle=t_angle_array(j,i);
         %to plot the arm
-        arm_plot=[0];
+        arm_plot=0;
         arm_plot(1,1)=arm_xini;
         arm_plot(2,1)=arm_yini;
         arm_plot(1,2)=arm_xini+La*cos(phi_shoulder);
