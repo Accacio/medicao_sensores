@@ -12,8 +12,11 @@
 #define LOADCELL_GAIN 220
 #define PI 3.14
 #define const_time 100
-#define FULL_OPEN 90
+#define FULL_OPEN 53
 #define FULL_CLOSE 0
+#define MAX_ELBOW_ANGLE 142*PI/180 // Max aperture of the elbow angle measure externally
+#define DCA 5.75    //Distance of the arm clamping
+#define DCF 4.75    //Distance of the forearm clamping
 
 enum sensor_array
 {
@@ -43,6 +46,8 @@ int cont_frvar=0;
 float PWM_value=FULL_OPEN;
 int comparador=5;
 int menu_var=-1;
+//initialization of x_max for the extension of the arm tensor
+float  X_Tensor_Max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MAX_ELBOW_ANGLE));
 
 Servo servooldg;
 
@@ -51,7 +56,7 @@ void setup()
 
 //analogReference(INTERNAL2V56);
   servooldg.attach(2,MPOS_DC,970); //20, 965
-//  servooldg.write(PWM_value);
+  servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
   Serial.begin(115200);
 }
@@ -65,8 +70,8 @@ void selection_menu()
   }
   if (menu_var==99||menu_var==67)
   {
-    Serial.println("Press l to calibrate Load Cell, p to calibrate Motor Pot, or s to calibrate Current Sensor");
-    while (menu_var==-1||(menu_var!=76 && menu_var!=108 && menu_var!=80 && menu_var!=112 && menu_var!=83 && menu_var!=115))
+    Serial.println("Press l to calibrate Load Cell, p to calibrate Motor Pot, s to calibrate Current Sensor, or e to calibrate elbow angle");
+  while (menu_var==-1||(menu_var!=76 && menu_var!=108 && menu_var!=80 && menu_var!=112 && menu_var!=83 && menu_var!=115 && menu_var!=69 && menu_var!=101))
     {
       menu_var=Serial.read();
     }
@@ -76,6 +81,11 @@ void selection_menu()
 void loop()
 {
   switch (menu_var) {
+    case 69:
+    case 101:
+      calibrate_elbow_angle();
+      selection_menu();
+      break;
     case 77:
     case 109:
     measurement();
@@ -472,15 +482,96 @@ void arm_movement(){
     Serial.println("Enter the percent of closed arm (value between 0 to 100):");
 
     if(cont_high<0){
- menu_var=-1;
- }
- if (Serial.read()=='\n'){
- flag=1;
- }
- }
-    servooldg.write(PWM_value);
- delay(20);
- readSensors(values_int);
-    Serial.println(values_int[ar_vloadcell]*1.0/10);
+      menu_var=-1;
+    }
+    if (Serial.read()=='\n'){
+    flag=1;
+    }
+  }
+  servooldg.write(PWM_value);
+  delay(20);
+  readSensors(values_int);
+  Serial.println(values_int[ar_vloadcell]*1.0/10);
  }while(menu_var>0);
  }
+
+ void calibrate_elbow_angle(){
+    int arm_pos;
+    int aux_max_open;
+    int aux_full_open;
+    float aux_angle;
+    PWM_value=FULL_OPEN;
+    Serial.println(PWM_value);
+    servooldg.write(PWM_value);
+    delay(20);
+    Serial.println("Enter the value that is required to move from 0 to 180. Always take count the position of the motor's piston:");
+    Serial.println("Enter -1 to forward to next calibration step");
+    do{
+    if (Serial.available()){
+     arm_pos= Serial.parseInt();
+     if(arm_pos<0){
+        break;
+     }
+    if (Serial.read()=='\n'){
+    flag=1;
+    }
+
+    Serial.println(arm_pos);
+    PWM_value=arm_pos;
+    Serial.println(PWM_value);
+    Serial.println("Enter the value that is required to move from 0 to 180. Always take count the position of the motor's piston:");
+    Serial.println("Enter -1 to forward to next calibration step");
+  }
+  servooldg.write(PWM_value);
+  delay(20);
+ // readSensors(values_int);
+ // Serial.println(values_int[ar_vloadcell]*1.0/10);
+ }while(1);
+
+Serial.println("For test enter, full open value, max open elbow in degrees and desired angle");
+Serial.println("Enter -1 to return to the menu");
+
+ do{
+    if (Serial.available()){
+     aux_full_open= Serial.parseInt();
+     aux_max_open= Serial.parseInt();
+     aux_angle= Serial.parseInt();
+     if(aux_full_open<0){
+        break;
+     }
+      if (Serial.read()=='\n'){
+      flag=1;
+      }
+    
+    Serial.print(aux_full_open);
+    Serial.print(',');
+    Serial.print(aux_max_open);
+    Serial.print(',');
+    Serial.println(aux_angle);
+    //initialization of x_max for the extension of the arm tensor
+    X_Tensor_Max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_max_open*PI/180));
+    float x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle*PI/180));
+    PWM_value=(x_tensor*aux_full_open)/(X_Tensor_Max);
+    Serial.print(X_Tensor_Max);
+    Serial.print(',');
+    Serial.print(x_tensor);
+    Serial.print(',');
+    Serial.println(PWM_value);
+    
+    servooldg.write(PWM_value);
+    delay(20);
+
+    Serial.println("Set the maximum opening of the elbow angle in degres for calibration, followed by angle opening desired");
+    Serial.println("Enter -1 to return to the menu");
+  }
+ }while(1);
+ 
+ }
+
+ void set_elbow_angle(float angle_set){
+  PWM_value=(angle_set*FULL_OPEN)/MAX_ELBOW_ANGLE;
+  servooldg.write(PWM_value);
+  delay(20);
+  
+ }
+
