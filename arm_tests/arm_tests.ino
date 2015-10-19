@@ -12,9 +12,12 @@
 #define LOADCELL_GAIN 220
 #define PI 3.14
 #define const_time 100
-#define FULL_OPEN 53
-#define FULL_CLOSE 0
+#define FULL_OPEN_ELBOW 53  // value in PWM to full open the elbow angle
+#define FULL_CLOSE_ELBOW 0  // value in PWM to close the elbow angle
 #define MAX_ELBOW_ANGLE 142*PI/180 // Max aperture of the elbow angle measure externally
+#define MIN_ELBOW_ANGLE 33*PI/180  // Min aperture of the elbow angle, measured exernally
+#define ANGLE_VPOT_MAX  194       // Value in bits of the vpot when is the maximum angle on the elbow
+#define ANGLE_VPOT_MIN  24       // Value in bits of the vpot when is the min angle on the elbow
 #define DCA 5.75    //Distance of the arm clamping
 #define DCF 4.75    //Distance of the forearm clamping
 
@@ -43,11 +46,13 @@ int percent_high=100;
 int flag=0;
 int cont_cycle=0;
 int cont_frvar=0;
-float PWM_value=FULL_OPEN;
+float PWM_value=FULL_OPEN_ELBOW;
 int comparador=5;
 int menu_var=-1;
 //initialization of x_max for the extension of the arm tensor
-float  X_Tensor_Max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MAX_ELBOW_ANGLE));
+const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));
+const float  Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MAX_ELBOW_ANGLE))-Traj_x_min;
+const int    Traj_angle=ANGLE_VPOT_MAX-ANGLE_VPOT_MIN;
 
 Servo servooldg;
 
@@ -111,12 +116,7 @@ void loop()
       break;
     default:
       selection_menu();
-}
-
-
-
-
-
+  }
 }
 
 void readSensors(int returnval_int[11]){
@@ -464,114 +464,198 @@ void calibrate_sensor()
   }
 }
 
+//----------- Functions related to the elbow---------------------
+//----------Elbow movement----------------
 void arm_movement(){
-  int arm_pos;
+  int elbow_angle;
   int values_int[ar_last];
-  PWM_value=FULL_OPEN;
-  Serial.println("Define the percent of closed arm (value between 0-full_open to 100-full_closed):");
-  PWM_value=FULL_OPEN;
-  servooldg.write(PWM_value);
-  delay(20);
+//  PWM_value=FULL_OPEN;
+  Serial.print("Define the aperture of the elbow angle (degres) between ");
+  Serial.print(MAX_ELBOW_ANGLE*180/PI); 
+  Serial.print(" and "); 
+  Serial.println(MIN_ELBOW_ANGLE*180/PI);
 
   do{
   if (Serial.available()){
-    arm_pos= Serial.parseInt();
-    Serial.println(arm_pos);
-    PWM_value=(FULL_OPEN-FULL_CLOSE)*(1-arm_pos/100.00);
-    Serial.println(PWM_value);
-    Serial.println("Enter the percent of closed arm (value between 0 to 100):");
-
-    if(cont_high<0){
-      menu_var=-1;
-    }
-    if (Serial.read()=='\n'){
-    flag=1;
-    }
-  }
-  servooldg.write(PWM_value);
-  delay(20);
-  readSensors(values_int);
-  Serial.println(values_int[ar_vloadcell]*1.0/10);
- }while(menu_var>0);
- }
-
- void calibrate_elbow_angle(){
-    int arm_pos;
-    int aux_max_open;
-    int aux_full_open;
-    float aux_angle;
-    PWM_value=FULL_OPEN;
-    Serial.println(PWM_value);
-    servooldg.write(PWM_value);
-    delay(20);
-    Serial.println("Enter the value that is required to move from 0 to 180. Always take count the position of the motor's piston:");
-    Serial.println("Enter -1 to forward to next calibration step");
-    do{
-    if (Serial.available()){
-     arm_pos= Serial.parseInt();
-     if(arm_pos<0){
+    elbow_angle= Serial.parseInt();
+    Serial.println(elbow_angle);
+    if(elbow_angle<0){
         break;
      }
     if (Serial.read()=='\n'){
-    flag=1;
-    }
-
-    Serial.println(arm_pos);
-    PWM_value=arm_pos;
-    Serial.println(PWM_value);
-    Serial.println("Enter the value that is required to move from 0 to 180. Always take count the position of the motor's piston:");
-    Serial.println("Enter -1 to forward to next calibration step");
-  }
-  servooldg.write(PWM_value);
-  delay(20);
- // readSensors(values_int);
- // Serial.println(values_int[ar_vloadcell]*1.0/10);
- }while(1);
-
-Serial.println("For test enter, full open value, max open elbow in degrees and desired angle");
-Serial.println("Enter -1 to return to the menu");
-
- do{
-    if (Serial.available()){
-     aux_full_open= Serial.parseInt();
-     aux_max_open= Serial.parseInt();
-     aux_angle= Serial.parseInt();
-     if(aux_full_open<0){
-        break;
-     }
-      if (Serial.read()=='\n'){
       flag=1;
-      }
+    }
+    Serial.println(elbow_angle);
+    set_elbow_angle(elbow_angle);
+    Serial.print("Define the aperture of the elbow angle (degres) between ");
+    Serial.print(MAX_ELBOW_ANGLE*180/PI); 
+    Serial.print(" and "); 
+    Serial.println(MIN_ELBOW_ANGLE*180/PI);
     
-    Serial.print(aux_full_open);
-    Serial.print(',');
-    Serial.print(aux_max_open);
-    Serial.print(',');
-    Serial.println(aux_angle);
-    //initialization of x_max for the extension of the arm tensor
-    X_Tensor_Max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_max_open*PI/180));
-    float x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle*PI/180));
-    PWM_value=(x_tensor*aux_full_open)/(X_Tensor_Max);
-    Serial.print(X_Tensor_Max);
-    Serial.print(',');
-    Serial.print(x_tensor);
-    Serial.print(',');
+  }
+  readSensors(values_int);
+  float angle_calculated=read_elbow_angle(values_int[ar_vpot]);
+  Serial.print(angle_calculated*180/PI);
+  Serial.print(",");
+  Serial.print(values_int[ar_vpot]);
+  Serial.print(",");
+  Serial.println(values_int[ar_vloadcell]*1.0/10);
+ }while(1);
+ }
+
+//------function for elbow calibration values and constants
+ void calibrate_elbow_angle(){
+    PWM_value=FULL_OPEN_ELBOW;
     Serial.println(PWM_value);
-    
     servooldg.write(PWM_value);
     delay(20);
+    do{
+    //menu of elbow calibration
+    Serial.println("Choose an action for calibration:");
+    Serial.println("  1) Free movement of elbow PWM bits, and measures");
+    Serial.println("  2) Confirmation to test choosen values for elbow angle movement calibration");
+    Serial.println("  3) Under construction");
+    Serial.println(" -1) To exit calibration tests");
+    int menu_value=0;
+    do{
+      if (Serial.available()){
+        menu_value= Serial.parseInt();
+        Serial.println(menu_value);
+        if (Serial.read()=='\n'){}
+        }
+    }while(menu_value==0);
+    if(menu_value<0){
+        break;
+     }
+    switch (menu_value){
+      case 1:
+      elbow_calibration_menu1();
+      break;
+      case 2:
+      elbow_calibration_menu2();
+      break;
+      case 3:
 
-    Serial.println("Set the maximum opening of the elbow angle in degres for calibration, followed by angle opening desired");
-    Serial.println("Enter -1 to return to the menu");
-  }
- }while(1);
- 
+      break;
+    }
+    }while(1);
  }
+ 
+//intern subfuction of elbow menu
+void elbow_calibration_menu1(){
+  int arm_pos;
+  int values_int[ar_last];
+  Serial.println("Enter the value that is required to move from 0 to 180 (bits). Always take count the position of the motor's piston:");
+  Serial.println("Enter -1 to exit to the calibration menu");
+  do{
+    if (Serial.available()){
+      arm_pos= Serial.parseInt();
+      if(arm_pos<0){
+        break;
+      }
+      if (Serial.read()=='\n'){}
+      Serial.println(arm_pos);
+      PWM_value=arm_pos;
+      servooldg.write(PWM_value);
+      delay(20);
+      Serial.println("Enter the value that is required to move from 0 to 180. Always take count the position of the motor's piston:");
+      Serial.println("Enter -1 to exit to the calibration menu");
+    }
+ readSensors(values_int);
+ Serial.print("Vpot= ");
+ Serial.println(values_int[ar_vpot]);
+ }while(1);
+}
+
+//intern subfuction of elbow menu 
+void elbow_calibration_menu2(){
+  int aux_angle_max;
+  int aux_angle_min;
+  int aux_full_open;
+  int aux_vpot_max=ANGLE_VPOT_MAX;
+  int aux_vpot_min=ANGLE_VPOT_MIN;
+  float aux_angle;
+  int values_int[ar_last];
+  float angle_read;
+  int aux_Traj_angle;
+  float x_tensor_read;
+  Serial.println("For test enter, full open elbow value(bits), max open elbow (degrees), min open elbow (degrees) and desired angle");
+  Serial.println("Enter -1 to exit to the calibration menu");
+  do{
+    if (Serial.available()){
+      aux_full_open= Serial.parseInt();
+      aux_angle_max= Serial.parseInt();
+      aux_angle_min=Serial.parseInt();
+      aux_vpot_max=Serial.parseInt();
+      aux_vpot_min=Serial.parseInt();
+      aux_angle= Serial.parseInt();
+      if(aux_full_open<0){
+        break;
+      }
+      if (Serial.read()=='\n'){} 
+      Serial.print(aux_full_open);
+      Serial.print(',');
+      Serial.print(aux_angle_max);
+      Serial.print(',');
+      Serial.print(aux_angle_min);
+      Serial.print(',');
+      Serial.print(aux_vpot_max);
+      Serial.print(',');
+      Serial.print(aux_vpot_min);
+      Serial.print(',');
+      Serial.println(aux_angle);
+    
+      //Calculation of the x tensor values and the PWM value given the data entered by the user
+      float Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_min*PI/180));
+      float Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_max*PI/180))-Traj_x_min;
+      float x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle*PI/180))-Traj_x_min;
+      PWM_value=(x_tensor*aux_full_open)/(Traj_x_max);
+      Serial.print("PWM setted: ");
+      Serial.println(PWM_value);
+    
+      servooldg.write(PWM_value);
+      delay(20);
+
+      Serial.println("Set the maximum opening of the elbow angle in degres for calibration, followed by angle opening desired");
+      Serial.println("Enter -1 to exit to the calibration menu");
+    }
+    delay(1000);
+    readSensors(values_int);
+    //Calculation for measure the elbow angle
+    aux_Traj_angle=aux_vpot_max-aux_vpot_min;
+    x_tensor_read=((values_int[ar_vpot]-aux_vpot_min)*Traj_x_max)/aux_Traj_angle+Traj_x_min;      
+    angle_read=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor_read,2))/(2*DCA*DCF));
+    Serial.print(Traj_angle);
+    Serial.print(", ");
+    Serial.print(values_int[ar_vpot]);
+    Serial.print(", ");
+    Serial.print(x_tensor_read);
+    Serial.print("Angle_measured: ");
+    Serial.println(angle_read*180/PI);
+  }while(1);
+ }
+
 
  void set_elbow_angle(float angle_set){
-  PWM_value=(angle_set*FULL_OPEN)/MAX_ELBOW_ANGLE;
+  float aux_angle=angle_set*PI/180;
+  if(aux_angle>=MIN_ELBOW_ANGLE && aux_angle<=MAX_ELBOW_ANGLE){
+  float x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle))-Traj_x_min;
+  PWM_value=(x_tensor*FULL_OPEN_ELBOW)/Traj_x_max;
   servooldg.write(PWM_value);
   delay(20);
+  }
+  else{
+    Serial.print("Elbow angle out of limits, please enter again a value between: ");
+    Serial.print(MAX_ELBOW_ANGLE*180/PI); 
+    Serial.print(" and "); 
+    Serial.println(MIN_ELBOW_ANGLE*180/PI);
+  } 
   
  }
+
+float read_elbow_angle(int Pot_value){
+  float x_tensor=(Pot_value-ANGLE_VPOT_MIN)*Traj_x_max/Traj_angle+Traj_x_min;
+  float angle_elbow=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor,2))/(2*DCA*DCF));
+  return angle_elbow; 
+}
 
