@@ -1,0 +1,9 @@
+phi_ref=50;
+phi_actual=10;
+E_ten=-20:0.5:20;
+b=5;
+a=3;
+lim_bottom=150-phi_actual;
+lim_upper=phi_ref;
+fx=-lim_bottom*(1-1./(1+exp(-(E_ten+3+b))))+lim_upper*(1./(1+exp(-(E_ten-3-a))));
+plot(E_ten,fx)
