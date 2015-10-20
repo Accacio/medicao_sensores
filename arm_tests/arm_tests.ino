@@ -8,16 +8,22 @@
 #define MPOS_MAX 619//604 //668
 #define CURRENTBIT_DC 109//218//109
 #define CURRENT_GAIN 5.6
-#define LOADCELL_DC 1
-#define LOADCELL_GAIN 220
 #define PI 3.14
+#define G 10   //Gravidade
 #define const_time 100
+//Definitions for the Load Cell
+#define LC_BIT_MIN  23
+#define LC_BIT_MAX  1023
+#define LC_NEWTON_MIN 1.4*G
+#define LC_NEWTON_MAX 50*G
+//Definitions for the elbow
 #define FULL_OPEN_ELBOW 53  // value in PWM to full open the elbow angle
 #define FULL_CLOSE_ELBOW 0  // value in PWM to close the elbow angle
 #define MAX_ELBOW_ANGLE 142*PI/180 // Max aperture of the elbow angle measure externally
 #define MIN_ELBOW_ANGLE 33*PI/180  // Min aperture of the elbow angle, measured exernally
 #define ANGLE_VPOT_MAX  194       // Value in bits of the vpot when is the maximum angle on the elbow
 #define ANGLE_VPOT_MIN  24       // Value in bits of the vpot when is the min angle on the elbow
+//Definitions for the Arm
 #define DCA 5.75    //Distance of the arm clamping
 #define DCF 4.75    //Distance of the forearm clamping
 
@@ -289,10 +295,8 @@ vpot_mean=100*((values_int[ar_vpot_mean]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
 im_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
 potref_mean=values_int[ar_potref_mean];
 pot_raw=values_int[ar_vpot];
-//loadcell=(values_int[ar_vloadcell]-LOADCELL_DC)*10;
-//loadcell_mean=(values_int[ar_vloadcell_mean]-LOADCELL_DC)*10;
-loadcell=values_int[ar_vloadcell];
-loadcell_mean=values_int[ar_vloadcell_mean];
+loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN);
+loadcell_mean=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN);
 
 //Sending information over serial
 Serial.print(PWM_value);
@@ -424,7 +428,44 @@ void get_pot_value(float angle)
 
 void calibrate_loadcell()
 {
-  Serial.println("Calibrei a celula de carga");
+  int aux_lcbit_min=0;
+  int aux_lcbit_max=0;
+  int aux_lcnewton_min=0;
+  int aux_lcnewton_max=0;
+  int values_int[ar_last];
+  float aux_lc;
+  
+  Serial.println("For calibration of the Load Cell enter: Max Measure (bits), Min Measure (bits), Max Weight (N), Min Weight (N)");
+  Serial.println("Enter -1 to exit to the calibration menu");
+  while(Serial.available()==0){};
+  
+  do{
+    if (Serial.available()){
+      aux_lcbit_max= Serial.parseInt();
+      if(aux_lcbit_max<0){
+        break;
+      }
+      aux_lcbit_min= Serial.parseInt();
+      aux_lcnewton_max= Serial.parseInt();
+      aux_lcnewton_min= Serial.parseInt();
+      Serial.print(aux_lcbit_max);
+      Serial.print(", ");      
+      Serial.print(aux_lcbit_min);
+      Serial.print(", ");      
+      Serial.print(aux_lcnewton_max);
+      Serial.print(", ");      
+      Serial.println(aux_lcnewton_min);
+      if (Serial.read()=='\n'){}
+      }
+    readSensors(values_int);
+    aux_lc=((values_int[ar_vloadcell_mean]-aux_lcbit_min)*(aux_lcnewton_max-aux_lcnewton_min))/(aux_lcbit_max-aux_lcbit_min)+aux_lcnewton_min;
+    Serial.print("Load Cell bit: ");      
+    Serial.print(values_int[ar_vloadcell_mean]);
+    Serial.print(", Load Cell Calculated:");      
+    Serial.println(aux_lc);
+    delay(1000);
+
+    }while(1);
 }
 
 
@@ -503,7 +544,7 @@ void arm_movement(){
  }while(1);
  }
 
-//------function for elbow calibration values and constants
+//------FUNCTION for elbow calibration values and constants
  void calibrate_elbow_angle(){
     PWM_value=FULL_OPEN_ELBOW;
     Serial.println(PWM_value);
@@ -635,7 +676,7 @@ void elbow_calibration_menu2(){
   }while(1);
  }
 
-
+//-------------FUNCTION to set the position of the elbow given the angle
  void set_elbow_angle(float angle_set){
   float aux_angle=angle_set*PI/180;
   if(aux_angle>=MIN_ELBOW_ANGLE && aux_angle<=MAX_ELBOW_ANGLE){
@@ -653,6 +694,7 @@ void elbow_calibration_menu2(){
   
  }
 
+//-------------FUNCTION to read the elbow angle given the vpot (position of the piston of the motor)
 float read_elbow_angle(int Pot_value){
   float x_tensor=(Pot_value-ANGLE_VPOT_MIN)*Traj_x_max/Traj_angle+Traj_x_min;
   float angle_elbow=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor,2))/(2*DCA*DCF));
