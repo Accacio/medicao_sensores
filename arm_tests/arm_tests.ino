@@ -735,3 +735,41 @@ float read_elbow_angle(int Pot_value)
   float angle_elbow=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor,2))/(2*DCA*DCF));
   return angle_elbow;
 }
+
+void angular_measures (){
+  unsigned long old_time=0;
+  unsigned long new_time=0;
+  unsigned long var_time;
+  float old_angle=0;
+  float new_angle=0;
+  float old_aspeed=0;
+  float new_aspeed=0;
+  float old_aaccel=0;
+  float new_aaccel=0;
+  int values_int[ar_last];
+
+  int num_measures=3;
+
+  for(int i=0;i<num_measures;i++){
+    readSensors(values_int);
+    old_time=new_time;
+    new_time=millis();
+    var_time=new_time-old_time;
+    old_angle=new_angle;
+    new_angle=read_elbow_angle(values_int[ar_vpot_mean]); //in rads
+    old_aspeed=new_aspeed;
+    new_aspeed=(new_angle-old_angle)/var_time;            // in rad/??
+    old_aaccel=new_aaccel;
+    new_aaccel=(new_aspeed-old_aspeed)/var_time;
+
+    Serial.print("Time: ");
+    Serial.print(var_time);
+    Serial.print(", Angle: ");
+    Serial.print(new_angle);
+    Serial.print(", Ang. Speed: ");
+    Serial.print(new_aspeed);
+    Serial.print(", Ang. Accel.: ");
+    Serial.println(new_aaccel);
+  }
+}
+
