@@ -1,7 +1,7 @@
 %settings
 cont_high=400;
 percent_high=95;
-xmax=8000; %8000 Para 10 iterações
+xmax=2400; %8000 Para 10 iterations % 2400 3
 Port_com='com3';
 
 s=serial(Port_com,'Baudrate',115200);

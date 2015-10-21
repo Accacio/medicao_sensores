@@ -1,9 +1,14 @@
-#define NUM_READS 100
+#define NUM_READS 100 // number of read measures to process the signal
+
+// Pin Numbers
 #define VPOT_IN A11
 #define VREF_IN A10
 #define VIM_IN A12
 #define POTREF_IN A13
 #define LOADCELL_IN A15
+
+
+// Constants
 #define MPOS_DC 32//29// xxx
 #define MPOS_MAX 619//604 //668
 #define CURRENTBIT_DC 109//218//109
@@ -14,7 +19,7 @@
 //Definitions for the Load Cell
 #define LC_BIT_MIN  23
 #define LC_BIT_MAX  1023
-#define LC_NEWTON_MIN 1.4*G
+#define LC_NEWTON_MIN 1.475*G
 #define LC_NEWTON_MAX 50*G
 //Definitions for the elbow
 #define FULL_OPEN_ELBOW 53  // value in PWM to full open the elbow angle
@@ -125,7 +130,8 @@ void loop()
   }
 }
 
-void readSensors(int returnval_int[11]){
+void readSensors(int returnval_int[11])
+{
    // read multiple values of three sensors at same time and sort them to take the mode
 
    int vecvalue_vref[NUM_READS];
@@ -134,7 +140,7 @@ void readSensors(int returnval_int[11]){
    int vecvalue_potref[NUM_READS];
    int vecvalue_vloadcell[NUM_READS];
 
-
+   // Acquire sensor values
    for(int i=0;i<NUM_READS;i++)
    {
      delayMicroseconds(10);
@@ -143,67 +149,71 @@ void readSensors(int returnval_int[11]){
      vecvalue_potref[i] = analogRead(POTREF_IN);
      vecvalue_vim[i] = analogRead(VIM_IN);
      vecvalue_vloadcell[i] = analogRead(LOADCELL_IN);
-    }
+   }
 
-    returnval_int[ar_vref] = int(filter(vecvalue_vref)+0.5); //value for vref
-    returnval_int[ar_vpot] = int(filter(vecvalue_vpot)+0.5); //value for vpot
-    returnval_int[ar_vim] = int(filter(vecvalue_vim)+0.5); //value for vim
-    returnval_int[ar_potref] = int(filter(vecvalue_potref)+0.5); //value for potref
-    returnval_int[ar_vloadcell] = int(filter(vecvalue_vloadcell)+0.5); //value for load cell
+   // Filter acquired values
+   returnval_int[ar_vref] = vecvalue_vref[99];//int(filter(vecvalue_vref)+0.5);
+   returnval_int[ar_vpot] = vecvalue_vpot[99];//int(filter(vecvalue_vpot)+0.5);
+   returnval_int[ar_vim] = vecvalue_vim[99];//int(filter(vecvalue_vim)+0.5);
+   returnval_int[ar_potref] = vecvalue_potref[99];//int(filter(vecvalue_potref)+0.5);
+   returnval_int[ar_vloadcell] = vecvalue_vloadcell[99];//int(filter(vecvalue_vloadcell)+0.5);
 
-    returnval_int[ar_vref_mean] = 0;//value for mean of vref
-    returnval_int[ar_vpot_mean] = 0;//value for mean of vpot
-    returnval_int[ar_vim_mean] = 0;//value for mean of vim
-    returnval_int[ar_potref_mean] = 0;//value for mean of potref
-    returnval_int[ar_vloadcell_mean] = 0;//value for mean of load cell
+   returnval_int[ar_vref_mean] = 0;//value for mean of vref
+   returnval_int[ar_vpot_mean] = 0;//value for mean of vpot
+   returnval_int[ar_vim_mean] = 0;//value for mean of vim
+   returnval_int[ar_potref_mean] = 0;//value for mean of potref
+   returnval_int[ar_vloadcell_mean] = 0;//value for mean of load cell
 
-    float aux_val[ar_last];
-    aux_val[ar_vref_mean] =0;
-    aux_val[ar_vpot_mean] =0;
-    aux_val[ar_vim_mean] =0;
-    aux_val[ar_potref_mean] =0;
-    aux_val[ar_vloadcell_mean] =0;
+   float aux_val[ar_last];
+   aux_val[ar_vref_mean] =0;
+   aux_val[ar_vpot_mean] =0;
+   aux_val[ar_vim_mean] =0;
+   aux_val[ar_potref_mean] =0;
+   aux_val[ar_vloadcell_mean] =0;
 
-  for(int i=0;i<NUM_READS;i++){
+   for(int i=0;i<NUM_READS;i++)
+   {
+     aux_val[ar_vref_mean] +=vecvalue_vref[i];
+     aux_val[ar_vpot_mean] +=vecvalue_vpot[i];
+     aux_val[ar_vim_mean] +=vecvalue_vim[i];
+     aux_val[ar_potref_mean] +=vecvalue_potref[i];
+     aux_val[ar_vloadcell_mean] +=vecvalue_vloadcell[i];
+   }
 
-    aux_val[ar_vref_mean] +=vecvalue_vref[i];
-    aux_val[ar_vpot_mean] +=vecvalue_vpot[i];
-    aux_val[ar_vim_mean] +=vecvalue_vim[i];
-    aux_val[ar_potref_mean] +=vecvalue_potref[i];
-    aux_val[ar_vloadcell_mean] +=vecvalue_vloadcell[i];
-  }
-
-    returnval_int[ar_vref_mean] =int(aux_val[ar_vref_mean]/NUM_READS+0.5);
-    returnval_int[ar_vpot_mean] =int(aux_val[ar_vpot_mean]/NUM_READS+0.5);
-    returnval_int[ar_vim_mean] =int(aux_val[ar_vim_mean]/NUM_READS+0.5);
-    returnval_int[ar_potref_mean] =int(aux_val[ar_potref_mean]/NUM_READS+0.5);
-    returnval_int[ar_vloadcell_mean] =int(aux_val[ar_vloadcell_mean]/NUM_READS+0.5);
+   returnval_int[ar_vref_mean] =int(aux_val[ar_vref_mean]/NUM_READS+0.5);
+   returnval_int[ar_vpot_mean] =int(aux_val[ar_vpot_mean]/NUM_READS+0.5);
+   returnval_int[ar_vim_mean] =int(aux_val[ar_vim_mean]/NUM_READS+0.5);
+   returnval_int[ar_potref_mean] =int(aux_val[ar_potref_mean]/NUM_READS+0.5);
+   returnval_int[ar_vloadcell_mean] =int(aux_val[ar_vloadcell_mean]/NUM_READS+0.5);
 
    //return returnval;
 }
 
-float filter(int raw_val[]){
-  //sorting the array
-  for(int i=0; i<(NUM_READS-1); i++) {
-        for(int j=0; j<(NUM_READS-(i+1)); j++) {
-                if(raw_val[j] > raw_val[j+1]) {
-                    int aux = raw_val[j];
-                    raw_val[j] = raw_val[j+1];
-                    raw_val[j+1] = aux;
-                }
-        }
+float filter(int raw_val[])
+{
+  // Sorting the array
+  for(int i=0; i<(NUM_READS-1); i++)
+  {
+    for(int j=0; j<(NUM_READS-(i+1)); j++)
+    {
+      if(raw_val[j] > raw_val[j+1])
+      {
+        int aux = raw_val[j];
+        raw_val[j] = raw_val[j+1];
+        raw_val[j+1] = aux;
+      }
     }
-
-    // median of the 20 center values of the array
-    float return_filvalue=0;
-    int cont=0;
-    for(int i=NUM_READS/2-10;i<(NUM_READS/2+10);i++){
-      return_filvalue +=raw_val[i];
-      cont++;
-   }
-   return_filvalue=return_filvalue/20;
-
-   return return_filvalue;
+  }
+  // Median of the 20 center values of the array
+  float return_filvalue=0;
+  int cont=0;
+  for(int i=NUM_READS/2-10;i<(NUM_READS/2+10);i++)
+  {
+    return_filvalue +=raw_val[i];
+    cont++;
+  }
+  return_filvalue=return_filvalue/20;
+  return return_filvalue;
 }
 
 void square_wave()
@@ -212,8 +222,8 @@ void square_wave()
   {
     PWM_value=1.8*percent_high;
   }
-//  if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
-   if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
+
+  if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
   {
     PWM_value=9;
   }
@@ -240,98 +250,103 @@ void sine_wave_fqvar()
   else
   {
     PWM_value=(1.8/2)*percent_high*(1-cos(cont_cycle*PI/cont_high));
-    if(cont_frvar>=2*cont_high){
+    if(cont_frvar>=2*cont_high)
+    {
       cont_high=cont_high/2;
       cont_frvar=0;
     }
   }
 }
 
-void measurement(){
-int values_int[ar_last];
-float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean;
-int register_vpot[comparador];
-int equal_mean;
-do{
-  servooldg.write(0);
-  delay(100);
-  readSensors(values_int);
-  equal_mean=0;
-  for(int i=0;i<comparador;i++)
-  {
-    equal_mean+=register_vpot[i];
-  }
-  equal_mean=equal_mean/comparador;
-
-  for(int i=1;i<comparador;i++)
-  {
-    register_vpot[i-1]=register_vpot[i];
-  }
-  register_vpot[comparador-1]=values_int[ar_vpot];
-}while(values_int[ar_vpot]!=equal_mean);
-
-
-cont_cycle=0;
-cont_frvar=0;
-t0_time=millis();
-
-do{
-square_wave();
-//sine_wave();
-//sine_wave_fqvar();
-
-servooldg.write(PWM_value);
-cont_cycle++;
-cont_frvar++;
-
-readSensors(values_int);
-// Conversion from bits to values
-vref=1.989*values_int[ar_vref];
-vpot=100*((values_int[ar_vpot]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-im=((values_int[ar_vim]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
-potref=values_int[ar_potref];
-vref_mean=1.989*values_int[ar_vref_mean];
-vpot_mean=100*((values_int[ar_vpot_mean]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-im_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
-potref_mean=values_int[ar_potref_mean];
-pot_raw=values_int[ar_vpot];
-loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN);
-loadcell_mean=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN);
-
-//Sending information over serial
-Serial.print(PWM_value);
-Serial.print(',');
-//Serial.print(vref);
-//Serial.print(',');
-//Serial.print(pot_raw);
-//Serial.print(',');
-Serial.print(vpot);//vpot_int
-Serial.print(',');
-//Serial.print(vref_mean);
-//Serial.print(',');
-Serial.print(vpot_mean);//vpot_mean int
-Serial.print(',');
-Serial.print(im);
-Serial.print(',');
-Serial.print(im_mean);
-Serial.print(',');
-Serial.print(loadcell);
-Serial.print(',');
-Serial.print(loadcell_mean);
-Serial.print(',');
-Serial.print(t_time);
-Serial.println(',');
-do{
-  delayMicroseconds(500);
-  t1_time=millis();
-  t_time=t1_time-t0_time;
-}while(t_time<const_time);
-t0_time=t1_time;
-if (Serial.available())
+void measurement()
 {
-  serialEvent();
-}
-}while(menu_var>0);
+  int values_int[ar_last];
+  float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean;
+  int register_vpot[comparador];
+  int equal_mean;
+  do
+  {
+    servooldg.write(0);
+    delay(100);
+    readSensors(values_int);
+    equal_mean=0;
+    for(int i=0;i<comparador;i++)
+    {
+      equal_mean+=register_vpot[i];
+    }
+    equal_mean=equal_mean/comparador;
+
+    for(int i=1;i<comparador;i++)
+    {
+      register_vpot[i-1]=register_vpot[i];
+    }
+    register_vpot[comparador-1]=values_int[ar_vpot];
+  }while(values_int[ar_vpot]!=equal_mean);
+
+
+  cont_cycle=0;
+  cont_frvar=0;
+  t0_time=millis();
+
+  do
+  {
+    square_wave();
+    //sine_wave();
+    //sine_wave_fqvar();
+
+    servooldg.write(PWM_value);
+    cont_cycle++;
+    cont_frvar++;
+
+    readSensors(values_int);
+    // Conversion from bits to values
+    vref=1.989*values_int[ar_vref];
+    vpot=100*((values_int[ar_vpot]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+    im=((values_int[ar_vim]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+    potref=values_int[ar_potref];
+    vref_mean=1.989*values_int[ar_vref_mean];
+    vpot_mean=100*((values_int[ar_vpot_mean]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+    im_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+    potref_mean=values_int[ar_potref_mean];
+    pot_raw=values_int[ar_vpot];
+    //loadcell=(values_int[ar_vloadcell]-LOADCELL_DC)*10;
+    //loadcell_mean=(values_int[ar_vloadcell_mean]-LOADCELL_DC)*10;
+    loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    loadcell_mean=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    //Sending information over serial
+    Serial.print(PWM_value);
+    Serial.print(',');
+    //Serial.print(vref);
+    //Serial.print(',');
+    //Serial.print(pot_raw);
+    //Serial.print(',');
+    Serial.print(vpot);//vpot_int
+    Serial.print(',');
+    //Serial.print(vref_mean);
+    //Serial.print(',');
+    Serial.print(vpot_mean);//vpot_mean int
+    Serial.print(',');
+    Serial.print(im);
+    Serial.print(',');
+    Serial.print(im_mean);
+    Serial.print(',');
+    Serial.print(loadcell);
+    Serial.print(',');
+    Serial.print(loadcell_mean);
+    Serial.print(',');
+    Serial.print(t_time);
+    Serial.println(',');
+    do{
+      delayMicroseconds(500);
+      t1_time=millis();
+      t_time=t1_time-t0_time;
+    }while(t_time<const_time);
+    t0_time=t1_time;
+    if (Serial.available())
+    {
+      serialEvent();
+    }
+  }while(menu_var>0);
 
 }
 
@@ -376,7 +391,8 @@ void get_pot_value(float angle)
     delay(20);
   }
 
-  do{
+  do
+  {
     servooldg.write(angle);
     delay(200);
     equal_mean=0;
@@ -392,9 +408,9 @@ void get_pot_value(float angle)
     }
     equal_mean=equal_mean/comparador;
 
-      Serial.print(values_int[ar_vpot_mean]);
-      Serial.print('-');
-      Serial.println(equal_mean);
+    Serial.print(values_int[ar_vpot_mean]);
+    Serial.print('-');
+    Serial.println(equal_mean);
 
 
     for(int i=1;i<comparador;i++)
@@ -403,7 +419,7 @@ void get_pot_value(float angle)
     }
     register_vpot[comparador-1]=values_int[ar_vpot];
   }while(values_int[ar_vpot]!=equal_mean);
-    //}while(ascending==comparador || descending==comparador);
+  //}while(ascending==comparador || descending==comparador);
   Serial.print(values_int[ar_vpot_mean]);
   Serial.print(',');
   Serial.println(equal_mean);
@@ -414,9 +430,9 @@ void get_pot_value(float angle)
     register_vpot[i] = values_int[ar_vpot];
     delayMicroseconds(10);
   }
-
- int measure=0;
-  for(int i=0;i<comparador;i++){
+  int measure=0;
+  for(int i=0;i<comparador;i++)
+  {
     measure+=register_vpot[i];
   }
   measure=measure/comparador;
@@ -428,17 +444,17 @@ void get_pot_value(float angle)
 
 void calibrate_loadcell()
 {
-  int aux_lcbit_min=0;
-  int aux_lcbit_max=0;
-  int aux_lcnewton_min=0;
-  int aux_lcnewton_max=0;
+  int aux_lcbit_min=LC_BIT_MIN;
+  int aux_lcbit_max=LC_BIT_MAX;
+  float aux_lcnewton_min=LC_NEWTON_MIN;
+  float aux_lcnewton_max=LC_NEWTON_MAX;
   int values_int[ar_last];
   float aux_lc;
-  
+
   Serial.println("For calibration of the Load Cell enter: Max Measure (bits), Min Measure (bits), Max Weight (N), Min Weight (N)");
   Serial.println("Enter -1 to exit to the calibration menu");
   while(Serial.available()==0){};
-  
+
   do{
     if (Serial.available()){
       aux_lcbit_max= Serial.parseInt();
@@ -446,22 +462,22 @@ void calibrate_loadcell()
         break;
       }
       aux_lcbit_min= Serial.parseInt();
-      aux_lcnewton_max= Serial.parseInt();
-      aux_lcnewton_min= Serial.parseInt();
+      aux_lcnewton_max= Serial.parseFloat();
+      aux_lcnewton_min= Serial.parseFloat();
       Serial.print(aux_lcbit_max);
-      Serial.print(", ");      
+      Serial.print(", ");
       Serial.print(aux_lcbit_min);
-      Serial.print(", ");      
+      Serial.print(", ");
       Serial.print(aux_lcnewton_max);
-      Serial.print(", ");      
+      Serial.print(", ");
       Serial.println(aux_lcnewton_min);
       if (Serial.read()=='\n'){}
       }
     readSensors(values_int);
     aux_lc=((values_int[ar_vloadcell_mean]-aux_lcbit_min)*(aux_lcnewton_max-aux_lcnewton_min))/(aux_lcbit_max-aux_lcbit_min)+aux_lcnewton_min;
-    Serial.print("Load Cell bit: ");      
+    Serial.print("Load Cell bit: ");
     Serial.print(values_int[ar_vloadcell_mean]);
-    Serial.print(", Load Cell Calculated:");      
+    Serial.print(", Load Cell Calculated:");
     Serial.println(aux_lc);
     delay(1000);
 
@@ -474,11 +490,10 @@ void calibrate_pot(int num_measures)
   servooldg.write(0);
   delay(200);
   float fract_angle=180/(num_measures-1);
-  for(float i=0;i<181;i+=fract_angle){
+  for(float i=0;i<181;i+=fract_angle)
+  {
     get_pot_value(i);
   }
-
-
 }
 
 void calibrate_sensor()
@@ -507,50 +522,56 @@ void calibrate_sensor()
 
 //----------- Functions related to the elbow---------------------
 //----------Elbow movement----------------
-void arm_movement(){
+void arm_movement()
+{
   int elbow_angle;
   int values_int[ar_last];
-//  PWM_value=FULL_OPEN;
+  //  PWM_value=FULL_OPEN;
   Serial.print("Define the aperture of the elbow angle (degres) between ");
-  Serial.print(MAX_ELBOW_ANGLE*180/PI); 
-  Serial.print(" and "); 
+  Serial.print(MAX_ELBOW_ANGLE*180/PI);
+  Serial.print(" and ");
   Serial.println(MIN_ELBOW_ANGLE*180/PI);
 
-  do{
-  if (Serial.available()){
-    elbow_angle= Serial.parseInt();
-    Serial.println(elbow_angle);
-    if(elbow_angle<0){
+  do
+  {
+    if (Serial.available())
+    {
+      elbow_angle= Serial.parseInt();
+      Serial.println(elbow_angle);
+      if(elbow_angle<0)
+      {
         break;
-     }
-    if (Serial.read()=='\n'){
-      flag=1;
+      }
+      if (Serial.read()=='\n')
+      {
+        flag=1;
+      }
+      Serial.println(elbow_angle);
+      set_elbow_angle(elbow_angle);
+      Serial.print("Define the aperture of the elbow angle (degres) between ");
+      Serial.print(MAX_ELBOW_ANGLE*180/PI);
+      Serial.print(" and ");
+      Serial.println(MIN_ELBOW_ANGLE*180/PI);
     }
-    Serial.println(elbow_angle);
-    set_elbow_angle(elbow_angle);
-    Serial.print("Define the aperture of the elbow angle (degres) between ");
-    Serial.print(MAX_ELBOW_ANGLE*180/PI); 
-    Serial.print(" and "); 
-    Serial.println(MIN_ELBOW_ANGLE*180/PI);
-    
-  }
-  readSensors(values_int);
-  float angle_calculated=read_elbow_angle(values_int[ar_vpot]);
-  Serial.print(angle_calculated*180/PI);
-  Serial.print(",");
-  Serial.print(values_int[ar_vpot]);
-  Serial.print(",");
-  Serial.println(values_int[ar_vloadcell]*1.0/10);
- }while(1);
- }
+    readSensors(values_int);
+    float angle_calculated=read_elbow_angle(values_int[ar_vpot]);
+    Serial.print(angle_calculated*180/PI);
+    Serial.print(",");
+    Serial.print(values_int[ar_vpot]);
+    Serial.print(",");
+    Serial.println(values_int[ar_vloadcell]*1.0/10);
+  }while(1);
+}
 
 //------FUNCTION for elbow calibration values and constants
- void calibrate_elbow_angle(){
-    PWM_value=FULL_OPEN_ELBOW;
-    Serial.println(PWM_value);
-    servooldg.write(PWM_value);
-    delay(20);
-    do{
+void calibrate_elbow_angle()
+{
+  PWM_value=FULL_OPEN_ELBOW;
+  Serial.println(PWM_value);
+  servooldg.write(PWM_value);
+  delay(20);
+  do
+  {
     //menu of elbow calibration
     Serial.println("Choose an action for calibration:");
     Serial.println("  1) Free movement of elbow PWM bits, and measures");
@@ -558,40 +579,48 @@ void arm_movement(){
     Serial.println("  3) Under construction");
     Serial.println(" -1) To exit calibration tests");
     int menu_value=0;
-    do{
-      if (Serial.available()){
+    do
+    {
+      if (Serial.available())
+      {
         menu_value= Serial.parseInt();
         Serial.println(menu_value);
         if (Serial.read()=='\n'){}
-        }
+      }
     }while(menu_value==0);
-    if(menu_value<0){
-        break;
-     }
-    switch (menu_value){
-      case 1:
-      elbow_calibration_menu1();
-      break;
-      case 2:
-      elbow_calibration_menu2();
-      break;
-      case 3:
-
+    if(menu_value<0)
+    {
       break;
     }
-    }while(1);
- }
- 
+    switch (menu_value)
+    {
+      case 1:
+        elbow_calibration_menu1();
+        break;
+      case 2:
+        elbow_calibration_menu2();
+        break;
+      case 3:
+
+        break;
+    }
+  }while(1);
+}
+
 //intern subfuction of elbow menu
-void elbow_calibration_menu1(){
+void elbow_calibration_menu1()
+{
   int arm_pos;
   int values_int[ar_last];
   Serial.println("Enter the value that is required to move from 0 to 180 (bits). Always take count the position of the motor's piston:");
   Serial.println("Enter -1 to exit to the calibration menu");
-  do{
-    if (Serial.available()){
+  do
+  {
+    if (Serial.available())
+    {
       arm_pos= Serial.parseInt();
-      if(arm_pos<0){
+      if(arm_pos<0)
+      {
         break;
       }
       if (Serial.read()=='\n'){}
@@ -602,14 +631,15 @@ void elbow_calibration_menu1(){
       Serial.println("Enter the value that is required to move from 0 to 180. Always take count the position of the motor's piston:");
       Serial.println("Enter -1 to exit to the calibration menu");
     }
- readSensors(values_int);
- Serial.print("Vpot= ");
- Serial.println(values_int[ar_vpot]);
- }while(1);
+    readSensors(values_int);
+    Serial.print("Vpot= ");
+    Serial.println(values_int[ar_vpot]);
+  }while(1);
 }
 
-//intern subfuction of elbow menu 
-void elbow_calibration_menu2(){
+//intern subfuction of elbow menu
+void elbow_calibration_menu2()
+{
   int aux_angle_max;
   int aux_angle_min;
   int aux_full_open;
@@ -622,8 +652,10 @@ void elbow_calibration_menu2(){
   float x_tensor_read;
   Serial.println("For test enter, full open elbow value(bits), max open elbow (degrees), min open elbow (degrees) and desired angle");
   Serial.println("Enter -1 to exit to the calibration menu");
-  do{
-    if (Serial.available()){
+  do
+  {
+    if (Serial.available())
+    {
       aux_full_open= Serial.parseInt();
       aux_angle_max= Serial.parseInt();
       aux_angle_min=Serial.parseInt();
@@ -633,7 +665,7 @@ void elbow_calibration_menu2(){
       if(aux_full_open<0){
         break;
       }
-      if (Serial.read()=='\n'){} 
+      if (Serial.read()=='\n'){}
       Serial.print(aux_full_open);
       Serial.print(',');
       Serial.print(aux_angle_max);
@@ -645,7 +677,7 @@ void elbow_calibration_menu2(){
       Serial.print(aux_vpot_min);
       Serial.print(',');
       Serial.println(aux_angle);
-    
+
       //Calculation of the x tensor values and the PWM value given the data entered by the user
       float Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_min*PI/180));
       float Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_max*PI/180))-Traj_x_min;
@@ -653,7 +685,7 @@ void elbow_calibration_menu2(){
       PWM_value=(x_tensor*aux_full_open)/(Traj_x_max);
       Serial.print("PWM setted: ");
       Serial.println(PWM_value);
-    
+
       servooldg.write(PWM_value);
       delay(20);
 
@@ -664,7 +696,7 @@ void elbow_calibration_menu2(){
     readSensors(values_int);
     //Calculation for measure the elbow angle
     aux_Traj_angle=aux_vpot_max-aux_vpot_min;
-    x_tensor_read=((values_int[ar_vpot]-aux_vpot_min)*Traj_x_max)/aux_Traj_angle+Traj_x_min;      
+    x_tensor_read=((values_int[ar_vpot]-aux_vpot_min)*Traj_x_max)/aux_Traj_angle+Traj_x_min;
     angle_read=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor_read,2))/(2*DCA*DCF));
     Serial.print(Traj_angle);
     Serial.print(", ");
@@ -674,30 +706,32 @@ void elbow_calibration_menu2(){
     Serial.print("Angle_measured: ");
     Serial.println(angle_read*180/PI);
   }while(1);
- }
+}
 
 //-------------FUNCTION to set the position of the elbow given the angle
- void set_elbow_angle(float angle_set){
+void set_elbow_angle(float angle_set)
+{
   float aux_angle=angle_set*PI/180;
-  if(aux_angle>=MIN_ELBOW_ANGLE && aux_angle<=MAX_ELBOW_ANGLE){
+  if(aux_angle>=MIN_ELBOW_ANGLE && aux_angle<=MAX_ELBOW_ANGLE)
+  {
   float x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle))-Traj_x_min;
   PWM_value=(x_tensor*FULL_OPEN_ELBOW)/Traj_x_max;
   servooldg.write(PWM_value);
   delay(20);
   }
-  else{
+  else
+  {
     Serial.print("Elbow angle out of limits, please enter again a value between: ");
-    Serial.print(MAX_ELBOW_ANGLE*180/PI); 
-    Serial.print(" and "); 
+    Serial.print(MAX_ELBOW_ANGLE*180/PI);
+    Serial.print(" and ");
     Serial.println(MIN_ELBOW_ANGLE*180/PI);
-  } 
-  
- }
-
-//-------------FUNCTION to read the elbow angle given the vpot (position of the piston of the motor)
-float read_elbow_angle(int Pot_value){
-  float x_tensor=(Pot_value-ANGLE_VPOT_MIN)*Traj_x_max/Traj_angle+Traj_x_min;
-  float angle_elbow=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor,2))/(2*DCA*DCF));
-  return angle_elbow; 
+  }
 }
 
+//-------------FUNCTION to read the elbow angle given the vpot (position of the piston of the motor)
+float read_elbow_angle(int Pot_value)
+{
+  float x_tensor=(Pot_value-ANGLE_VPOT_MIN)*Traj_x_max/Traj_angle+Traj_x_min;
+  float angle_elbow=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor,2))/(2*DCA*DCF));
+  return angle_elbow;
+}
