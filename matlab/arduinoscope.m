@@ -1,3 +1,4 @@
+clear
 %settings
 cont_high=400;
 percent_high=95;
@@ -45,7 +46,7 @@ im_ymin=0;
 im_ymax=1500;
 
 loadcell_ymin=0;
-loadcell_ymax=6000;
+loadcell_ymax=100;
 
 sampl_time=0;
 commas_error=0;
