@@ -22,15 +22,17 @@
 #define LC_NEWTON_MIN 1.475*G
 #define LC_NEWTON_MAX 50*G
 //Definitions for the elbow
-#define FULL_OPEN_ELBOW 53  // value in PWM to full open the elbow angle
+#define FULL_OPEN_ELBOW 50  // value in PWM to full open the elbow angle
 #define FULL_CLOSE_ELBOW 0  // value in PWM to close the elbow angle
 #define MAX_ELBOW_ANGLE 142*PI/180 // Max aperture of the elbow angle measure externally
-#define MIN_ELBOW_ANGLE 33*PI/180  // Min aperture of the elbow angle, measured exernally
-#define ANGLE_VPOT_MAX  194       // Value in bits of the vpot when is the maximum angle on the elbow
-#define ANGLE_VPOT_MIN  24       // Value in bits of the vpot when is the min angle on the elbow
+#define MIN_ELBOW_ANGLE 34*PI/180  // Min aperture of the elbow angle, measured exernally
+#define ANGLE_VPOT_MAX  190       // Value in bits of the vpot when is the maximum angle on the elbow
+#define ANGLE_VPOT_MIN  25       // Value in bits of the vpot when is the min angle on the elbow
 //Definitions for the Arm
 #define DCA 5.75    //Distance of the arm clamping
 #define DCF 4.75    //Distance of the forearm clamping
+#define PFCM 0.682   //Forearm center of mass
+#define PFW  0.022   //Forearm proportional weight
 
 enum sensor_array
 {
@@ -60,6 +62,13 @@ int cont_frvar=0;
 float PWM_value=FULL_OPEN_ELBOW;
 int comparador=5;
 int menu_var=-1;
+
+//subject difintions
+float Subject_weight=70;
+float La=0.28;
+float Lf=0.26;
+float Lh=0.08;
+
 //initialization of x_max for the extension of the arm tensor
 const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));
 const float  Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MAX_ELBOW_ANGLE))-Traj_x_min;
@@ -80,7 +89,7 @@ void setup()
 void selection_menu()
 {
   Serial.println("Press c to Calibration, a for arm movement, or m to Measurement");
-  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=97 && menu_var!=65))
+  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=97 && menu_var!=65 && menu_var!=84 && menu_var!=116))
   {
     menu_var=Serial.read();
   }
@@ -97,6 +106,11 @@ void selection_menu()
 void loop()
 {
   switch (menu_var) {
+    case 84:
+    case 116:
+      deterministic_model();
+      selection_menu();
+      break;
     case 69:
     case 101:
       calibrate_elbow_angle();
@@ -736,7 +750,7 @@ float read_elbow_angle(int Pot_value)
   return angle_elbow;
 }
 
-void angular_measures (){
+void angular_measures (float results[3]){
   unsigned long old_time=0;
   unsigned long new_time=0;
   unsigned long var_time;
@@ -771,5 +785,36 @@ void angular_measures (){
     Serial.print(", Ang. Accel.: ");
     Serial.println(new_aaccel);
   }
+  results[1]=new_angle;
+  results[2]=new_aspeed;
+  results[3]=new_aaccel;
+}
+
+void deterministic_model(){
+float elbow_angulars[3];
+float FW=PFW*Subject_weight;
+float FCM=PFCM*(Lf+Lh);
+float I=FW*pow(FCM,2);
+float Tf;
+float Td=0;
+float Taccel;
+float Tcf;
+float x_tensor;
+float teta_ac;
+while(1){
+angular_measures(elbow_angulars);
+x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(elbow_angulars[1]));
+teta_ac=asin((DCF*sin(elbow_angulars[1]))/x_tensor);
+Tf=FW*FCM*G*sin(elbow_angulars[1]);
+Taccel=I*elbow_angulars[3];
+Tcf=(Taccel+Tf+Td)/(DCA*sin(teta_ac));
+    Serial.print(" Trq. forearm: ");
+    Serial.print(Tf);
+    Serial.print(", Trq. mov: ");
+    Serial.print(Taccel);
+    Serial.print(", Trq. CF: ");
+    Serial.println(Tcf);
+}
+  
 }
 
