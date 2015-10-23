@@ -55,7 +55,7 @@ unsigned long t1_time;
 unsigned long t_time;
 int cont_high=100;
 int cont_low=0;
-int percent_high=100;
+int percent_high=20;
 int flag=0;
 int cont_cycle=0;
 int cont_frvar=0;
@@ -573,7 +573,7 @@ void arm_movement()
     Serial.print(",");
     Serial.print(values_int[ar_vpot]);
     Serial.print(",");
-    Serial.println(values_int[ar_vloadcell]*1.0/10);
+    Serial.println(((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN);
   }while(1);
 }
 
@@ -815,6 +815,5 @@ Tcf=(Taccel+Tf+Td)/(DCA*sin(teta_ac));
     Serial.print(", Trq. CF: ");
     Serial.println(Tcf);
 }
-  
-}
 
+}
