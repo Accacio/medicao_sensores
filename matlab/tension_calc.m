@@ -1,4 +1,4 @@
-function [ Fcf] = tension_calc( Dca,Dcf,phi)
+function [ Fcf] = tension_calc( Dca,Dcf,phi,Wf)
 %program to simulate the clamping force of the arm project
 %Ffc tension over the clamping point in the forearme in Newtons
 %phi angle of the elbow in radians
@@ -56,7 +56,9 @@ teta_ac=0;     % arm clamping angle in radians
 max_phi_open=2.1679; %150 degrees
 
 %forearm variables
-Wf=per_fw*Sw           %weight of the forearm + hand in kg.
+if ~exist('Wf','var')
+    Wf=per_fw*Sw;           %weight of the forearm + hand in kg.
+end
 Dfcm=per_fcm*(Lf+Lh);   %distance of the center of mass in the forearm + hand in mts.
 
 %disturbance variables
