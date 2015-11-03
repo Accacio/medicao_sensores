@@ -4,7 +4,7 @@ max_phi=140;
 var_phi=5;
 phi_vect=min_phi:var_phi:max_phi;
 
-Wf=1.5;
+Wf=0.5;
 Dca=0.057;
 Dcf=0.047;
 F_dinamic=0;

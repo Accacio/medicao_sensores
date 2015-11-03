@@ -224,13 +224,20 @@ void elbow_calibration_menu2()
   int aux_angle_max;
   int aux_angle_min;
   int aux_full_open;
+  int auxbit_downward_compen;
   int aux_vpot_max=ANGLE_VPOT_MAX;
   int aux_vpot_min=ANGLE_VPOT_MIN;
+  int auxvpot_downward_compen;
   float aux_angle;
   int values_int[ar_last];
   float angle_read;
   int aux_Traj_angle;
   float x_tensor_read;
+  float Traj_x_min;
+  float Traj_x_max;
+  float vpot_max_function;
+
+  
   Serial.println("For test enter, full open elbow value(bits), max open elbow (degrees), min open elbow (degrees) and desired angle");
   Serial.println("Enter -1 to exit to the calibration menu");
   do
@@ -238,9 +245,11 @@ void elbow_calibration_menu2()
     if (Serial.available())
     {
       aux_full_open= Serial.parseInt();
+      int auxbit_compen= Serial.parseInt();
       aux_angle_max= Serial.parseInt();
       aux_angle_min=Serial.parseInt();
       aux_vpot_max=Serial.parseInt();
+      int auxvpot_compen=Serial.parseInt();
       aux_vpot_min=Serial.parseInt();
       aux_angle= Serial.parseInt();
       if(aux_full_open<0){
@@ -249,21 +258,40 @@ void elbow_calibration_menu2()
       if (Serial.read()=='\n'){}
       Serial.print(aux_full_open);
       Serial.print(',');
+      Serial.print(auxbit_compen);
+      Serial.print(',');
       Serial.print(aux_angle_max);
       Serial.print(',');
       Serial.print(aux_angle_min);
       Serial.print(',');
       Serial.print(aux_vpot_max);
       Serial.print(',');
+      Serial.print(auxvpot_compen);
+      Serial.print(',');
       Serial.print(aux_vpot_min);
       Serial.print(',');
       Serial.println(aux_angle);
 
       //Calculation of the x tensor values and the PWM value given the data entered by the user
-      float Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_min*PI/180));
-      float Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_max*PI/180))-Traj_x_min;
+      auxbit_downward_compen=auxbit_compen-aux_full_open;
+      auxvpot_downward_compen=auxvpot_compen-aux_vpot_max;
+      Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_min*PI/180));
+      Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_max*PI/180))-Traj_x_min;
       float x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle*PI/180))-Traj_x_min;
-      PWM_value=(x_tensor*aux_full_open)/(Traj_x_max);
+      
+      int full_open_function=aux_full_open;
+      vpot_max_function=aux_vpot_max;
+      readSensors(values_int);
+      float xx_tensor_read=((values_int[ar_vpot]-aux_vpot_min)*Traj_x_max)/(aux_vpot_max-aux_vpot_min)+Traj_x_min;
+      float actual_angle=acos((pow(DCA,2)+pow(DCF,2)-pow(xx_tensor_read,2))/(2*DCA*DCF))*180/PI;
+      if (aux_angle>actual_angle)
+      {
+        Serial.println("compensated hysteresis");
+        full_open_function+=auxbit_downward_compen;
+        vpot_max_function+=auxvpot_downward_compen;
+        Serial.println(vpot_max_function);
+      }
+      PWM_value=(x_tensor*full_open_function)/Traj_x_max;
       Serial.print("PWM setted: ");
       Serial.println(PWM_value);
 
@@ -275,16 +303,17 @@ void elbow_calibration_menu2()
     }
     delay(1000);
     readSensors(values_int);
+    
     //Calculation for measure the elbow angle
-    aux_Traj_angle=aux_vpot_max-aux_vpot_min;
-    x_tensor_read=((values_int[ar_vpot]-aux_vpot_min)*Traj_x_max)/aux_Traj_angle+Traj_x_min;
+
+    x_tensor_read=((values_int[ar_vpot]-aux_vpot_min)*Traj_x_max)/(vpot_max_function-aux_vpot_min)+Traj_x_min;
     angle_read=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor_read,2))/(2*DCA*DCF));
     Serial.print(Traj_angle);
     Serial.print(", ");
     Serial.print(values_int[ar_vpot]);
     Serial.print(", ");
     Serial.print(x_tensor_read);
-    Serial.print("Angle_measured: ");
+    Serial.print(" Angle measured: ");
     Serial.println(angle_read*180/PI);
   }while(1);
 }

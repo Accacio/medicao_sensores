@@ -27,9 +27,9 @@
 #define FULL_OPEN_ELBOW 50  // value in PWM to full open the elbow angle
 #define FULL_CLOSE_ELBOW 0  // value in PWM to close the elbow angle
 #define MAX_ELBOW_ANGLE 142*PI/180 // Max aperture of the elbow angle measure externally
-#define MIN_ELBOW_ANGLE 34*PI/180  // Min aperture of the elbow angle, measured exernally
-#define ANGLE_VPOT_MAX  190       // Value in bits of the vpot when is the maximum angle on the elbow
-#define ANGLE_VPOT_MIN  25       // Value in bits of the vpot when is the min angle on the elbow
+#define MIN_ELBOW_ANGLE 41*PI/180  // Min aperture of the elbow angle, measured exernally
+#define ANGLE_VPOT_MAX  185       // Value in bits of the vpot when is the maximum angle on the elbow
+#define ANGLE_VPOT_MIN  30       // Value in bits of the vpot when is the min angle on the elbow
 //Definitions for the Arm
 #define DCA 5.75    //Distance of the arm clamping
 #define DCF 4.75    //Distance of the forearm clamping
