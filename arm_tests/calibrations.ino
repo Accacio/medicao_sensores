@@ -11,7 +11,7 @@ void get_pot_value(float angle)
   for(int i=0;i<comparador;i++)
   {
     readSensors(values_int);
-    register_vpot[i] = values_int[ar_vpot];
+    register_vpot[i] = values_int[ar_vpot_mean];
     delay(20);
   }
 
@@ -23,7 +23,7 @@ void get_pot_value(float angle)
     ascending=0;
     descending=0;
     readSensors(values_int);
-    int aux=values_int[ar_vpot];
+    int aux=values_int[ar_vpot_mean];
     for(int i=0;i<comparador;i++)
     {
       equal_mean+=register_vpot[i];
@@ -41,8 +41,8 @@ void get_pot_value(float angle)
     {
       register_vpot[i-1]=register_vpot[i];
     }
-    register_vpot[comparador-1]=values_int[ar_vpot];
-  }while(values_int[ar_vpot]!=equal_mean);
+    register_vpot[comparador-1]=values_int[ar_vpot_mean];
+  }while(values_int[ar_vpot_mean]!=equal_mean);
   //}while(ascending==comparador || descending==comparador);
   Serial.print(values_int[ar_vpot_mean]);
   Serial.print(',');
@@ -51,7 +51,7 @@ void get_pot_value(float angle)
   for(int i=0;i<comparador;i++)
   {
     readSensors(values_int);
-    register_vpot[i] = values_int[ar_vpot];
+    register_vpot[i] = values_int[ar_vpot_mean];
     delayMicroseconds(10);
   }
   int measure=0;
@@ -214,7 +214,7 @@ void elbow_calibration_menu1()
     }
     readSensors(values_int);
     Serial.print("Vpot= ");
-    Serial.println(values_int[ar_vpot]);
+    Serial.println(values_int[ar_vpot_mean]);
   }while(1);
 }
 
@@ -237,7 +237,7 @@ void elbow_calibration_menu2()
   float Traj_x_max;
   float vpot_max_function;
 
-  
+
   Serial.println("For test enter, full open elbow value(bits), max open elbow (degrees), min open elbow (degrees) and desired angle");
   Serial.println("Enter -1 to exit to the calibration menu");
   do
@@ -278,11 +278,11 @@ void elbow_calibration_menu2()
       Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_min*PI/180));
       Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle_max*PI/180))-Traj_x_min;
       float x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle*PI/180))-Traj_x_min;
-      
+
       int full_open_function=aux_full_open;
       vpot_max_function=aux_vpot_max;
       readSensors(values_int);
-      float xx_tensor_read=((values_int[ar_vpot]-aux_vpot_min)*Traj_x_max)/(aux_vpot_max-aux_vpot_min)+Traj_x_min;
+      float xx_tensor_read=((values_int[ar_vpot_mean]-aux_vpot_min)*Traj_x_max)/(aux_vpot_max-aux_vpot_min)+Traj_x_min;
       float actual_angle=acos((pow(DCA,2)+pow(DCF,2)-pow(xx_tensor_read,2))/(2*DCA*DCF))*180/PI;
       if (aux_angle>actual_angle)
       {
@@ -303,14 +303,14 @@ void elbow_calibration_menu2()
     }
     delay(1000);
     readSensors(values_int);
-    
+
     //Calculation for measure the elbow angle
 
-    x_tensor_read=((values_int[ar_vpot]-aux_vpot_min)*Traj_x_max)/(vpot_max_function-aux_vpot_min)+Traj_x_min;
+    x_tensor_read=((values_int[ar_vpot_mean]-aux_vpot_min)*Traj_x_max)/(vpot_max_function-aux_vpot_min)+Traj_x_min;
     angle_read=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor_read,2))/(2*DCA*DCF));
     Serial.print(Traj_angle);
     Serial.print(", ");
-    Serial.print(values_int[ar_vpot]);
+    Serial.print(values_int[ar_vpot_mean]);
     Serial.print(", ");
     Serial.print(x_tensor_read);
     Serial.print(" Angle measured: ");

@@ -5,36 +5,35 @@ void arm_movement()
   int elbow_angle;
   int values_int[ar_last];
   //  PWM_value=FULL_OPEN;
-  Serial.print("Define the aperture of the elbow angle (degres) between ");
-  Serial.print(MAX_ELBOW_ANGLE*180/PI);
-  Serial.print(" and ");
-  Serial.println(MIN_ELBOW_ANGLE*180/PI);
+  //Serial.print("Define the aperture of the elbow angle (degres) between ");
+  //Serial.print(MAX_ELBOW_ANGLE*180/PI);
+  //Serial.print(" and ");
+  //Serial.println(MIN_ELBOW_ANGLE*180/PI);
 
   do
   {
     if (Serial.available())
     {
       elbow_angle= Serial.parseInt();
-      Serial.println(elbow_angle);
+      //Serial.println(elbow_angle);
       if(elbow_angle<0)
       {
         break;
       }
       if (Serial.read()=='\n'){}
-      Serial.println(elbow_angle);
+      //Serial.println(elbow_angle);
       set_elbow_angle(elbow_angle);
-      Serial.print("Define the aperture of the elbow angle (degres) between ");
-      Serial.print(MAX_ELBOW_ANGLE*180/PI);
-      Serial.print(" and ");
-      Serial.println(MIN_ELBOW_ANGLE*180/PI);
+      //Serial.print("Define the aperture of the elbow angle (degres) between ");
+      //Serial.print(MAX_ELBOW_ANGLE*180/PI);
+      //Serial.print(" and ");
+      //Serial.println(MIN_ELBOW_ANGLE*180/PI);
     }
     readSensors(values_int);
-    float angle_calculated=read_elbow_angle(values_int[ar_vpot]);
+    float angle_calculated=read_elbow_angle(values_int[ar_vpot_mean]);
     Serial.print(angle_calculated*180/PI);
     Serial.print(",");
-    Serial.print(values_int[ar_vpot]);
-    Serial.print(",");
-    Serial.println(((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN);
+    Serial.print(((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN);
+    Serial.println(",");
   }while(1);
 }
 
@@ -49,20 +48,20 @@ void set_elbow_angle(float angle_set)
   {
   Traj_angle=ANGLE_VPOT_MAX-ANGLE_VPOT_MIN;     //without compensation for the hysteresys in the vpot measure
   readSensors(values_int);
-  float actual_angle=read_elbow_angle(values_int[ar_vpot]);
-  
+  float actual_angle=read_elbow_angle(values_int[ar_vpot_mean]);
+
   if (aux_angle>actual_angle)
       {
-        Serial.println("compensated hysteresis");
+        //Serial.println("compensated hysteresis");
         full_open_function+=FULL_OPEN_COMPEN;
         Traj_angle+=ANGLE_VPOT_COMPEN;          //compensation for the hysteresys in the vpot measure
-      }    
-  Serial.print(actual_angle);
-  Serial.print(", ");
-  Serial.print(aux_angle);
-  Serial.print(", ");
-  Serial.println(full_open_function);
-  
+      }
+  //Serial.print(actual_angle);
+  //Serial.print(", ");
+  //Serial.print(aux_angle);
+  //Serial.print(", ");
+  //Serial.println(full_open_function);
+
   float x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle))-Traj_x_min;
   PWM_value=(x_tensor*full_open_function)/Traj_x_max;
   servooldg.write(PWM_value);
@@ -70,10 +69,10 @@ void set_elbow_angle(float angle_set)
   }
   else
   {
-    Serial.print("Elbow angle out of limits, please enter again a value between: ");
-    Serial.print(MAX_ELBOW_ANGLE*180/PI);
-    Serial.print(" and ");
-    Serial.println(MIN_ELBOW_ANGLE*180/PI);
+    //Serial.print("Elbow angle out of limits, please enter again a value between: ");
+    //Serial.print(MAX_ELBOW_ANGLE*180/PI);
+    //Serial.print(" and ");
+    //Serial.println(MIN_ELBOW_ANGLE*180/PI);
   }
 }
 
