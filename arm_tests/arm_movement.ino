@@ -20,10 +20,7 @@ void arm_movement()
       {
         break;
       }
-      if (Serial.read()=='\n')
-      {
-        flag=1;
-      }
+      if (Serial.read()=='\n'){}
       Serial.println(elbow_angle);
       set_elbow_angle(elbow_angle);
       Serial.print("Define the aperture of the elbow angle (degres) between ");
@@ -46,10 +43,28 @@ void arm_movement()
 void set_elbow_angle(float angle_set)
 {
   float aux_angle=angle_set*PI/180;
+  float full_open_function=FULL_OPEN_ELBOW;
+  int values_int[ar_last];
   if(aux_angle>=MIN_ELBOW_ANGLE && aux_angle<=MAX_ELBOW_ANGLE)
   {
+  Traj_angle=ANGLE_VPOT_MAX-ANGLE_VPOT_MIN;     //without compensation for the hysteresys in the vpot measure
+  readSensors(values_int);
+  float actual_angle=read_elbow_angle(values_int[ar_vpot]);
+  
+  if (aux_angle>actual_angle)
+      {
+        Serial.println("compensated hysteresis");
+        full_open_function+=FULL_OPEN_COMPEN;
+        Traj_angle+=ANGLE_VPOT_COMPEN;          //compensation for the hysteresys in the vpot measure
+      }    
+  Serial.print(actual_angle);
+  Serial.print(", ");
+  Serial.print(aux_angle);
+  Serial.print(", ");
+  Serial.println(full_open_function);
+  
   float x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle))-Traj_x_min;
-  PWM_value=(x_tensor*FULL_OPEN_ELBOW)/Traj_x_max;
+  PWM_value=(x_tensor*full_open_function)/Traj_x_max;
   servooldg.write(PWM_value);
   delay(20);
   }

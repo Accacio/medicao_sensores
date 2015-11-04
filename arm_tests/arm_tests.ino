@@ -24,11 +24,13 @@
 #define LC_NEWTON_MIN 1.475*G
 #define LC_NEWTON_MAX 50*G
 //Definitions for the elbow
-#define FULL_OPEN_ELBOW 50  // value in PWM to full open the elbow angle
+#define FULL_OPEN_ELBOW 47  // value in PWM to full open the elbow angle
+#define FULL_OPEN_COMPEN 2 // to compensante the Hysteresis in the elbow 
 #define FULL_CLOSE_ELBOW 0  // value in PWM to close the elbow angle
-#define MAX_ELBOW_ANGLE 142*PI/180 // Max aperture of the elbow angle measure externally
-#define MIN_ELBOW_ANGLE 41*PI/180  // Min aperture of the elbow angle, measured exernally
-#define ANGLE_VPOT_MAX  185       // Value in bits of the vpot when is the maximum angle on the elbow
+#define MAX_ELBOW_ANGLE 141*PI/180 // Max aperture of the elbow angle measure externally
+#define MIN_ELBOW_ANGLE 40*PI/180  // Min aperture of the elbow angle, measured exernally
+#define ANGLE_VPOT_MAX  180       // Value in bits of the vpot when is the maximum angle on the elbow
+#define ANGLE_VPOT_COMPEN 6     // to compensate the Hysteresis no angle measure
 #define ANGLE_VPOT_MIN  30       // Value in bits of the vpot when is the min angle on the elbow
 //Definitions for the Arm
 #define DCA 5.75    //Distance of the arm clamping
@@ -74,7 +76,7 @@ float Lh=0.08;
 //initialization of x_max for the extension of the arm tensor
 const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));
 const float  Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MAX_ELBOW_ANGLE))-Traj_x_min;
-const int    Traj_angle=ANGLE_VPOT_MAX-ANGLE_VPOT_MIN;
+int    Traj_angle=ANGLE_VPOT_MAX-ANGLE_VPOT_MIN;
 
 Servo servooldg;
 
