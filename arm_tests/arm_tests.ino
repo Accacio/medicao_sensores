@@ -58,7 +58,7 @@ unsigned long t0_time;
 unsigned long t1_time;
 unsigned long t_time;
 int cont_high=100;
-int cont_low=0;
+int cont_low=100;
 int percent_high=20;
 int flag=0;
 int cont_cycle=0;

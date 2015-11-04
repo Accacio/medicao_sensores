@@ -1,5 +1,18 @@
 
 
+void openclosearmsquarewave()
+{
+  if (cont_cycle%(cont_high+cont_low)<cont_high)
+  {
+    PWM_value=FULL_OPEN_ELBOW;
+  }
+
+  if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
+  {
+    PWM_value=FULL_CLOSE_ELBOW;
+  }
+  Serial.println(cont_cycle);
+}
 
 
 void square_wave()
@@ -48,7 +61,7 @@ void sine_wave_fqvar()
 void measurement()
 {
   int values_int[ar_last];
-  float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean;
+  float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean, angle;
   int register_vpot[comparador];
   int equal_mean;
   do
@@ -77,7 +90,7 @@ void measurement()
 
   do
   {
-    square_wave();
+    openclosearmsquarewave();
     //sine_wave();
     //sine_wave_fqvar();
 
@@ -96,6 +109,7 @@ void measurement()
     im_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
     potref_mean=values_int[ar_potref_mean];
     pot_raw=values_int[ar_vpot];
+    angle=read_elbow_angle(values_int[ar_vpot_mean]);
     //loadcell=(values_int[ar_vloadcell]-LOADCELL_DC)*10;
     //loadcell_mean=(values_int[ar_vloadcell_mean]-LOADCELL_DC)*10;
     loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
@@ -107,19 +121,21 @@ void measurement()
     //Serial.print(',');
     //Serial.print(pot_raw);
     //Serial.print(',');
-    Serial.print(vpot);//vpot_int
-    Serial.print(',');
+    //Serial.print(vpot);//vpot_int
+    //Serial.print(',');
     //Serial.print(vref_mean);
     //Serial.print(',');
-    Serial.print(vpot_mean);//vpot_mean int
-    Serial.print(',');
-    Serial.print(im);
-    Serial.print(',');
-    Serial.print(im_mean);
-    Serial.print(',');
-    Serial.print(loadcell);
-    Serial.print(',');
+    //Serial.print(vpot_mean);//vpot_mean int
+    //Serial.print(',');
+    //Serial.print(im);
+    //Serial.print(',');
+    //Serial.print(im_mean);
+    //Serial.print(',');
+    //Serial.print(loadcell);
+    //Serial.print(',');
     Serial.print(loadcell_mean);
+    Serial.print(',');
+    Serial.print(angle);
     Serial.print(',');
     Serial.print(t_time);
     Serial.println(',');
