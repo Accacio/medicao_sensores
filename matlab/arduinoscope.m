@@ -81,14 +81,15 @@ commas_error=commas_error+1;
 else
 PWM_value(i,1)=str2double(out(1:commas(1)-1))*100/180;
 %vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
-vpot(i,1)=str2double(out(commas(1)+1:commas(2)-1));
-vpot_mean(i,1)=str2double(out(commas(2)+1:commas(3)-1));
+vpot(i,1)=str2double(out(commas(1)+1:commas(2)-1));%lastaspeed
+vpot_mean(i,1)=str2double(out(commas(2)+1:commas(3)-1));%aacel
 %vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
-im(i,1)=str2double(out(commas(3)+1:commas(4)-1));
-im_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
-loadcell(i,1)=str2double(out(commas(5)+1:commas(6)-1));
-loadcell_mean(i,1)=str2double(out(commas(6)+1:commas(7)-1));
-sampl_time=sampl_time+str2double(out(commas(7)+1:commas(8)-1));
+im(i,1)=str2double(out(commas(3)+1:commas(4)-1));%loadcell
+im_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));%angle
+%loadcell
+sampl_time(i,1)=str2double(out(commas(5)+1:commas(6)-1));%time
+%loadcell_mean(i,1)=str2double(out(commas(6)+1:commas(7)-1));
+%sampl_time=sampl_time+str2double(out(commas(7)+1:commas(8)-1));
 end
 
 %     %plot vref
@@ -104,6 +105,7 @@ end
     subplot(2,2,1)
     plot(axisx(end-11*sign(end-11):end),vpot(end-11*sign(end-11):end),'LineWidth',2)
     hold on
+    subplot(2,2,4)
     plot(axisx(end-11*sign(end-11):end),vpot_mean(end-11*sign(end-11):end),'r','LineWidth',2)
     axis([0 xmax Rp_ymin Rp_ymax]);
 
@@ -125,11 +127,11 @@ end
     axis([0 xmax im_ymin im_ymax]);
 
     %plot loadcell
-    subplot(2,2,4)
-    plot(axisx(end-11*sign(end-11):end),loadcell(end-11*sign(end-11):end),'LineWidth',2)
-    hold on
-    plot(axisx(end-11*sign(end-11):end),loadcell_mean(end-11*sign(end-11):end),'r','LineWidth',2)
-    axis([0 xmax loadcell_ymin loadcell_ymax]);
+    %subplot(2,2,4)
+    %plot(axisx(end-11*sign(end-11):end),loadcell(end-11*sign(end-11):end),'LineWidth',2)
+    %hold on
+    %plot(axisx(end-11*sign(end-11):end),loadcell_mean(end-11*sign(end-11):end),'r','LineWidth',2)
+    %axis([0 xmax loadcell_ymin loadcell_ymax]);
 
     drawnow
   else

@@ -54,6 +54,11 @@ enum sensor_array
 };
 
 
+//angular definitions
+float last_angle;
+float last_aspeed;
+
+
 unsigned long t0_time;
 unsigned long t1_time;
 unsigned long t_time;
@@ -67,7 +72,8 @@ float PWM_value=FULL_OPEN_ELBOW;
 int comparador=5;
 int menu_var=-1;
 
-//subject difintions
+
+//subject defintions
 float Subject_weight=70;
 float La=0.28;
 float Lf=0.26;
