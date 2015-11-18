@@ -38,6 +38,7 @@
 #define PFCM 0.682   //Forearm center of mass
 #define PFW  0.022   //Forearm proportional weight
 
+
 enum sensor_array
 {
   ar_vref=1,
@@ -78,6 +79,10 @@ float Subject_weight=70;
 float La=0.28;
 float Lf=0.26;
 float Lh=0.08;
+
+//definitions to calibrate control law
+float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
+float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law 
 
 //initialization of x_max for the extension of the arm tensor
 const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));

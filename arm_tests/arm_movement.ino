@@ -2,8 +2,10 @@
 //----------Elbow movement----------------
 void arm_movement()
 {
-  int elbow_angle;
+  float elbow_angle=FULL_OPEN_ELBOW;
   int values_int[ar_last];
+  float Tension_measured;
+  float Controlled_elbow_angle;
   //  PWM_value=FULL_OPEN;
   //Serial.print("Define the aperture of the elbow angle (degres) between ");
   //Serial.print(MAX_ELBOW_ANGLE*180/PI);
@@ -15,6 +17,7 @@ void arm_movement()
     if (Serial.available())
     {
       elbow_angle= Serial.parseInt();
+      elbow_angle=elbow_angle*PI/180;
       //Serial.println(elbow_angle);
       if(elbow_angle<0)
       {
@@ -22,17 +25,24 @@ void arm_movement()
       }
       if (Serial.read()=='\n'){}
       //Serial.println(elbow_angle);
+      
       set_elbow_angle(elbow_angle);
       //Serial.print("Define the aperture of the elbow angle (degres) between ");
       //Serial.print(MAX_ELBOW_ANGLE*180/PI);
       //Serial.print(" and ");
       //Serial.println(MIN_ELBOW_ANGLE*180/PI);
     }
+
     readSensors(values_int);
+    Tension_measured=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    Controlled_elbow_angle=collision_control(elbow_angle,Tension_measured);
+    set_elbow_angle(Controlled_elbow_angle);
     float angle_calculated=read_elbow_angle(values_int[ar_vpot_mean]);
+    Serial.print(Controlled_elbow_angle);
+    Serial.print(",");
     Serial.print(angle_calculated*180/PI);
     Serial.print(",");
-    Serial.print(((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN);
+    Serial.print(Tension_measured);
     Serial.println(",");
   }while(1);
 }
@@ -41,7 +51,7 @@ void arm_movement()
 //-------------FUNCTION to set the position of the elbow given the angle
 void set_elbow_angle(float angle_set)
 {
-  float aux_angle=angle_set*PI/180;
+  float aux_angle=angle_set;
   float full_open_function=FULL_OPEN_ELBOW;
   int values_int[ar_last];
   if(aux_angle>=MIN_ELBOW_ANGLE && aux_angle<=MAX_ELBOW_ANGLE)
@@ -154,3 +164,31 @@ void deterministic_model()
     Serial.println(Tcf);
   }
 }
+
+
+//-----------------------
+// Damping control by colision
+
+float collision_control(float teta_ref, float Tension_measure){
+float Tension_theoric=26;  //Place where a function returns the value of the theoric tension
+float et=Tension_measure-Tension_theoric;
+float sgm_low=1-1/(1+exp(-(et+3-Sgm_left_lim)));
+float sgm_up=1/(1+exp(-(et-3-Sgm_right_lim)));
+float u=teta_ref+(MIN_ELBOW_ANGLE-teta_ref)*sgm_low+(MAX_ELBOW_ANGLE-teta_ref)*sgm_up;
+//    Serial.print(exp(et+3-Sgm_left_lim));
+//    Serial.print("|");
+//    Serial.print(teta_ref);
+//    Serial.print("|");
+//    
+//    Serial.print(et);
+//    Serial.print("|");
+//    Serial.print((MIN_ELBOW_ANGLE-teta_ref)*sgm_low);
+//    Serial.print("|");
+//    Serial.print((MAX_ELBOW_ANGLE-teta_ref)*sgm_up);
+//    Serial.print("|");
+//    Serial.print(u);
+//    Serial.print("|");
+
+return u;  
+}
+
