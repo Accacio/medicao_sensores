@@ -1,9 +1,9 @@
 clear
 %settings
-cont_high=400;
+cont_high=100;
 percent_high=95;
 xmax=2400; %8000 Para 10 iterations % 2400 3
-Port_com='com3';
+Port_com='com4';
 
 s=serial(Port_com,'Baudrate',115200);
 fopen(s);
@@ -37,13 +37,13 @@ vim_ymin=0;
 vim_ymax=5;
 %Rp
 Rp_ymin=0;
-Rp_ymax=100;
+Rp_ymax=4;
 %vref
 vref_ymin=0;
 vref_ymax=1060;
 %im
 im_ymin=0;
-im_ymax=1500;
+im_ymax=10;
 
 loadcell_ymin=0;
 loadcell_ymax=100;
@@ -102,30 +102,33 @@ end
     %plot Rp
   if count_plot==10
     count_plot=0;
-    subplot(2,2,1)
+    subplot(2,2,3)
     plot(axisx(end-11*sign(end-11):end),vpot(end-11*sign(end-11):end),'LineWidth',2)
+    title('Speed');
     hold on
+    subplot(2,2,1)
+    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),'LineWidth',2)
+    axis([0 xmax PWM_value_ymin PWM_value_ymax]);
+    title('PWM')
+    hold on
+
     subplot(2,2,4)
     plot(axisx(end-11*sign(end-11):end),vpot_mean(end-11*sign(end-11):end),'r','LineWidth',2)
     axis([0 xmax Rp_ymin Rp_ymax]);
-
+    title('angular acceleration')
 %     plot vim
 %     subplot(4,1,3)
 %     plot(axisx,vim,'LineWidth',2)
 %     axis([0 xmax vim_ymin vim_ymax]);
 
-    subplot(2,2,2)
-    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),'LineWidth',2)
-    axis([0 xmax PWM_value_ymin PWM_value_ymax]);
-    hold on
 
     %plot im
-    subplot(2,2,3)
-    plot(axisx(end-11*sign(end-11):end),im(end-11*sign(end-11):end),'LineWidth',2)
-    hold on
-    plot(axisx(end-11*sign(end-11):end),im_mean(end-11*sign(end-11):end),'r','LineWidth',2)
+    subplot(2,2,2)
+%    plot(axisx(end-11*sign(end-11):end),im(end-11*sign(end-11):end),'LineWidth',2)
+%    hold on
+    plot(axisx(end-11*sign(end-11):end),im_mean(end-11*sign(end-11):end)*180/pi,'r','LineWidth',2)
     axis([0 xmax im_ymin im_ymax]);
-
+    title('angle')
     %plot loadcell
     %subplot(2,2,4)
     %plot(axisx(end-11*sign(end-11):end),loadcell(end-11*sign(end-11):end),'LineWidth',2)
@@ -142,29 +145,29 @@ toc
 
 % Mean of im values
 
-iterator=0;
-IM=[];
-IM_MEAN=[];
-IM=[];
-IM_MEAN=[];
-while iterator<xmax;
-    iterator=iterator+cont_high/2;
-    IM=[IM im(iterator-180:iterator-30,1)];
-    IM_MEAN=[IM_MEAN im_mean(iterator-180:iterator-30,1)];
-end
-Mean_im=sum(IM)/151;
-Mean_im_mean=sum(IM_MEAN)/151;
-iterator=5;
-while iterator<=size(Mean_im,2);
-
-   Mean_im(floor((iterator-1)/4)+1,mod(iterator,4)+4*(mod(iterator,4)==0))=Mean_im(1,iterator);
-   Mean_im(1,iterator)=0;
-   Mean_im_mean(floor((iterator-1)/4)+1,mod(iterator,4)+4*(mod(iterator,4)==0))=Mean_im_mean(1,iterator);
-   Mean_im_mean(1,iterator)=0;
-   iterator=iterator+1;
-end
-clear iterator, IM, IM_MEAN;
-
+% iterator=0;
+% IM=[];
+% IM_MEAN=[];
+% IM=[];
+% IM_MEAN=[];
+% while iterator<xmax;
+%     iterator=iterator+cont_high/2;
+%     IM=[IM im(iterator-180:iterator-30,1)];
+%     IM_MEAN=[IM_MEAN im_mean(iterator-180:iterator-30,1)];
+% end
+% Mean_im=sum(IM)/151;
+% Mean_im_mean=sum(IM_MEAN)/151;
+% iterator=5;
+% while iterator<=size(Mean_im,2);
+% 
+%    Mean_im(floor((iterator-1)/4)+1,mod(iterator,4)+4*(mod(iterator,4)==0))=Mean_im(1,iterator);
+%    Mean_im(1,iterator)=0;
+%    Mean_im_mean(floor((iterator-1)/4)+1,mod(iterator,4)+4*(mod(iterator,4)==0))=Mean_im_mean(1,iterator);
+%    Mean_im_mean(1,iterator)=0;
+%    iterator=iterator+1;
+% end
+% clear iterator, IM, IM_MEAN;
+% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 data.samp_t=sampl_time/(1000*xmax)
