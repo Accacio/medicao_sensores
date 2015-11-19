@@ -8,6 +8,9 @@
 #define VIM_IN A12
 #define POTREF_IN A13
 #define LOADCELL_IN A15
+#define x_accel A8
+#define y_accel A9
+#define z_accel A10
 
 
 // Constants
@@ -51,6 +54,9 @@ enum sensor_array
   ar_potref_mean,
   ar_vloadcell,
   ar_vloadcell_mean,
+  ar_xaccel_mean,
+  ar_yaccel_mean,
+  ar_zaccel_mean,
   ar_last,
 };
 
@@ -84,6 +90,10 @@ float Lh=0.08;
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law 
 
+//definitions to calibrate aceleromenter
+float X_AXE_ACCEL=160;
+float Y_AXE_ACCEL=366;
+float Z_AXE_ACCEL=270;
 //initialization of x_max for the extension of the arm tensor
 const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));
 const float  Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MAX_ELBOW_ANGLE))-Traj_x_min;

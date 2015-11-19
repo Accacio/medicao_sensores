@@ -60,7 +60,8 @@ void sine_wave_fqvar()
 void measurement()
 {
   int values_int[ar_last];
-  float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean, angle, aspeed, aacel;
+  float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean, angle, aspeed, aacel, total_accel;
+  int xaccel_mean,yaccel_mean,zaccel_mean;
   int register_vpot[comparador];
   int equal_mean;
   do
@@ -119,7 +120,20 @@ void measurement()
     //loadcell_mean=(values_int[ar_vloadcell_mean]-LOADCELL_DC)*10;
     loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
     loadcell_mean=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    xaccel_mean=values_int[ar_xaccel_mean]-X_AXE_ACCEL;
+    yaccel_mean=values_int[ar_yaccel_mean]-Y_AXE_ACCEL;
+    zaccel_mean=values_int[ar_zaccel_mean]-Z_AXE_ACCEL;
+    total_accel=sqrt(pow(xaccel_mean,2)+pow(yaccel_mean,2)+pow(zaccel_mean,2));
+    
     //Sending information over serial
+    Serial.print(total_accel);
+    Serial.print('|');
+    Serial.print(xaccel_mean);
+    Serial.print('|');
+    Serial.print(yaccel_mean);
+    Serial.print('|');
+    Serial.print(zaccel_mean);
+    Serial.print('|');    
     Serial.print(PWM_value);
     Serial.print(',');
     Serial.print(last_aspeed);

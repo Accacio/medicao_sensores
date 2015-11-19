@@ -1,6 +1,6 @@
 
 
-void readSensors(int returnval_int[11])
+void readSensors(int returnval_int[14])
 {
    // read multiple values of three sensors at same time and sort them to take the mode
 
@@ -9,7 +9,10 @@ void readSensors(int returnval_int[11])
    int vecvalue_vim[NUM_READS];
    int vecvalue_potref[NUM_READS];
    int vecvalue_vloadcell[NUM_READS];
-
+   int vecvalue_xaccell[NUM_READS];
+   int vecvalue_yaccell[NUM_READS];
+   int vecvalue_zaccell[NUM_READS];
+   
    // Acquire sensor values
    for(int i=0;i<NUM_READS;i++)
    {
@@ -19,6 +22,9 @@ void readSensors(int returnval_int[11])
      vecvalue_potref[i] = analogRead(POTREF_IN);
      vecvalue_vim[i] = analogRead(VIM_IN);
      vecvalue_vloadcell[i] = analogRead(LOADCELL_IN);
+     vecvalue_xaccell[i] = analogRead(x_accel);
+     vecvalue_yaccell[i] = analogRead(y_accel);
+     vecvalue_zaccell[i] = analogRead(z_accel);
    }
 
    // Filter acquired values
@@ -33,6 +39,9 @@ void readSensors(int returnval_int[11])
    returnval_int[ar_vim_mean] = 0;//value for mean of vim
    returnval_int[ar_potref_mean] = 0;//value for mean of potref
    returnval_int[ar_vloadcell_mean] = 0;//value for mean of load cell
+   returnval_int[ar_xaccel_mean] = 0;
+   returnval_int[ar_yaccel_mean] = 0;
+   returnval_int[ar_zaccel_mean] = 0;
 
    float aux_val[ar_last];
    aux_val[ar_vref_mean] =0;
@@ -40,6 +49,9 @@ void readSensors(int returnval_int[11])
    aux_val[ar_vim_mean] =0;
    aux_val[ar_potref_mean] =0;
    aux_val[ar_vloadcell_mean] =0;
+   aux_val[ar_xaccel_mean] = 0;
+   aux_val[ar_yaccel_mean] = 0;
+   aux_val[ar_zaccel_mean] = 0;
 
    for(int i=0;i<NUM_READS;i++)
    {
@@ -48,6 +60,9 @@ void readSensors(int returnval_int[11])
      aux_val[ar_vim_mean] +=vecvalue_vim[i];
      aux_val[ar_potref_mean] +=vecvalue_potref[i];
      aux_val[ar_vloadcell_mean] +=vecvalue_vloadcell[i];
+     aux_val[ar_xaccel_mean] +=vecvalue_xaccell[i];
+     aux_val[ar_yaccel_mean] +=vecvalue_yaccell[i];
+     aux_val[ar_zaccel_mean] +=vecvalue_zaccell[i];
    }
 
    returnval_int[ar_vref_mean] =int(aux_val[ar_vref_mean]/NUM_READS+0.5);
@@ -55,6 +70,9 @@ void readSensors(int returnval_int[11])
    returnval_int[ar_vim_mean] =int(aux_val[ar_vim_mean]/NUM_READS+0.5);
    returnval_int[ar_potref_mean] =int(aux_val[ar_potref_mean]/NUM_READS+0.5);
    returnval_int[ar_vloadcell_mean] =int(aux_val[ar_vloadcell_mean]/NUM_READS+0.5);
+   returnval_int[ar_xaccel_mean] =int(aux_val[ar_xaccel_mean]/NUM_READS+0.5);
+   returnval_int[ar_yaccel_mean] =int(aux_val[ar_yaccel_mean]/NUM_READS+0.5);
+   returnval_int[ar_zaccel_mean] =int(aux_val[ar_zaccel_mean]/NUM_READS+0.5);
 
    //return returnval;
 }

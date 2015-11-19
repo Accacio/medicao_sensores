@@ -170,7 +170,7 @@ void deterministic_model()
 // Damping control by colision
 
 float collision_control(float teta_ref, float Tension_measure){
-float Tension_theoric=26;  //Place where a function returns the value of the theoric tension
+float Tension_theoric=28;  //Place where a function returns the value of the theoric tension
 float et=Tension_measure-Tension_theoric;
 float sgm_low=1-1/(1+exp(-(et+3-Sgm_left_lim)));
 float sgm_up=1/(1+exp(-(et-3-Sgm_right_lim)));
