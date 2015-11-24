@@ -60,7 +60,7 @@ void sine_wave_fqvar()
 void measurement()
 {
   int values_int[ar_last];
-  float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean, angle, aspeed, aacel, total_accel;
+  float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean, angle, aspeed, aacel, total_accel, angle_filt, angle_rawfilt;
   int xaccel_mean,yaccel_mean,zaccel_mean;
   int register_vpot[comparador];
   int equal_mean;
@@ -89,6 +89,8 @@ void measurement()
   cont_frvar=0;
   t0_time=millis();
 
+
+
   do
   {
     //square_wave();
@@ -101,6 +103,7 @@ void measurement()
     cont_frvar++;
 
     readSensors(values_int);
+    lowpassFilter.input(values_int[ar_vpot_mean]);
     // Conversion from bits to values
     vref=1.989*values_int[ar_vref];
     vpot=100*((values_int[ar_vpot]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
@@ -111,7 +114,10 @@ void measurement()
     im_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
     potref_mean=values_int[ar_potref_mean];
     pot_raw=values_int[ar_vpot];
-    angle=read_elbow_angle(values_int[ar_vpot_mean]);
+    angle=read_elbow_angle(values_int[ar_vpot_mean])*180/PI;
+    angle_filt=read_elbow_angle(lowpassFilter.output())*180/PI;
+    angle_rawfilt=read_elbow_angle(vpot_filter.output())*180/PI;
+  
     aspeed=(angle-last_angle)*1000/const_time;
     aacel=(last_aspeed-aspeed)*1000/const_time;
     last_angle=angle;
@@ -126,20 +132,16 @@ void measurement()
     total_accel=sqrt(pow(xaccel_mean,2)+pow(yaccel_mean,2)+pow(zaccel_mean,2));
     
     //Sending information over serial
-    Serial.print(total_accel);
-    Serial.print('|');
-    Serial.print(xaccel_mean);
-    Serial.print('|');
-    Serial.print(yaccel_mean);
-    Serial.print('|');
-    Serial.print(zaccel_mean);
-    Serial.print('|');    
     Serial.print(PWM_value);
     Serial.print(',');
-    Serial.print(last_aspeed);
-    Serial.print(',');
-    Serial.print(aacel);
-    Serial.print(',');
+//    Serial.print(total_accel);
+//    Serial.print(',');
+//    Serial.print(xaccel_mean);
+//    Serial.print(',');
+//    Serial.print(yaccel_mean);
+//    Serial.print(',');
+//    Serial.print(zaccel_mean);
+//    Serial.print(',');    
     //Serial.print(vref);
     //Serial.print(',');
     //Serial.print(pot_raw);
@@ -159,6 +161,10 @@ void measurement()
     Serial.print(loadcell_mean);
     Serial.print(',');
     Serial.print(angle);
+    Serial.print(',');
+    Serial.print(angle_filt);
+    Serial.print(',');
+    Serial.print(angle_rawfilt);
     Serial.print(',');
     Serial.print(t_time);
     Serial.println(',');

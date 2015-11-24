@@ -2,7 +2,7 @@ clear
 %settings
 cont_high=100;
 percent_high=95;
-xmax=2400; %8000 Para 10 iterations % 2400 3
+xmax=300; %8000 Para 10 iterations % 2400 3
 Port_com='com4';
 
 s=serial(Port_com,'Baudrate',115200);
@@ -58,14 +58,14 @@ fprintf(s,[num2str(cont_high),',',num2str(percent_high)]);
 pause(1);
 count_plot=0;
 
-tic
+
 for i=1:xmax+1;
 axisx(i,1)=i;
 %flushinput(s);
 %for j=1:3
 out=fscanf(s);
 commas=strfind(out,',');
-if numel(commas)<6
+if numel(commas)<5
 PWM_value(i,1)=PWM_value(i-1,1);
 %vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
 %im(i,1)=str2double(out(commas(2)+1:commas(3)-1))*100/1023;
@@ -80,14 +80,34 @@ sampl_time=sampl_time+sampl_time/i-1;
 commas_error=commas_error+1;
 else
 PWM_value(i,1)=str2double(out(1:commas(1)-1))*100/180;
+position=1;
+data1(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+position=2;
+data2(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+% position=3;
+% data2(i,2)=str2double(out(commas(position)+1:commas(position+1)-1));
+% position=4;
+% data2(i,3)=str2double(out(commas(position)+1:commas(position+1)-1));
+ position=3;
+ data3(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+  position=4;
+  data4(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+% position=5;
+% data5(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+% position=6;
+% data6(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+% position=7;
+sampl_time(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+
+
 %vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
-vpot(i,1)=str2double(out(commas(1)+1:commas(2)-1));%lastaspeed
-vpot_mean(i,1)=str2double(out(commas(2)+1:commas(3)-1));%aacel
-%vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
-im(i,1)=str2double(out(commas(3)+1:commas(4)-1));%loadcell
-im_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));%angle
-%loadcell
-sampl_time(i,1)=str2double(out(commas(5)+1:commas(6)-1));%time
+% vpot(i,1)=str2double(out(commas(1)+1:commas(2)-1));%lastaspeed
+% vpot_mean(i,1)=str2double(out(commas(2)+1:commas(3)-1));%aacel
+% %vref_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));
+% im(i,1)=str2double(out(commas(3)+1:commas(4)-1));%loadcell
+% im_mean(i,1)=str2double(out(commas(4)+1:commas(5)-1));%angle
+% %loadcell
+%sampl_time(i,1)=str2double(out(commas(5)+1:commas(6)-1));%time
 %loadcell_mean(i,1)=str2double(out(commas(6)+1:commas(7)-1));
 %sampl_time=sampl_time+str2double(out(commas(7)+1:commas(8)-1));
 end
@@ -102,33 +122,27 @@ end
     %plot Rp
   if count_plot==10
     count_plot=0;
-    subplot(2,2,3)
-    plot(axisx(end-11*sign(end-11):end),vpot(end-11*sign(end-11):end),'LineWidth',2)
-    title('Speed');
-    hold on
     subplot(2,2,1)
-    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),'LineWidth',2)
-    axis([0 xmax PWM_value_ymin PWM_value_ymax]);
-    title('PWM')
+    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),'b')
+    title('PWM input signal');
+    hold on
+    subplot(2,2,2)
+    plot(axisx(end-11*sign(end-11):end),data2(end-11*sign(end-11):end),'r',axisx(end-11*sign(end-11):end)',data2(end-11*sign(end-11):end,1))
+%    axis([0 xmax PWM_value_ymin PWM_value_ymax]);
+    title('Accelerations')
     hold on
 
+    subplot(2,2,3)
+    plot(axisx(end-11*sign(end-11):end),data2(end-11*sign(end-11):end),'b',axisx(end-11*sign(end-11):end),data3(end-11*sign(end-11):end),'r',axisx(end-11*sign(end-11):end),data4(end-11*sign(end-11):end),'g')
+%    axis([0 xmax Rp_ymin Rp_ymax]);
+    title('Angle')
+    hold on
+ 
     subplot(2,2,4)
-    plot(axisx(end-11*sign(end-11):end),vpot_mean(end-11*sign(end-11):end),'r','LineWidth',2)
-    axis([0 xmax Rp_ymin Rp_ymax]);
-    title('angular acceleration')
-%     plot vim
-%     subplot(4,1,3)
-%     plot(axisx,vim,'LineWidth',2)
-%     axis([0 xmax vim_ymin vim_ymax]);
-
-
-    %plot im
-    subplot(2,2,2)
-%    plot(axisx(end-11*sign(end-11):end),im(end-11*sign(end-11):end),'LineWidth',2)
-%    hold on
-    plot(axisx(end-11*sign(end-11):end),im_mean(end-11*sign(end-11):end)*180/pi,'r','LineWidth',2)
-    axis([0 xmax im_ymin im_ymax]);
-    title('angle')
+    plot(axisx(end-11*sign(end-11):end),data1(end-11*sign(end-11):end),'r','LineWidth',2)
+    axis([0 xmax 0 50]);
+    title('Tension over the Load cell')
+    hold on
     %plot loadcell
     %subplot(2,2,4)
     %plot(axisx(end-11*sign(end-11):end),loadcell(end-11*sign(end-11):end),'LineWidth',2)
@@ -141,7 +155,7 @@ end
   count_plot=count_plot+1;
   end
 end
-toc
+
 
 % Mean of im values
 

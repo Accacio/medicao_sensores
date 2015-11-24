@@ -25,6 +25,7 @@ void readSensors(int returnval_int[14])
      vecvalue_xaccell[i] = analogRead(x_accel);
      vecvalue_yaccell[i] = analogRead(y_accel);
      vecvalue_zaccell[i] = analogRead(z_accel);
+     vpot_filter.input(vecvalue_vpot[i]);
    }
 
    // Filter acquired values

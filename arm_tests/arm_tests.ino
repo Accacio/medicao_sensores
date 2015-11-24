@@ -1,5 +1,5 @@
 #include <Servo.h>
-
+#include <Filters.h>
 #define NUM_READS 100 // number of read measures to process the signal
 
 // Pin Numbers
@@ -91,13 +91,20 @@ float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid functi
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law 
 
 //definitions to calibrate aceleromenter
-float X_AXE_ACCEL=160;
-float Y_AXE_ACCEL=366;
-float Z_AXE_ACCEL=270;
+float X_AXE_ACCEL=150;
+float Y_AXE_ACCEL=356;
+float Z_AXE_ACCEL=260;
 //initialization of x_max for the extension of the arm tensor
 const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));
 const float  Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MAX_ELBOW_ANGLE))-Traj_x_min;
 int    Traj_angle=ANGLE_VPOT_MAX-ANGLE_VPOT_MIN;
+
+//filter initialization
+float filter_frequency=0.25;
+FilterOnePole lowpassFilter( LOWPASS, filter_frequency );
+
+float filter2=0.8;
+FilterOnePole vpot_filter( LOWPASS, filter2 );
 
 Servo servooldg;
 
