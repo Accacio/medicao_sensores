@@ -2,7 +2,7 @@ clear
 %settings
 cont_high=400;
 %percent_high=20;
-xmax=400; %8000 Para 10 iterations % 2400 3
+xmax=500; %250 Para 1 iterations % 2400 3
 Wf=0.5; %change to each weight value
 Dca=0.057;
 Dcf=0.047;
@@ -55,32 +55,36 @@ sampl_time=0;
 commas_error=0;
 
 out=fscanf(s)
-fwrite(s,'a');
+fwrite(s,'m');
 pause(1);
-fwrite(s,'40')
+%fwrite(s,'40')
 pause(1);
 count_plot=0;
 
 tic
 for i=1:xmax+1;
-  if i==150
-    fwrite(s,'140')
-  end
+  %if i==150
+  %  fwrite(s,'140')
+  %end
 axisx(i,1)=i;
 out=fscanf(s);
 commas=strfind(out,',');
-if numel(commas)<2
-angle_value(i,1)=angle_value(i-1,1);
-loadcell_mean(i,1)=loadcell_mean(i-1,1);
-tension_value(i,1)=tension_value(i-1,1);
-commas_error=commas_error+1;
- else
-angle_value(i,1)=str2double(out(1:commas(1)-1));
+% if numel(commas)<2
+% angle_value(i,1)=angle_value(i-1,1);
+% loadcell_mean(i,1)=loadcell_mean(i-1,1);
+% tension_value(i,1)=tension_value(i-1,1);
+% commas_error=commas_error+1;
+%  else
+loadcell_mean(i,1)=str2double(out(1:commas(1)-1));
 %vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
-loadcell_mean(i,1)=str2double(out(commas(1)+1:commas(2)-1));
-tension_value(i,1)=tension_calc(Dca,Dcf,angle_value(i,1)*pi/180,Wf);
+loadcell_filt(i,1)=str2double(out(commas(1)+1:commas(2)-1));
+loadcell_rawfilt(i,1)=str2double(out(commas(2)+1:commas(3)-1));
+angle_mean_value(i,1)=str2double(out(commas(3)+1:commas(4)-1));
+angle_filt_value(i,1)=str2double(out(commas(4)+1:commas(5)-1));
+angle_rawfilt_value(i,1)=str2double(out(commas(5)+1:commas(6)-1));
+%tension_value(i,1)=tension_calc(Dca,Dcf,angle_value(i,1)*pi/180,Wf);
 
-end
+%end
 
 %     %plot vref
 %     subplot(3,1,1)
@@ -93,22 +97,37 @@ end
   if count_plot==10
     count_plot=0;
 
-%     plot vim
-%     subplot(4,1,3)
-%     plot(axisx,vim,'LineWidth',2)
-%     axis([0 xmax vim_ymin vim_ymax]);
 
-    subplot(2,1,1)
-    plot(angle_value(end-11*sign(end-11):end),tension_value(end-11*sign(end-11):end),'LineWidth',2)
+    % Hysteresis plot angle_mean_value
+    subplot(2,2,1)
+    %plot(angle_mean_value(end-11*sign(end-11):end),tension_value(end-11*sign(end-11):end),'LineWidth',2)
     hold on
-    plot(angle_value(end-11*sign(end-11):end),loadcell_mean(end-11*sign(end-11):end),'r','LineWidth',2)
+    plot(angle_mean_value(end-11*sign(end-11):end),loadcell_mean(end-11*sign(end-11):end),'r','LineWidth',2)
+    axis([0 180 0 100 ]);
+
+    % Hysteresis plot angle_filt_value
+    subplot(2,2,2)
+    %plot(angle_filt_value(end-11*sign(end-11):end),tension_value(end-11*sign(end-11):end),'LineWidth',2)
+    hold on
+    plot(angle_filt_value(end-11*sign(end-11):end),loadcell_filt(end-11*sign(end-11):end),'g','LineWidth',2)
+    axis([0 180 0 100 ]);
+
+    % Hysteresis plot angle_rawfilt_value
+    subplot(2,2,3)
+    hold on
+    plot(angle_rawfilt_value(end-11*sign(end-11):end),loadcell_rawfilt(end-11*sign(end-11):end),'b','LineWidth',2)
     axis([0 180 0 100 ]);
 
     %plot loadcell
-    subplot(2,1,2)
-    plot(axisx(end-11*sign(end-11):end),tension_value(end-11*sign(end-11):end),'LineWidth',2)
+    subplot(2,2,4)
+    %plot(axisx(end-11*sign(end-11):end),tension_value(end-11*sign(end-11):end),'LineWidth',2)
     hold on
     plot(axisx(end-11*sign(end-11):end),loadcell_mean(end-11*sign(end-11):end),'r','LineWidth',2)
+    hold on
+    plot(axisx(end-11*sign(end-11):end),loadcell_filt(end-11*sign(end-11):end),'g','LineWidth',2)
+    hold on
+    plot(axisx(end-11*sign(end-11):end),loadcell_rawfilt(end-11*sign(end-11):end),'b','LineWidth',2)
+    hold on
     axis([0 xmax loadcell_ymin loadcell_ymax]);
 
     drawnow
@@ -134,7 +153,7 @@ toc
 
 
 
-
+fwrite(s,'-1');
 fclose(s);
 delete(s);
 

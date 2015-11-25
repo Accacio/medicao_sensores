@@ -12,7 +12,7 @@ void readSensors(int returnval_int[14])
    int vecvalue_xaccell[NUM_READS];
    int vecvalue_yaccell[NUM_READS];
    int vecvalue_zaccell[NUM_READS];
-   
+
    // Acquire sensor values
    for(int i=0;i<NUM_READS;i++)
    {
@@ -26,6 +26,7 @@ void readSensors(int returnval_int[14])
      vecvalue_yaccell[i] = analogRead(y_accel);
      vecvalue_zaccell[i] = analogRead(z_accel);
      vpot_filter.input(vecvalue_vpot[i]);
+     loadcell_filter.input(vecvalue_vloadcell[i]);
    }
 
    // Filter acquired values

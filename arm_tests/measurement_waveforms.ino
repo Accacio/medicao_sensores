@@ -60,7 +60,9 @@ void sine_wave_fqvar()
 void measurement()
 {
   int values_int[ar_last];
-  float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean, pot_raw, im, im_mean, loadcell, loadcell_mean, angle, aspeed, aacel, total_accel, angle_filt, angle_rawfilt;
+  float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean;
+  float pot_raw, im, im_mean, loadcell, loadcell_mean, angle, aspeed, aacel;
+  float total_accel, angle_filt, angle_rawfilt, loadcell_filt, loadcell_rawfilt;
   int xaccel_mean,yaccel_mean,zaccel_mean;
   int register_vpot[comparador];
   int equal_mean;
@@ -104,6 +106,7 @@ void measurement()
 
     readSensors(values_int);
     lowpassFilter.input(values_int[ar_vpot_mean]);
+    lowpassLoadCell.input(values_int[ar_vloadcell_mean]);
     // Conversion from bits to values
     vref=1.989*values_int[ar_vref];
     vpot=100*((values_int[ar_vpot]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
@@ -117,7 +120,7 @@ void measurement()
     angle=read_elbow_angle(values_int[ar_vpot_mean])*180/PI;
     angle_filt=read_elbow_angle(lowpassFilter.output())*180/PI;
     angle_rawfilt=read_elbow_angle(vpot_filter.output())*180/PI;
-  
+
     aspeed=(angle-last_angle)*1000/const_time;
     aacel=(last_aspeed-aspeed)*1000/const_time;
     last_angle=angle;
@@ -126,14 +129,16 @@ void measurement()
     //loadcell_mean=(values_int[ar_vloadcell_mean]-LOADCELL_DC)*10;
     loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
     loadcell_mean=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    loadcell_filt=((lowpassLoadCell.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
     xaccel_mean=values_int[ar_xaccel_mean]-X_AXE_ACCEL;
     yaccel_mean=values_int[ar_yaccel_mean]-Y_AXE_ACCEL;
     zaccel_mean=values_int[ar_zaccel_mean]-Z_AXE_ACCEL;
     total_accel=sqrt(pow(xaccel_mean,2)+pow(yaccel_mean,2)+pow(zaccel_mean,2));
-    
+
     //Sending information over serial
-    Serial.print(PWM_value);
-    Serial.print(',');
+//    Serial.print(PWM_value);
+//    Serial.print(',');
 //    Serial.print(total_accel);
 //    Serial.print(',');
 //    Serial.print(xaccel_mean);
@@ -141,7 +146,7 @@ void measurement()
 //    Serial.print(yaccel_mean);
 //    Serial.print(',');
 //    Serial.print(zaccel_mean);
-//    Serial.print(',');    
+//    Serial.print(',');
     //Serial.print(vref);
     //Serial.print(',');
     //Serial.print(pot_raw);
@@ -159,6 +164,10 @@ void measurement()
     //Serial.print(loadcell);
     //Serial.print(',');
     Serial.print(loadcell_mean);
+    Serial.print(',');
+    Serial.print(loadcell_filt);
+    Serial.print(',');
+    Serial.print(loadcell_rawfilt);
     Serial.print(',');
     Serial.print(angle);
     Serial.print(',');

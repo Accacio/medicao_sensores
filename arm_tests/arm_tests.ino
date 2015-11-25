@@ -88,7 +88,7 @@ float Lh=0.08;
 
 //definitions to calibrate control law
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
-float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law 
+float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law
 
 //definitions to calibrate aceleromenter
 float X_AXE_ACCEL=150;
@@ -102,10 +102,11 @@ int    Traj_angle=ANGLE_VPOT_MAX-ANGLE_VPOT_MIN;
 //filter initialization
 float filter_frequency=0.25;
 FilterOnePole lowpassFilter( LOWPASS, filter_frequency );
+FilterOnePole lowpassLoadCell(LOWPASS,filter_frequency);
 
-float filter2=0.8;
+float filter2=0.25;
 FilterOnePole vpot_filter( LOWPASS, filter2 );
-
+FilterOnePole loadcell_filter( LOWPASS, filter2 );
 Servo servooldg;
 
 
