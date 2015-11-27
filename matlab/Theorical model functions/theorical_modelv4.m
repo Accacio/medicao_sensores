@@ -19,7 +19,7 @@ Wf=Sw*wcmf;
 %create estructure of the gradient data
 %filtered signal
 fs=10;
-[a,b]=butter(4,2*2/fs,'low'); %design of the low passband filter
+[a,b]=butter(4,0.25*2/fs,'low'); %design of the low passband filter
 %vector=filtfilt(a,b,angle_value)*pi/180; %implementation of the filter and filtered signal
 %vector=aux;
 vector=angle_filt_value*pi/180;
@@ -75,48 +75,67 @@ Fs=Tt+Torq_f+Torq_p+Friction;
 figure
 plot(axisx,vector,axisx,Fs,axisx,loadcell_filt,axisx,speed_calc)
 
-band1=0.08;
-band2=-0.08;
+band1=0.245;
+band2=-0.125;
 h1(1,1)=1;
 h2(1,1)=0;
+stepup_sgm=1/30;
+stepdown_sgm=1/10;
+Hdc_up=0.2333;
+Hdc_low=-0.4526;
+
 for i=2:size(speed_calc,1)
     if(speed_calc(i,1)-band1>0)
-        h1(i,1)=1;
-        h2(i,1)=0;
+        h1(i,1)=min(1,h1(i-1,1)+stepup_sgm);
+        h2(i,1)=max(0,h2(i-1,1)-stepdown_sgm);
     else
         if(speed_calc(i,1)-band2<0)
-            h1(i,1)=0;
-            h2(i,1)=1;
+            h1(i,1)=max(0,h1(i-1,1)-stepup_sgm);
+            h2(i,1)=min(1,h2(i-1,1)+stepdown_sgm);
         else
-            h1(i,1)=h1(i-1);
-            h2(i,1)=h2(i-1);
+            h1(i,1)=h1(i-1,1);
+            h2(i,1)=h2(i-1,1);
         end
     end
 end
-Hdc_up=0.2333;
-Hdc_low=0.4119-0.9318;
 H=Hdc_up*h1+Hdc_low*h2;
-plot(axisx,Ts,axisx,Torq_f+H)
+Fs_hysteresis=Torq_f+H+Tt;
 
-
+%minimos cuadrados
 f1=accel_calc;
 f2=Wf*g*sin(vector).*speed_calc*(Lf+Lh)*dcmf;
 f3=Wf*(Lf+Lh)*dcmf*g*sin(vector);
 f4=h1;
 f5=h2;
-% f1=accel_calc./sin(Beta);
-% f2=speed_calc./sin(Beta);
-% f3=sin(vector)./sin(Beta);
 
-
-
-A_matx=[f1,f4,f5];
+A_matx=[f1,f2,f3,f4,f5];
 B_matx=Ts;
-
 Teta=inv(A_matx'*A_matx)*A_matx'*B_matx;
-
-%Fs_result=Teta(1)*f1+Teta(2)*f2+Teta(3)*f3+Teta(4)*f4+Teta(5)*f5;
 Fs_resul=A_matx*Teta;
+
 figure
-plot(axisx,Ts,axisx,Fs_result)
+subplot(2,1,1)
+plot(axisx,Ts,axisx,Fs_hysteresis,axisx,Ts-Fs_hysteresis,'r')
+xlabel('Time')
+ylabel('Adimensional (Newton*sin(rad))')
+title('Manual aproximation of Fs angular presentation')
+legend('Loadcell measure','Model signal','Error')
+subplot(2,1,2)
+plot(axisx,Ts./Dcf.*sin(Beta),axisx,Fs_hysteresis./Dcf.*sin(Beta),axisx,(Ts-Fs_hysteresis)/Dcf.*sin(Beta),'r')
+xlabel('Time')
+ylabel('Tension (Newton)')
+title('Manual aproximation of Fs tension presentation')
+
+figure
+subplot(2,1,1)
+plot(axisx,Ts,axisx,Fs_result,axisx,Ts-Fs_result,'r')
+title('Least Squares aproximation of Fs angular presentation')
+xlabel('Time')
+ylabel('Adimensional Newton*sin(rad)')
+legend('Loadcell measure','Model signal','Error')
+subplot(2,1,2)
+plot(axisx,Ts./Dcf.*sin(Beta),axisx,Fs_result./Dcf.*sin(Beta),axisx,(Ts-Fs_result)./Dcf.*sin(Beta),'r')
+title('Least Squares aproximation of Fs tension presentation')
+xlabel('Time')
+ylabel('Tension (Newton)')
 
