@@ -1,4 +1,13 @@
-
+void readSensors_filteronly()
+{
+  // Acquire sensor values
+  for(int i=0;i<NUM_READS_FILTER;i++)
+  {
+    delayMicroseconds(10);
+    vpot_filter.input(analogRead(VPOT_IN));
+    loadcell_filter.input(analogRead(LOADCELL_IN));
+  }  
+}
 
 void readSensors(int returnval_int[14])
 {
@@ -79,6 +88,7 @@ void readSensors(int returnval_int[14])
    //return returnval;
 }
 
+/* Filter not used anymore due to delay
 float filter(int raw_val[])
 {
   // Sorting the array
@@ -105,3 +115,4 @@ float filter(int raw_val[])
   return_filvalue=return_filvalue/20;
   return return_filvalue;
 }
+*/

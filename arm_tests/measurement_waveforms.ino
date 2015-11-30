@@ -104,37 +104,34 @@ void measurement()
     cont_cycle++;
     cont_frvar++;
 
-    readSensors(values_int);
-    lowpassFilter.input(values_int[ar_vpot_mean]);
-    lowpassLoadCell.input(values_int[ar_vloadcell_mean]);
-    // Conversion from bits to values
-    vref=1.989*values_int[ar_vref];
-    vpot=100*((values_int[ar_vpot]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-    im=((values_int[ar_vim]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
-    potref=values_int[ar_potref];
-    vref_mean=1.989*values_int[ar_vref_mean];
-    vpot_mean=100*((values_int[ar_vpot_mean]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
-    im_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
-    potref_mean=values_int[ar_potref_mean];
-    pot_raw=values_int[ar_vpot];
-    angle=read_elbow_angle(values_int[ar_vpot_mean])*180/PI;
-    angle_filt=read_elbow_angle(lowpassFilter.output())*180/PI;
-    angle_rawfilt=read_elbow_angle(vpot_filter.output())*180/PI;
+    //readSensors(values_int);
+    //lowpassFilter.input(values_int[ar_vpot_mean]);
+    //lowpassLoadCell.input(values_int[ar_vloadcell_mean]);
+    //loadcell_filt=((lowpassLoadCell.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    //// Conversion from bits to values
+    //vref=1.989*values_int[ar_vref];
+    //vpot=100*((values_int[ar_vpot]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+    //im=((values_int[ar_vim]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+    //potref=values_int[ar_potref];
+    //vref_mean=1.989*values_int[ar_vref_mean];
+    //vpot_mean=100*((values_int[ar_vpot_mean]*1.0-MPOS_DC)/(MPOS_MAX-MPOS_DC));
+    //im_mean=((values_int[ar_vim_mean]-CURRENTBIT_DC)*(5000/(CURRENT_GAIN*1023.00)))/0.167;
+    //potref_mean=values_int[ar_potref_mean];
+    //pot_raw=values_int[ar_vpot];
+    //angle=read_elbow_angle(values_int[ar_vpot_mean])*180/PI;
+    //angle_filt=read_elbow_angle(lowpassFilter.output())*180/PI;
+    //angle_rawfilt=read_elbow_angle(vpot_filter.output())*180/PI;
+    //loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    //loadcell_mean=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
 
-    aspeed=(angle-last_angle)*1000/const_time;
-    aacel=(last_aspeed-aspeed)*1000/const_time;
-    last_angle=angle;
-    last_aspeed=aspeed;
-    //loadcell=(values_int[ar_vloadcell]-LOADCELL_DC)*10;
-    //loadcell_mean=(values_int[ar_vloadcell_mean]-LOADCELL_DC)*10;
-    loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-    loadcell_mean=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-    loadcell_filt=((lowpassLoadCell.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+
+
+    tfilter=millis();
+    readSensors_filteronly();
+    angle_rawfilt=read_elbow_angle(vpot_filter.output())*180/PI;
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-    xaccel_mean=values_int[ar_xaccel_mean]-X_AXE_ACCEL;
-    yaccel_mean=values_int[ar_yaccel_mean]-Y_AXE_ACCEL;
-    zaccel_mean=values_int[ar_zaccel_mean]-Z_AXE_ACCEL;
-    total_accel=sqrt(pow(xaccel_mean,2)+pow(yaccel_mean,2)+pow(zaccel_mean,2));
+    tfilter=millis()-tfilter;
+
 
     //Sending information over serial
 //    Serial.print(PWM_value);
@@ -163,20 +160,24 @@ void measurement()
     //Serial.print(',');
     //Serial.print(loadcell);
     //Serial.print(',');
-    Serial.print(loadcell_mean);
-    Serial.print(',');
-    Serial.print(loadcell_filt);
-    Serial.print(',');
+    //Serial.print(loadcell_mean);
+    //Serial.print(',');
+    //Serial.print(loadcell_filt);
+    //Serial.print(',');
     Serial.print(loadcell_rawfilt);
     Serial.print(',');
-    Serial.print(angle);
-    Serial.print(',');
-    Serial.print(angle_filt);
-    Serial.print(',');
+    //Serial.print(angle);
+    //Serial.print(',');
+    //Serial.print(angle_filt);
+    //Serial.print(',');
     Serial.print(angle_rawfilt);
     Serial.print(',');
     Serial.print(t_time);
     Serial.println(',');
+    // Filter time
+    //Serial.print(tfilter);
+    //Serial.println(',');
+    // Filter time
     do{
       delayMicroseconds(500);
       t1_time=millis();

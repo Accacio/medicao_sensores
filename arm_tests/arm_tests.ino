@@ -1,6 +1,7 @@
 #include <Servo.h>
 #include <Filters.h>
 #define NUM_READS 100 // number of read measures to process the signal
+#define NUM_READS_FILTER 10 // number of filter only measures to process the signal
 
 // Pin Numbers
 #define VPOT_IN A11
@@ -69,6 +70,7 @@ float last_aspeed;
 unsigned long t0_time;
 unsigned long t1_time;
 unsigned long t_time;
+unsigned long tfilter;
 int cont_high=100;
 int cont_low=100;
 int percent_high=20;
