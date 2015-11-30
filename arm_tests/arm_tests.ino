@@ -27,14 +27,14 @@
 #define LC_NEWTON_MIN 1.475*G
 #define LC_NEWTON_MAX 50*G
 //Definitions for the elbow
-#define FULL_OPEN_ELBOW 42  // value in PWM to full open the elbow angle
-#define FULL_OPEN_COMPEN 2 // to compensante the Hysteresis in the elbow
+#define FULL_OPEN_ELBOW 41  // value in PWM to full open the elbow angle
+#define FULL_OPEN_COMPEN 3 // to compensante the Hysteresis in the elbow
 #define FULL_CLOSE_ELBOW 0  // value in PWM to close the elbow angle
 #define MAX_ELBOW_ANGLE 120*PI/180 // Max aperture of the elbow angle measure externally
 #define MIN_ELBOW_ANGLE 40*PI/180  // Min aperture of the elbow angle, measured exernally
-#define ANGLE_VPOT_MAX  157       // Value in bits of the vpot when is the maximum angle on the elbow
-#define ANGLE_VPOT_COMPEN 6     // to compensate the Hysteresis no angle measure
-#define ANGLE_VPOT_MIN  28       // Value in bits of the vpot when is the min angle on the elbow
+#define ANGLE_VPOT_MAX  167       // Value in bits of the vpot when is the maximum angle on the elbow
+#define ANGLE_VPOT_COMPEN 7     // to compensate the Hysteresis no angle measure
+#define ANGLE_VPOT_MIN  35       // Value in bits of the vpot when is the min angle on the elbow
 //Definitions for the Arm
 #define DCA 5.75    //Distance of the arm clamping
 #define DCF 4.75    //Distance of the forearm clamping

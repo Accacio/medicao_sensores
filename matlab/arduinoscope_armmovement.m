@@ -103,6 +103,7 @@ angle_rawfilt_value(i,1)=str2double(out(commas(5)+1:commas(6)-1));
     %plot(angle_mean_value(end-11*sign(end-11):end),tension_value(end-11*sign(end-11):end),'LineWidth',2)
     hold on
     plot(angle_mean_value(end-11*sign(end-11):end),loadcell_mean(end-11*sign(end-11):end),'r','LineWidth',2)
+    title('Angle vs Tension (mean)')
     axis([0 180 0 250 ]);
 
     % Hysteresis plot angle_filt_value
@@ -110,12 +111,14 @@ angle_rawfilt_value(i,1)=str2double(out(commas(5)+1:commas(6)-1));
     %plot(angle_filt_value(end-11*sign(end-11):end),tension_value(end-11*sign(end-11):end),'LineWidth',2)
     hold on
     plot(angle_filt_value(end-11*sign(end-11):end),loadcell_filt(end-11*sign(end-11):end),'g','LineWidth',2)
+    title('Angle vs Tension (meanfiltered)')
     axis([0 180 0 250 ]);
 
     % Hysteresis plot angle_rawfilt_value
     subplot(2,2,3)
     hold on
     plot(angle_rawfilt_value(end-11*sign(end-11):end),loadcell_rawfilt(end-11*sign(end-11):end),'b','LineWidth',2)
+    title('Angle vs Tension (filter)')
     axis([0 180 0 250 ]);
 
     %plot loadcell
@@ -128,6 +131,7 @@ angle_rawfilt_value(i,1)=str2double(out(commas(5)+1:commas(6)-1));
     hold on
     plot(axisx(end-11*sign(end-11):end),loadcell_rawfilt(end-11*sign(end-11):end),'b','LineWidth',2)
     hold on
+    title('Time vs Tension (mean filter and meanfiltered)')
     axis([0 xmax 0 250]);
 
     drawnow
