@@ -1,7 +1,9 @@
 
 %load('tension_hysteresis\0.5kgfirsttest.mat','angle_value','axisx','loadcell_mean','tension_value')
-load('tension_hysteresis\0.5kgsecondtest.mat','angle_filt_value','axisx','loadcell_filt')
-
+load('tension_hysteresis\1.5kgfourthtest.mat','angle_rawfilt_value','axisx','loadcell_rawfilt')
+%load('tension_hysteresis\0.5kgfilteronly.mat','angle_rawfilt_value','axisx','loadcell_rawfilt')
+loadcell_filt=loadcell_rawfilt;
+angle_filt_value=angle_rawfilt_value;
 %data of the forearm
 Lf=0.28; %length of the forearm
 Lh=0; %0.10; %lenght of the hand
@@ -47,7 +49,7 @@ accel_calc=filtfilt(a,b,accel_calc);            %filtering the acceleration vect
 Upper_lim_speed=0.245;          %Upper limit of the speed band for the hysteresis
 Lower_lim_speed=-0.125;         %Lower limit of the speed band for the hysteresis            
 stepup_sgm=1/30;                %Quantity of steps to achieve the top of the hysteresis (kind of smootnes)
-stepdown_sgm=1/10;              %Quantity of steps to achieve the bottom of the hysteresis (kind of smootnes)
+stepdown_sgm=1/9;              %Quantity of steps to achieve the bottom of the hysteresis (kind of smootnes)
 
 Hdc_up=0.2333;                  %Factor of top hysteresis                
 Hdc_low=-0.4526;                %Factor of bottom hysteresis
@@ -61,8 +63,8 @@ for i=2:size(speed_calc,1)      %construction of the hysteresis based the speed
         h2(i,1)=max(0,h2(i-1,1)-stepdown_sgm);
     else
         if(speed_calc(i,1)-Lower_lim_speed<0)
-            h1(i,1)=max(0,h1(i-1,1)-stepup_sgm);
-            h2(i,1)=min(1,h2(i-1,1)+stepdown_sgm);
+            h1(i,1)=max(0,h1(i-1,1)-stepdown_sgm);
+            h2(i,1)=min(1,h2(i-1,1)+stepup_sgm);
         else
             h1(i,1)=h1(i-1,1);
             h2(i,1)=h2(i-1,1);
@@ -96,8 +98,8 @@ Fc_hysteresis=Torq_f+H+Tt;          %Clamping force based only on hysteresis, ac
 
 %---- Least Squares Calculations
 ls1=accel_calc;
-ls2=Wf*g*sin(vector).*speed_calc*(Lf+Lh)*dcmf;
-ls3=Wf*(Lf+Lh)*dcmf*g*sin(vector);
+ls2=g*sin(vector)*(Lf+Lh)*dcmf.*speed_calc;
+ls3=g*sin(vector)*(Lf+Lh)*dcmf;
 ls4=h1;
 ls5=h2;
 
@@ -106,6 +108,7 @@ B_LS=Tc;
 LS_parameters=inv(A_LS'*A_LS)*A_LS'*B_LS;
 Fc_least_squares=A_LS*LS_parameters;
 
+Error_newtons=(Tc-Fc_least_squares)./Dcf.*sin(Beta);
 %---- Angle, angular speed and angular aceleration figrue
 figure
 plot(axisx,vector,axisx,speed_calc,axisx,accel_calc)
@@ -131,7 +134,7 @@ xlabel('Time')
 ylabel('Adimensional Newton*sin(rad)')
 legend('Loadcell measure','Model signal','Error')
 subplot(2,1,2)
-plot(axisx,Tc./Dcf.*sin(Beta),axisx,Fc_least_squares./Dcf.*sin(Beta),axisx,(Tc-Fc_least_squares)./Dcf.*sin(Beta),'r')
+plot(axisx,Tc./Dcf.*sin(Beta),axisx,Fc_least_squares./Dcf.*sin(Beta),axisx,Error_newtons,'r')
 title('Least Squares aproximation of Fc tension presentation')
 xlabel('Time')
 ylabel('Tension (Newton)')
