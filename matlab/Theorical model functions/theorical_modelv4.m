@@ -16,46 +16,31 @@ g=9.8;
 dp=Lf+Lh;
 Wf=Sw*wcmf;
 
-%create estructure of the gradient data
-%filtered signal
+%-----filter parameters construction
 fs=10;
 [a,b]=butter(4,0.25*2/fs,'low'); %design of the low passband filter
 %vector=filtfilt(a,b,angle_value)*pi/180; %implementation of the filter and filtered signal
-%vector=aux;
+
+%----Chosing the variable for the vector
 vector=angle_filt_value*pi/180;
 %vector=data3;
-axisx(:,1)=(1:size(vector))*0.1;
-grad_state=struct('ek_1',vector(2,1),'state',[3,0,0],'gradient',0,'quantizer',3);
 
-gradient=0;
-gradient(1,1)=0;
-gradient(2,1)=0;
+axisx(:,1)=(1:size(vector))*0.1;    %x vector construction
 
-v_speeds=0;
-v_speeds(1,1)=0;
-v_speeds(2,1)=0;
-ek_0=vector(2,1);
-vk_0=0;
-t=1;            %requiere confirmación del valor
-for i=3:size(vector,1)
-    ek_1=ek_0;
-    ek_0=vector(i,1);
-    [aux_grad,grad_state]=calculate_gradient(ek_0,grad_state);
-    gradient(i,1)=aux_grad;
-    vk_0=gradient(i,1)*abs(ek_0-ek_1)/t;
-    v_speeds(i,1)=(vk_0+v_speeds(i-1,1)+v_speeds(i-2,1))/3;
-end
-aux_speed_calc=diff(vector)./diff(axisx);
-speed_calc=zeros(size(aux_speed_calc,1)+1,1);
-speed_calc(2:end,1)=-aux_speed_calc(:,1);
-speed_calc=filtfilt(a,b,speed_calc);
-aux_accel=diff(speed_calc(2:end,1))./diff(axisx(2:end,1));
-accel_calc=zeros(size(aux_accel,1)+2,1);
-accel_calc(3:end,1)=aux_accel(:,1);
-accel_calc=filtfilt(a,b,accel_calc);
+%----Calculating the speed
+speed_calc=zeros(size(aux_speed_calc,1)+1,1);   %initialiazing the vector
+aux_speed_calc=diff(vector)./diff(axisx);       %speed calculation
+speed_calc(2:end,1)=-aux_speed_calc(:,1);       %shifting one space the speed vector       
+speed_calc=filtfilt(a,b,speed_calc);            %filtering the speed vector
+
+%----Calculating the acceleration
+accel_calc=zeros(size(aux_accel,1)+2,1);        %initialiazing the vector      
+aux_accel=diff(speed_calc(2:end,1))./diff(axisx(2:end,1));  %acceleration calculation
+accel_calc(3:end,1)=aux_accel(:,1);             %shiftiing two speces the speed vector
+accel_calc=filtfilt(a,b,accel_calc);            %filtering the acceleration vector
 
 figure
-plot(axisx,vector,axisx,gradient,axisx,v_speeds,axisx,speed_calc,axisx,accel_calc)
+plot(axisx,vector,axisx,speed_calc,axisx,accel_calc)
 Inertia_exo=m_exo*(Lf^2)/3;
 Inertia_arm=((Lf+Lh)*dcmf)^2*Wf;
 I=Inertia_exo+Inertia_arm;
@@ -111,7 +96,7 @@ f5=h2;
 A_matx=[f1,f2,f3,f4,f5];
 B_matx=Ts;
 Teta=inv(A_matx'*A_matx)*A_matx'*B_matx;
-Fs_resul=A_matx*Teta;
+Fs_result=A_matx*Teta;
 
 figure
 subplot(2,1,1)
