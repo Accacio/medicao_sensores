@@ -121,6 +121,47 @@ void angular_measures (float angle)
   
 }
 
+void hysteresis_function(float Pwm_value)
+{
+    for (int i=0;i<2;i++)
+  {
+    Pwm_array[2-i]=Pwm_array[1-i];
+    h1_array[2-i]=h1_array[1-i];
+    h2_array[2-i]=h2_array[1-i];
+  }
+  Pwm_array[0]=Pwm_value;
+  if (Pwm_array[0]>0)
+  {
+    Hyst_cont_h1++;
+    Hyst_cont_h2=0;
+    if(Hyst_cont_h1>Hyst_cont_down)
+    {
+      h1_array[0]=0;
+      h2_array[0]=1;
+
+    }
+    else
+    {
+      h1_array[0]=1;
+      h2_array[0]=0;      
+    } 
+  }
+  else
+  {
+    Hyst_cont_h1=0;
+    Hyst_cont_h2++;
+    if(Hyst_cont_h2>Hyst_cont_up)
+    {
+      h1_array[0]=1;
+      h2_array[0]=0;
+    }
+    else
+    {
+      h1_array[0]=0;
+      h2_array[0]=1;      
+    } 
+  }
+}
 void deterministic_model()
 {
   float elbow_angulars[3];

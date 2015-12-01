@@ -68,6 +68,15 @@ float speed_array [3] = {0,0,0};
 float accel_array [3] = {0,0,0};
 unsigned long angular_time[3] = {0,0,0};
 
+// Hysteresis function definitions
+float Pwm_array [3] = {0,0,0};
+float h1_array [3] = {0,0,0};
+float h2_array [3] = {0,0,0};
+int Hyst_cont_h1=0;
+int Hyst_cont_h2=0;
+int Hyst_cont_down=2;
+int Hyst_cont_up=2;
+
 
 unsigned long t0_time;
 unsigned long t1_time;
@@ -108,13 +117,14 @@ float filter_frequency=0.25;
 FilterOnePole lowpassFilter( LOWPASS, filter_frequency );
 FilterOnePole lowpassLoadCell(LOWPASS,filter_frequency);
 
-float filter2=0.5;
+float filter2=0.15;
 FilterOnePole vpot_filter( LOWPASS, filter2 );
 FilterOnePole loadcell_filter( LOWPASS, filter2 );
 
-float angular_filt=0.5;
-FilterOnePole speed_filter( LOWPASS, angular_filt);
-FilterOnePole accel_filter( LOWPASS, angular_filt );
+float fs_speed=0.05;
+FilterOnePole speed_filter( LOWPASS, fs_speed);
+float fs_accel=0.05;
+FilterOnePole accel_filter( LOWPASS, fs_accel );
 
 
 Servo servooldg;

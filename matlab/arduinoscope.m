@@ -1,8 +1,8 @@
 clear
 %settings
-cont_high=100;
+cont_high=120;
 percent_high=95;
-xmax=300; %8000 Para 10 iterations % 2400 3
+xmax=3*120*2; %8000 Para 10 iterations % 2400 3
 Port_com='com4';
 
 s=serial(Port_com,'Baudrate',115200);
@@ -90,12 +90,12 @@ data2(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
 % data2(i,3)=str2double(out(commas(position)+1:commas(position+1)-1));
  position=3;
  data3(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
-  position=4;
-  data4(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
-% position=5;
-% data5(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
-% position=6;
-% data6(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+ position=4;
+ data4(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+ position=5;
+ data5(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+ position=6;
+ data6(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
 % position=7;
 sampl_time(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
 
@@ -123,7 +123,7 @@ end
   if count_plot==10
     count_plot=0;
     subplot(2,2,1)
-    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),'b')
+    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data5(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data6(end-11*sign(end-11):end))
     title('PWM input signal');
     hold on
     subplot(2,2,2)

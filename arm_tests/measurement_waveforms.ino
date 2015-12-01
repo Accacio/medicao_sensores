@@ -132,6 +132,7 @@ void measurement()
     readSensors_filteronly();
     angle_rawfilt=read_elbow_angle(vpot_filter.output());
     angular_measures(angle_rawfilt);
+    hysteresis_function(PWM_value);
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
     tfilter=millis()-tfilter;
 
@@ -178,6 +179,10 @@ void measurement()
     Serial.print(speed_filter.output());
     Serial.print(',');
     Serial.print(accel_filter.output());
+    Serial.print(',');
+    Serial.print(h1_array[0]);
+    Serial.print(',');
+    Serial.print(h2_array[0]);
     Serial.print(',');
     Serial.print(t_time);
     Serial.println(',');
