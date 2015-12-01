@@ -228,6 +228,8 @@ void elbow_calibration_menu2()
   int aux_vpot_max=ANGLE_VPOT_MAX;
   int aux_vpot_min=ANGLE_VPOT_MIN;
   int auxvpot_downward_compen;
+  int auxbit_compen;
+  int auxvpot_compen;
   float aux_angle;
   int values_int[ar_last];
   float angle_read;
@@ -236,7 +238,7 @@ void elbow_calibration_menu2()
   float Traj_x_min;
   float Traj_x_max;
   float vpot_max_function;
-
+  
 
   Serial.println("For test enter, full open elbow value(bits), max open elbow (degrees), min open elbow (degrees) and desired angle");
   Serial.println("Enter -1 to exit to the calibration menu");
@@ -244,17 +246,19 @@ void elbow_calibration_menu2()
   {
     if (Serial.available())
     {
+
       aux_full_open= Serial.parseInt();
-      int auxbit_compen= Serial.parseInt();
-      aux_angle_max= Serial.parseInt();
-      aux_angle_min=Serial.parseInt();
-      aux_vpot_max=Serial.parseInt();
-      int auxvpot_compen=Serial.parseInt();
-      aux_vpot_min=Serial.parseInt();
-      aux_angle= Serial.parseInt();
       if(aux_full_open<0){
         break;
       }
+      auxbit_compen= Serial.parseInt();
+      aux_angle_max= Serial.parseInt();
+      aux_angle_min=Serial.parseInt();
+      aux_vpot_max=Serial.parseInt();
+      auxvpot_compen=Serial.parseInt();
+      aux_vpot_min=Serial.parseInt();
+      aux_angle= Serial.parseInt();
+
       if (Serial.read()=='\n'){}
       Serial.print(aux_full_open);
       Serial.print(',');
@@ -301,7 +305,7 @@ void elbow_calibration_menu2()
       Serial.println("Set the maximum opening of the elbow angle in degres for calibration, followed by angle opening desired");
       Serial.println("Enter -1 to exit to the calibration menu");
     }
-    delay(1000);
+    delay(100);
     readSensors(values_int);
 
     //Calculation for measure the elbow angle

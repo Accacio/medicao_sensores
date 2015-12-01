@@ -84,9 +84,11 @@ void measurement()
     }
     register_vpot[comparador-1]=values_int[ar_vpot_mean];
   }while(values_int[ar_vpot_mean]!=equal_mean);
-
-  last_angle=read_elbow_angle(values_int[ar_vpot_mean]);
-  last_aspeed=0;
+  readSensors_filteronly();
+  angular_measures(read_elbow_angle(vpot_filter.output()));
+  readSensors_filteronly();
+  angular_measures(read_elbow_angle(vpot_filter.output()));
+// angular_measures(read_elbow_angle(values_int[ar_vpot_mean]));
   cont_cycle=0;
   cont_frvar=0;
   t0_time=millis();
@@ -128,14 +130,15 @@ void measurement()
 
     tfilter=millis();
     readSensors_filteronly();
-    angle_rawfilt=read_elbow_angle(vpot_filter.output())*180/PI;
+    angle_rawfilt=read_elbow_angle(vpot_filter.output());
+    angular_measures(angle_rawfilt);
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
     tfilter=millis()-tfilter;
 
 
     //Sending information over serial
-//    Serial.print(PWM_value);
-//    Serial.print(',');
+    Serial.print(PWM_value);
+    Serial.print(',');
 //    Serial.print(total_accel);
 //    Serial.print(',');
 //    Serial.print(xaccel_mean);
@@ -170,7 +173,11 @@ void measurement()
     //Serial.print(',');
     //Serial.print(angle_filt);
     //Serial.print(',');
-    Serial.print(angle_rawfilt);
+    Serial.print(angle_rawfilt*180/PI);
+    Serial.print(',');
+    Serial.print(speed_filter.output());
+    Serial.print(',');
+    Serial.print(accel_filter.output());
     Serial.print(',');
     Serial.print(t_time);
     Serial.println(',');

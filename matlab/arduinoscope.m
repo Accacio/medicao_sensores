@@ -127,13 +127,13 @@ end
     title('PWM input signal');
     hold on
     subplot(2,2,2)
-    plot(axisx(end-11*sign(end-11):end),data2(end-11*sign(end-11):end),'r',axisx(end-11*sign(end-11):end)',data2(end-11*sign(end-11):end,1))
+    plot(axisx(end-11*sign(end-11):end),data2(end-11*sign(end-11):end)*pi/180,axisx(end-11*sign(end-11):end)',data3(end-11*sign(end-11):end,1),axisx(end-11*sign(end-11):end)',data4(end-11*sign(end-11):end,1))
 %    axis([0 xmax PWM_value_ymin PWM_value_ymax]);
-    title('Accelerations')
+    title('Angle, Speed and Acceleration')
     hold on
 
     subplot(2,2,3)
-    plot(axisx(end-11*sign(end-11):end),data2(end-11*sign(end-11):end),'b',axisx(end-11*sign(end-11):end),data3(end-11*sign(end-11):end),'r',axisx(end-11*sign(end-11):end),data4(end-11*sign(end-11):end),'g')
+    plot(axisx(end-11*sign(end-11):end),data2(end-11*sign(end-11):end),'b')
 %    axis([0 xmax Rp_ymin Rp_ymax]);
     title('Angle')
     hold on

@@ -33,9 +33,9 @@
 #define FULL_CLOSE_ELBOW 0  // value in PWM to close the elbow angle
 #define MAX_ELBOW_ANGLE 120*PI/180 // Max aperture of the elbow angle measure externally
 #define MIN_ELBOW_ANGLE 40*PI/180  // Min aperture of the elbow angle, measured exernally
-#define ANGLE_VPOT_MAX  167       // Value in bits of the vpot when is the maximum angle on the elbow
-#define ANGLE_VPOT_COMPEN 7     // to compensate the Hysteresis no angle measure
-#define ANGLE_VPOT_MIN  35       // Value in bits of the vpot when is the min angle on the elbow
+#define ANGLE_VPOT_MAX  165       // Value in bits of the vpot when is the maximum angle on the elbow
+#define ANGLE_VPOT_COMPEN 6     // to compensate the Hysteresis no angle measure
+#define ANGLE_VPOT_MIN  23       // Value in bits of the vpot when is the min angle on the elbow
 //Definitions for the Arm
 #define DCA 5.75    //Distance of the arm clamping
 #define DCF 4.75    //Distance of the forearm clamping
@@ -63,8 +63,10 @@ enum sensor_array
 
 
 //angular definitions
-float last_angle;
-float last_aspeed;
+float angle_array [3] = {0,0,0};
+float speed_array [3] = {0,0,0};
+float accel_array [3] = {0,0,0};
+unsigned long angular_time[3] = {0,0,0};
 
 
 unsigned long t0_time;
@@ -106,9 +108,15 @@ float filter_frequency=0.25;
 FilterOnePole lowpassFilter( LOWPASS, filter_frequency );
 FilterOnePole lowpassLoadCell(LOWPASS,filter_frequency);
 
-float filter2=0.25;
+float filter2=0.5;
 FilterOnePole vpot_filter( LOWPASS, filter2 );
 FilterOnePole loadcell_filter( LOWPASS, filter2 );
+
+float angular_filt=0.5;
+FilterOnePole speed_filter( LOWPASS, angular_filt);
+FilterOnePole accel_filter( LOWPASS, angular_filt );
+
+
 Servo servooldg;
 
 

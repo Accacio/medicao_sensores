@@ -94,46 +94,31 @@ float read_elbow_angle(int Pot_value)
   return angle_elbow;
 }
 
-void angular_measures (float results[3])
+void angular_measures (float angle)
 {
-  unsigned long old_time=0;
-  unsigned long new_time=0;
-  unsigned long var_time;
-  float old_angle=0;
-  float new_angle=0;
-  float old_aspeed=0;
-  float new_aspeed=0;
-  float old_aaccel=0;
-  float new_aaccel=0;
-  int values_int[ar_last];
-
-  int num_measures=3;
-
-  for(int i=0;i<num_measures;i++)
+  for (int i=0;i<2;i++)
   {
-    readSensors(values_int);
-    old_time=new_time;
-    new_time=millis();
-    var_time=new_time-old_time;
-    old_angle=new_angle;
-    new_angle=read_elbow_angle(values_int[ar_vpot_mean]); //in rads
-    old_aspeed=new_aspeed;
-    new_aspeed=(new_angle-old_angle)/var_time;            // in rad/??
-    old_aaccel=new_aaccel;
-    new_aaccel=(new_aspeed-old_aspeed)/var_time;
-
-    Serial.print("Time: ");
-    Serial.print(var_time);
-    Serial.print(", Angle: ");
-    Serial.print(new_angle);
-    Serial.print(", Ang. Speed: ");
-    Serial.print(new_aspeed);
-    Serial.print(", Ang. Accel.: ");
-    Serial.println(new_aaccel);
+    angular_time[2-i]=angular_time[1-i];
+    angle_array[2-i]=angle_array[1-i];
+    speed_array[2-i]=speed_array[1-i];
+    accel_array[2-i]=accel_array[1-i];  
   }
-  results[1]=new_angle;
-  results[2]=new_aspeed;
-  results[3]=new_aaccel;
+  angular_time[0]=millis();
+  angle_array[0]=angle;
+  speed_array[0]= (angle_array[0]-angle_array[1])*1000/(angular_time[0]-angular_time[1]);
+  accel_array[0]= (speed_array[0]-speed_array[1])*1000/(angular_time[0]-angular_time[1]);
+  speed_filter.input(speed_array[0]);
+  accel_filter.input(accel_array[0]);
+  
+//    Serial.print("Time: ");
+//    Serial.print(var_time);
+//      Serial.print(", Angle: ");
+//      Serial.print(angle_array[0]);
+//      Serial.print(", Ang. Speed: ");
+//      Serial.print(speed_array[0]);
+//      Serial.print(", Ang. Accel.: ");
+//      Serial.println(accel_array[0]);
+  
 }
 
 void deterministic_model()
@@ -150,7 +135,8 @@ void deterministic_model()
   float teta_ac;
   while(1)
   {
-    angular_measures(elbow_angulars);
+    
+    //angular_measures();
     x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(elbow_angulars[1]));
     teta_ac=asin((DCF*sin(elbow_angulars[1]))/x_tensor);
     Tf=FW*FCM*G*sin(elbow_angulars[1]);
