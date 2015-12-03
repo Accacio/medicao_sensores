@@ -39,8 +39,7 @@
 //Definitions for the Arm
 #define DCA 5.75    //Distance of the arm clamping
 #define DCF 4.75    //Distance of the forearm clamping
-#define PFCM 0.682   //Forearm center of mass
-#define PFW  0.022   //Forearm proportional weight
+#define DCMF 0.682   //Forearm center of mass
 
 
 enum sensor_array
@@ -72,10 +71,10 @@ unsigned long angular_time[3] = {0,0,0};
 float Pwm_array [3] = {0,0,0};
 float h1_array [3] = {0,0,0};
 float h2_array [3] = {0,0,0};
-int Hyst_cont_h1=0;
-int Hyst_cont_h2=0;
-int Hyst_cont_down=2;
-int Hyst_cont_up=2;
+//int Hyst_cont_h1=0;
+//int Hyst_cont_h2=0;
+//int Hyst_cont_down=2;
+//int Hyst_cont_up=2;
 
 
 unsigned long t0_time;
@@ -94,7 +93,6 @@ int menu_var=-1;
 
 
 //subject defintions
-float Subject_weight=70;
 float La=0.28;
 float Lf=0.26;
 float Lh=0.08;
@@ -102,11 +100,8 @@ float Lh=0.08;
 //definitions to calibrate control law
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law
+float LS_param_array[7] = {0,0,0,0,0,0,0};     //vector of parameters definitions obtained after LS calibration function
 
-//definitions to calibrate aceleromenter
-float X_AXE_ACCEL=150;
-float Y_AXE_ACCEL=356;
-float Z_AXE_ACCEL=260;
 //initialization of x_max for the extension of the arm tensor
 const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));
 const float  Traj_x_max=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MAX_ELBOW_ANGLE))-Traj_x_min;
@@ -117,15 +112,17 @@ float filter_frequency=0.25;
 FilterOnePole lowpassFilter( LOWPASS, filter_frequency );
 FilterOnePole lowpassLoadCell(LOWPASS,filter_frequency);
 
-float filter2=0.15;
+float filter2=0.1;
 FilterOnePole vpot_filter( LOWPASS, filter2 );
 FilterOnePole loadcell_filter( LOWPASS, filter2 );
 
 float fs_speed=0.05;
-FilterOnePole speed_filter( LOWPASS, fs_speed);
+FilterOnePole speed_filter( LOWPASS, fs_speed );
 float fs_accel=0.05;
 FilterOnePole accel_filter( LOWPASS, fs_accel );
-
+float fs_hyster=0.05;
+FilterOnePole h1_filter( LOWPASS, fs_hyster );
+FilterOnePole h2_filter( LOWPASS, fs_hyster );
 
 Servo servooldg;
 
@@ -145,8 +142,8 @@ void setup()
 
 void selection_menu()
 {
-  Serial.println("Press c to Calibration, a for arm movement, or m to Measurement");
-  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=97 && menu_var!=65 && menu_var!=84 && menu_var!=116))
+  Serial.println("Press c to Calibration, a for arm movement, or m to Measurement, or Q for LS calibration");
+  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=97 && menu_var!=65 && menu_var!=84 && menu_var!=116 && menu_var!=81 && menu_var!=113))
   {
     menu_var=Serial.read();
   }
@@ -165,7 +162,7 @@ void loop()
   switch (menu_var) {
     case 84:
     case 116:
-      deterministic_model();
+      deterministic_model(MAX_ELBOW_ANGLE);
       selection_menu();
       break;
     case 69:
@@ -196,6 +193,12 @@ void loop()
     case 65:
       arm_movement();
       break;
+    case 81:
+    case 113:
+      LS_parameters_finder();
+      selection_menu();
+      break;
+
     default:
       selection_menu();
   }

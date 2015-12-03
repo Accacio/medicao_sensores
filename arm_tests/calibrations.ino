@@ -321,3 +321,125 @@ void elbow_calibration_menu2()
     Serial.println(angle_read*180/PI);
   }while(1);
 }
+
+void LS_parameters_finder ()
+{
+  float angle_rawfilt;
+  float loadcell_rawfilt;
+  float angle_ant=0;
+  cont_high = cont_low=0;
+    
+  //initializing the position of the test
+  do{    
+  angle_ant=angle_rawfilt;
+  servooldg.write(FULL_CLOSE_ELBOW);
+  delay(500);
+  readSensors_filteronly();
+  angle_rawfilt=read_elbow_angle(vpot_filter.output());
+  }while(angle_rawfilt!=angle_ant);
+  Serial.println("Ready");
+  //initializing the speed and aceleration arrays
+  readSensors_filteronly();
+  angular_measures(read_elbow_angle(vpot_filter.output()));
+  readSensors_filteronly();
+  angular_measures(read_elbow_angle(vpot_filter.output()));
+
+  cont_cycle=0;
+  cont_frvar=0;
+  t0_time=millis();
+
+  //Runing cycles of measures
+  do{
+    if (Serial.available())
+    {
+      cont_high = cont_low = Serial.parseInt();
+      if(cont_high<0)
+      {
+        menu_var=-1;
+        break;
+      }
+      if (Serial.read()=='\n'){}
+    }
+    if(cont_high>0)
+    {
+      openclosearmsquarewave();
+      cont_cycle++;
+      cont_frvar++;
+
+      tfilter=millis();
+      readSensors_filteronly();
+      angle_rawfilt=read_elbow_angle(vpot_filter.output());
+      angular_measures(angle_rawfilt);
+      hysteresis_function(PWM_value);
+      loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+      tfilter=millis()-tfilter;
+
+      //Sending information over serial
+      Serial.print(PWM_value);
+      Serial.print(',');
+      Serial.print(loadcell_rawfilt);
+      Serial.print(',');
+      Serial.print(angle_rawfilt*180/PI);
+      Serial.print(',');
+      Serial.print(speed_filter.output());
+      Serial.print(',');
+      Serial.print(accel_filter.output());
+      Serial.print(',');
+      Serial.print(h1_filter.output());
+      Serial.print(',');
+      Serial.print(h2_filter.output());
+      Serial.print(',');
+      Serial.print(t_time);
+      Serial.println(',');
+      do{
+        delayMicroseconds(500);
+        t1_time=millis();
+        t_time=t1_time-t0_time;
+      }while(t_time<const_time);
+      t0_time=t1_time;
+  }
+  else{
+      delayMicroseconds(500);
+  }
+  }while(cont_high>=0);
+    
+}
+
+void LS_parameters_saver()
+{
+  int ampl_fprint=0;
+  do{
+    if (Serial.available())
+    {
+      ampl_fprint=Serial.parseInt();
+      if(ampl_fprint<0)
+      {
+        menu_var=-1;
+        break;
+      }
+      LS_param_array[0] = Serial.parseInt()/ampl_fprint;
+      LS_param_array[1] = Serial.parseInt()/ampl_fprint;
+      LS_param_array[2] = Serial.parseInt()/ampl_fprint;
+      LS_param_array[3] = Serial.parseInt()/ampl_fprint;
+      LS_param_array[4] = Serial.parseInt()/ampl_fprint;
+      LS_param_array[5] = Serial.parseInt()/ampl_fprint;
+      LS_param_array[6] = Serial.parseInt()/ampl_fprint;
+      if (Serial.read()=='\n'){}
+    }
+  }while(ampl_fprint==0);
+  Serial.print(LS_param_array[0]);
+  Serial.print(',');
+  Serial.print(LS_param_array[1]);
+  Serial.print(',');
+  Serial.print(LS_param_array[2]);
+  Serial.print(',');
+  Serial.print(LS_param_array[3]);
+  Serial.print(',');
+  Serial.print(LS_param_array[4]);
+  Serial.print(',');
+  Serial.print(LS_param_array[5]);
+  Serial.print(',');
+  Serial.println(LS_param_array[6]);
+
+}
+

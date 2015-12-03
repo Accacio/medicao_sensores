@@ -96,7 +96,10 @@ data2(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
  data5(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
  position=6;
  data6(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
-% position=7;
+ position=7;
+ data7(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+ position=8;
+ data8(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
 sampl_time(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
 
 
@@ -123,7 +126,7 @@ end
   if count_plot==10
     count_plot=0;
     subplot(2,2,1)
-    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data5(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data6(end-11*sign(end-11):end))
+    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data5(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data6(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end)+5,axisx(end-11*sign(end-11):end),data8(end-11*sign(end-11):end)+10)
     title('PWM input signal');
     hold on
     subplot(2,2,2)

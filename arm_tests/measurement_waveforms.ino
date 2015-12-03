@@ -4,12 +4,14 @@ void openclosearmsquarewave()
 {
   if (cont_cycle%(cont_high+cont_low)<cont_high)
   {
-    PWM_value=FULL_OPEN_ELBOW;
+    //PWM_value=FULL_OPEN_ELBOW;
+   set_elbow_angle(MAX_ELBOW_ANGLE);
   }
 
   if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
   {
-    PWM_value=FULL_CLOSE_ELBOW;
+   set_elbow_angle(MIN_ELBOW_ANGLE);    
+    //PWM_value=FULL_CLOSE_ELBOW;
   }
 }
 
@@ -180,9 +182,9 @@ void measurement()
     Serial.print(',');
     Serial.print(accel_filter.output());
     Serial.print(',');
-    Serial.print(h1_array[0]);
+    Serial.print(h1_filter.output());
     Serial.print(',');
-    Serial.print(h2_array[0]);
+    Serial.print(h2_filter.output());
     Serial.print(',');
     Serial.print(t_time);
     Serial.println(',');
