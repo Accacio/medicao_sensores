@@ -6,6 +6,7 @@ void readSensors_filteronly()
     delayMicroseconds(10);
     vpot_filter.input(analogRead(VPOT_IN));
     loadcell_filter.input(analogRead(LOADCELL_IN));
+    
   }  
 }
 

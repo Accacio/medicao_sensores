@@ -10,7 +10,7 @@
 
 %settings
 cont_high=120;
-cycles=1;
+cycles=3;
 Port_com='com4';
 
 s=serial(Port_com,'Baudrate',115200);
@@ -31,11 +31,11 @@ h2=zeros(tmax,1);
 sampl_time=zeros(tmax,1);
 
 %data of the forearm
-Lf=0.28; %length of the forearm
-Lh=0; %0.10; %lenght of the hand
+Lf=0.26; %length of the forearm
+Lh=0.10; %0.10; %lenght of the hand
 Dcf=0.0475;   %clamping of the forearm distance
 Dca=0.0575;   %clamping of the arm distance
-dcmf=1; %0.682; %forearm distance in percent of the center of mass
+dcmf=0.682; %forearm distance in percent of the center of mass
 g=9.8;
 
 
@@ -133,16 +133,15 @@ LS_parameters=inv(A_LS'*A_LS)*A_LS'*B_LS;   %LS parameters results
 Fc_LS=A_LS*LS_parameters;               % Force clamping LS equation calculation
 
 Error=Tc-Fc_LS;
-Sens_uplim=max(Error(20:end,1));
-Sens_lowlim=min(Error(20:end,1));
+Sens_uplim=max(Error(20:end,1))*2;
+Sens_lowlim=min(Error(20:end,1))*1.25;
 
 %Sending parameters to arduino
-ampl_fprint=1;
-aux_param=[num2str(ampl_fprint)];
-for i=1:size(LS_parameters)
-    aux_param=[aux_param,',',num2str(LS_parameters(i)*ampl_fprint)];
+aux_param=[num2str(LS_parameters(1))];
+for i=2:size(LS_parameters)
+    aux_param=[aux_param,',',num2str(LS_parameters(i))];
 end
-aux_param=[aux_param,',',num2str(Sens_lowlim*ampl_fprint),',',num2str(Sens_uplim*ampl_fprint)]        
+aux_param=[aux_param,',',num2str(Sens_lowlim),',',num2str(Sens_uplim)]        
 
 % fprintf(s,aux_param);
 % pause(1);

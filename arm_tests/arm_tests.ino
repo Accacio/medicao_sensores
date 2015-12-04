@@ -20,7 +20,7 @@
 #define CURRENTBIT_DC 109//218//109
 #define CURRENT_GAIN 5.6
 #define PI 3.14
-#define G 10   //Gravidade
+#define G 9.8   //Gravidade
 #define const_time 100
 //Definitions for the Load Cell
 #define LC_BIT_MIN  23
@@ -37,8 +37,8 @@
 #define ANGLE_VPOT_COMPEN 6     // to compensate the Hysteresis no angle measure
 #define ANGLE_VPOT_MIN  23       // Value in bits of the vpot when is the min angle on the elbow
 //Definitions for the Arm
-#define DCA 5.75    //Distance of the arm clamping
-#define DCF 4.75    //Distance of the forearm clamping
+#define DCA 0.0575    //Distance of the arm clamping
+#define DCF 0.0475    //Distance of the forearm clamping
 #define DCMF 0.682   //Forearm center of mass
 
 
@@ -95,12 +95,13 @@ int menu_var=-1;
 //subject defintions
 float La=0.28;
 float Lf=0.26;
-float Lh=0.08;
+float Lh=0.10;    
 
 //definitions to calibrate control law
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law
-float LS_param_array[7] = {0,0,0,0,0,0,0};     //vector of parameters definitions obtained after LS calibration function
+float LS_param_array[7] = {-2.4885,-0.20436,0.54144,0.11204,-0.4336,-7.259,8.8801};     //vector of parameters definitions obtained after LS calibration function
+float Sgm_slope=2.5;
 
 //initialization of x_max for the extension of the arm tensor
 const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));
@@ -115,10 +116,10 @@ FilterOnePole lowpassLoadCell(LOWPASS,filter_frequency);
 float filter2=0.1;
 FilterOnePole vpot_filter( LOWPASS, filter2 );
 FilterOnePole loadcell_filter( LOWPASS, filter2 );
-
+FilterOnePole T_theorical_filter( LOWPASS, 1 );
 float fs_speed=0.05;
 FilterOnePole speed_filter( LOWPASS, fs_speed );
-float fs_accel=0.05;
+float fs_accel=0.01;
 FilterOnePole accel_filter( LOWPASS, fs_accel );
 float fs_hyster=0.05;
 FilterOnePole h1_filter( LOWPASS, fs_hyster );
@@ -142,8 +143,8 @@ void setup()
 
 void selection_menu()
 {
-  Serial.println("Press c to Calibration, a for arm movement, or m to Measurement, or Q for LS calibration");
-  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=97 && menu_var!=65 && menu_var!=84 && menu_var!=116 && menu_var!=81 && menu_var!=113))
+  Serial.println("Press c to Calibration, a for arm movement, or m to Measurement, Q for LS calibration, W to sabe parameters");
+  while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=97 && menu_var!=65 && menu_var!=84 && menu_var!=116 && menu_var!=81 && menu_var!=113 && menu_var!=87 && menu_var!=119))
   {
     menu_var=Serial.read();
   }
@@ -162,7 +163,7 @@ void loop()
   switch (menu_var) {
     case 84:
     case 116:
-      deterministic_model(MAX_ELBOW_ANGLE);
+      Theorical_model(MAX_ELBOW_ANGLE);
       selection_menu();
       break;
     case 69:
@@ -196,6 +197,11 @@ void loop()
     case 81:
     case 113:
       LS_parameters_finder();
+      selection_menu();
+      break;
+    case 87:
+    case 119:
+      LS_parameters_saver();
       selection_menu();
       break;
 

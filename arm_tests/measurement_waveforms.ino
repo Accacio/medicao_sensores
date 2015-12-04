@@ -4,14 +4,14 @@ void openclosearmsquarewave()
 {
   if (cont_cycle%(cont_high+cont_low)<cont_high)
   {
-    //PWM_value=FULL_OPEN_ELBOW;
+//    PWM_value=FULL_OPEN_ELBOW;
    set_elbow_angle(MAX_ELBOW_ANGLE);
   }
 
   if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
   {
    set_elbow_angle(MIN_ELBOW_ANGLE);    
-    //PWM_value=FULL_CLOSE_ELBOW;
+//    PWM_value=FULL_CLOSE_ELBOW;
   }
 }
 
@@ -63,7 +63,7 @@ void measurement()
 {
   int values_int[ar_last];
   float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean;
-  float pot_raw, im, im_mean, loadcell, loadcell_mean, angle, aspeed, aacel;
+  float pot_raw, im, im_mean, loadcell, loadcell_mean, angle, T_theor;
   float total_accel, angle_filt, angle_rawfilt, loadcell_filt, loadcell_rawfilt;
   int xaccel_mean,yaccel_mean,zaccel_mean;
   int register_vpot[comparador];
@@ -135,6 +135,9 @@ void measurement()
     angle_rawfilt=read_elbow_angle(vpot_filter.output());
     angular_measures(angle_rawfilt);
     hysteresis_function(PWM_value);
+    T_theor=Theorical_model(angle_rawfilt);
+    T_theor=T_theorical_filter.output();
+   
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
     tfilter=millis()-tfilter;
 
@@ -142,40 +145,8 @@ void measurement()
     //Sending information over serial
     Serial.print(PWM_value);
     Serial.print(',');
-//    Serial.print(total_accel);
-//    Serial.print(',');
-//    Serial.print(xaccel_mean);
-//    Serial.print(',');
-//    Serial.print(yaccel_mean);
-//    Serial.print(',');
-//    Serial.print(zaccel_mean);
-//    Serial.print(',');
-    //Serial.print(vref);
-    //Serial.print(',');
-    //Serial.print(pot_raw);
-    //Serial.print(',');
-    //Serial.print(vpot);//vpot_int
-    //Serial.print(',');
-    //Serial.print(vref_mean);
-    //Serial.print(',');
-    //Serial.print(vpot_mean);//vpot_mean int
-    //Serial.print(',');
-    //Serial.print(im);
-    //Serial.print(',');
-    //Serial.print(im_mean);
-    //Serial.print(',');
-    //Serial.print(loadcell);
-    //Serial.print(',');
-    //Serial.print(loadcell_mean);
-    //Serial.print(',');
-    //Serial.print(loadcell_filt);
-    //Serial.print(',');
     Serial.print(loadcell_rawfilt);
     Serial.print(',');
-    //Serial.print(angle);
-    //Serial.print(',');
-    //Serial.print(angle_filt);
-    //Serial.print(',');
     Serial.print(angle_rawfilt*180/PI);
     Serial.print(',');
     Serial.print(speed_filter.output());
@@ -185,6 +156,8 @@ void measurement()
     Serial.print(h1_filter.output());
     Serial.print(',');
     Serial.print(h2_filter.output());
+    Serial.print(',');
+    Serial.print(T_theor);
     Serial.print(',');
     Serial.print(t_time);
     Serial.println(',');

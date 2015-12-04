@@ -407,26 +407,28 @@ void LS_parameters_finder ()
 
 void LS_parameters_saver()
 {
-  int ampl_fprint=0;
+  LS_param_array[0]=0;
+    Serial.println("Enter the parameters of the theorical model Equation");
+    Serial.println("Order: I, F. Friction, F. Weight, H1, H2, Neg. collision limit, Posit. collision limit.");
   do{
     if (Serial.available())
     {
-      ampl_fprint=Serial.parseInt();
-      if(ampl_fprint<0)
+      LS_param_array[0] = Serial.parseFloat();
+      if(LS_param_array[0]<0)
       {
         menu_var=-1;
         break;
       }
-      LS_param_array[0] = Serial.parseInt()/ampl_fprint;
-      LS_param_array[1] = Serial.parseInt()/ampl_fprint;
-      LS_param_array[2] = Serial.parseInt()/ampl_fprint;
-      LS_param_array[3] = Serial.parseInt()/ampl_fprint;
-      LS_param_array[4] = Serial.parseInt()/ampl_fprint;
-      LS_param_array[5] = Serial.parseInt()/ampl_fprint;
-      LS_param_array[6] = Serial.parseInt()/ampl_fprint;
+      LS_param_array[1] = Serial.parseFloat();
+      LS_param_array[2] = Serial.parseFloat();
+      LS_param_array[3] = Serial.parseFloat();
+      LS_param_array[4] = Serial.parseFloat();
+      LS_param_array[5] = Serial.parseFloat();
+      LS_param_array[6] = Serial.parseFloat();
       if (Serial.read()=='\n'){}
     }
-  }while(ampl_fprint==0);
+  }while(LS_param_array[0]==0);
+  menu_var=-1;
   Serial.print(LS_param_array[0]);
   Serial.print(',');
   Serial.print(LS_param_array[1]);
