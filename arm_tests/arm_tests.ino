@@ -1,3 +1,4 @@
+#include <EEPROMex.h>
 #include <Servo.h>
 #include <Filters.h>
 #define NUM_READS 100 // number of read measures to process the signal
@@ -27,15 +28,18 @@
 #define LC_BIT_MAX  1023
 #define LC_NEWTON_MIN 1.475*G
 #define LC_NEWTON_MAX 50*G
+
 //Definitions for the elbow
-#define FULL_OPEN_ELBOW 41  // value in PWM to full open the elbow angle
-#define FULL_OPEN_COMPEN 3 // to compensante the Hysteresis in the elbow
-#define FULL_CLOSE_ELBOW 0  // value in PWM to close the elbow angle
-#define MAX_ELBOW_ANGLE 120*PI/180 // Max aperture of the elbow angle measure externally
-#define MIN_ELBOW_ANGLE 40*PI/180  // Min aperture of the elbow angle, measured exernally
-#define ANGLE_VPOT_MAX  165       // Value in bits of the vpot when is the maximum angle on the elbow
-#define ANGLE_VPOT_COMPEN 6     // to compensate the Hysteresis no angle measure
-#define ANGLE_VPOT_MIN  23       // Value in bits of the vpot when is the min angle on the elbow
+//Utilisar read
+int FULL_OPEN_ELBOW   = EEPROM.readInt(0);   // 41;  // value in PWM to full open the elbow angle
+int FULL_OPEN_COMPEN  = EEPROM.readInt(2);  // 3 ;// to compensante the Hysteresis in the elbow
+int FULL_CLOSE_ELBOW  = 0 ;           // value in PWM to close the elbow angle
+float MAX_ELBOW_ANGLE = EEPROM.readInt(4)*PI/180;  //120*PI/180;   // Max aperture of the elbow angle measure externally
+float MIN_ELBOW_ANGLE = EEPROM.readInt(6)*PI/180;  //40*PI/180;    // Min aperture of the elbow angle, measured exernally
+int ANGLE_VPOT_MAX    = EEPROM.readInt(8);  // 165 ;      // Value in bits of the vpot when is the maximum angle on the elbow
+int ANGLE_VPOT_COMPEN = EEPROM.readInt(10);  // 6 ;    // to compensate the Hysteresis no angle measure
+int ANGLE_VPOT_MIN    = EEPROM.readInt(12);  // 23  ;     // Value in bits of the vpot when is the min angle on the elbow
+
 //Definitions for the Arm
 #define DCA 0.0575    //Distance of the arm clamping
 #define DCF 0.0475    //Distance of the forearm clamping
@@ -95,7 +99,7 @@ int menu_var=-1;
 //subject defintions
 float La=0.28;
 float Lf=0.26;
-float Lh=0.10;    
+float Lh=0.10;
 
 //definitions to calibrate control law
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
