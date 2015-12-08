@@ -212,9 +212,11 @@ void elbow_calibration_menu1()
       Serial.println("Enter the value that is required to move from 0 to 180. Always take count the position of the motor's piston:");
       Serial.println("Enter -1 to exit to the calibration menu");
     }
-    readSensors(values_int);
+    readSensors_filteronly();
+//    readSensors(values_int);
     Serial.print("Vpot= ");
-    Serial.println(values_int[ar_vpot_mean]);
+    Serial.println(vpot_filter.output());
+//    Serial.println(values_int[ar_vpot_mean]);
   }while(1);
 }
 
@@ -285,6 +287,7 @@ void elbow_calibration_menu2()
 
       int full_open_function=aux_full_open;
       vpot_max_function=aux_vpot_max;
+      
       readSensors(values_int);
       float xx_tensor_read=((values_int[ar_vpot_mean]-aux_vpot_min)*Traj_x_max)/(aux_vpot_max-aux_vpot_min)+Traj_x_min;
       float actual_angle=acos((pow(DCA,2)+pow(DCF,2)-pow(xx_tensor_read,2))/(2*DCA*DCF))*180/PI;
@@ -306,15 +309,16 @@ void elbow_calibration_menu2()
       Serial.println("Enter -1 to exit to the calibration menu");
     }
     delay(100);
-    readSensors(values_int);
-
+//    readSensors(values_int);
+    readSensors_filteronly();
     //Calculation for measure the elbow angle
 
-    x_tensor_read=((values_int[ar_vpot_mean]-aux_vpot_min)*Traj_x_max)/(vpot_max_function-aux_vpot_min)+Traj_x_min;
+    x_tensor_read=((vpot_filter.output()-aux_vpot_min)*Traj_x_max)/(vpot_max_function-aux_vpot_min)+Traj_x_min;
+//    x_tensor_read=((values_int[ar_vpot_mean]-aux_vpot_min)*Traj_x_max)/(vpot_max_function-aux_vpot_min)+Traj_x_min;
     angle_read=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor_read,2))/(2*DCA*DCF));
     Serial.print(Traj_angle);
     Serial.print(", ");
-    Serial.print(values_int[ar_vpot_mean]);
+    Serial.print(vpot_filter.output());
     Serial.print(", ");
     Serial.print(x_tensor_read);
     Serial.print(" Angle measured: ");

@@ -159,7 +159,7 @@ void setup()
 
 void selection_menu()
 {
-  Serial.println("Press c to Calibration, a for arm movement, or m to Measurement, Q for LS calibration, W to sabe parameters");
+  Serial.println("Press c to Calibration, a for arm movement, or m to Measurement, Q for LS calibration, W to save parameters");
   while (menu_var==-1||(menu_var!=99 && menu_var!=67 && menu_var!=77 && menu_var!=109 && menu_var!=97 && menu_var!=65 && menu_var!=84 && menu_var!=116 && menu_var!=81 && menu_var!=113 && menu_var!=87 && menu_var!=119))
   {
     menu_var=Serial.read();
