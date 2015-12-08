@@ -688,11 +688,11 @@ void elbow_calibration_set_to_eeprom()
       {
         // Save in EEPROM
         EEPROM.updateInt(0, full_open_elbow);
-        EEPROM.updateInt(2, full_open_compen);
+        EEPROM.updateInt(2, full_open_compen-full_open_elbow);
         EEPROM.updateInt(4, max_elbow_angle);
         EEPROM.updateInt(6, min_elbow_angle);
         EEPROM.updateInt(8, angle_vpot_max);
-        EEPROM.updateInt(10, angle_vpot_compen);
+        EEPROM.updateInt(10, angle_vpot_compen-angle_vpot_max);
         EEPROM.updateInt(12, angle_vpot_min);
 
         Serial.println("New Data Saved");
