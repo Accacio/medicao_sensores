@@ -126,7 +126,6 @@ void measurement()
     cont_frvar++;
 
     readSensors_filteronly();
-    
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);

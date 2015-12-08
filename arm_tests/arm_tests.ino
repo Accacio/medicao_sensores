@@ -106,8 +106,9 @@ float Lh=0.10;
 //definitions to calibrate control law
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law
-float LS_param_array[7] = {-2.4885,-0.20436,0.54144,0.11204,-0.4336,-7.259,8.8801};     //vector of parameters definitions obtained after LS calibration function
+float LS_param_array[7] = {-1.0233,-0.27965,0.33326,0.14631,0.17033,-3.0378,2.2897};     //vector of parameters definitions obtained after LS calibration function
 float Sgm_slope=2.5;
+float tolerance;
 
 //initialization of x_max for the extension of the arm tensor
 const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));
@@ -120,7 +121,7 @@ FilterOnePole lowpassFilter( LOWPASS, filter_frequency );
 FilterOnePole lowpassLoadCell(LOWPASS,filter_frequency);
 
 //float fs_sensor=0.1;
-float fs_sensor=0.4;
+float fs_sensor=0.2;
 FilterOnePole vpot_filter( LOWPASS, fs_sensor );
 FilterOnePole loadcell_filter( LOWPASS, fs_sensor );
 
@@ -130,12 +131,15 @@ float fs_speed=0.25;
 FilterOnePole speed_filter( LOWPASS, fs_speed );
 float fs_accel=0.1;
 FilterOnePole accel_filter( LOWPASS, fs_accel );
-float fs_hyster=0.5;
+float fs_hyster=0.4; 
 FilterOnePole h1_filter( LOWPASS, fs_hyster );
 FilterOnePole h2_filter( LOWPASS, fs_hyster );
 //float fs_theorical=0.1;
-float fs_theorical=0.4;
+float fs_theorical=5;
 FilterOnePole T_theorical_filter( LOWPASS, fs_theorical );
+
+float fs_DCCangle=10;
+FilterOnePole DCCangle_filter( LOWPASS, fs_DCCangle );
 
 Servo servooldg;
 

@@ -14,7 +14,25 @@ void arm_movement()
   //Serial.print(MAX_ELBOW_ANGLE*180/PI);
   //Serial.print(" and ");
   //Serial.println(MIN_ELBOW_ANGLE*180/PI);
-
+  Serial.println("Enter the tolerance deviation (percentage increment)");
+  tolerance=0;
+  do
+  {
+    if (Serial.available()){
+      tolerance= Serial.parseInt();
+      if(tolerance<0){
+        menu_var=-1;
+        break;
+      }
+      if (Serial.read()=='\n'){}
+      if(tolerance>1){
+        tolerance=tolerance/100;
+      }
+      Serial.println(tolerance);      
+    }
+  }while(tolerance==0);
+  Serial.println("Enter the aperture of the elbow angle desired");
+  Serial.println("Ready");
   do
   {
     if (Serial.available())
@@ -37,16 +55,24 @@ void arm_movement()
 //    Controlled_elbow_angle=collision_control(elbow_angle,Tension_measured);
 //    set_elbow_angle(Controlled_elbow_angle);
 
-    readSensors_filteronly();   
-    angle_rawfilt=read_elbow_angle(vpot_filter.output());
-    angular_measures(angle_rawfilt);
+    readSensors_filteronly();
+    angle_filter.input(read_elbow_angle(vpot_filter.output()));
+    angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
-    T_theor=Theorical_model(angle_rawfilt);
+    T_theor=Theorical_model(angle_filter.output());
+    T_theor=T_theorical_filter.output();
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    
+//    Controlled_elbow_angle=collision_control(elbow_angle_required,loadcell_rawfilt,T_theor);
     Controlled_elbow_angle=collision_control(elbow_angle_required,loadcell_rawfilt,T_theor);
+    Controlled_elbow_angle=DCCangle_filter.output();
     set_elbow_angle(Controlled_elbow_angle);
 
+//    Serial.print(PWM_value);
+//    Serial.print(",");
 //    Serial.print(loadcell_rawfilt);
+//    Serial.print(",");
+//    Serial.print(angle_rawfilt);
 //    Serial.print(",");
 //    Serial.print(T_theor);
 //    Serial.print(",");
@@ -238,13 +264,14 @@ float collision_control(float teta_ref, float Tension_measure, float T_theorical
 
   //definitions
   float et=Tension_measure-T_theorical;
-  Sgm_left_lim=LS_param_array[5];
-  Sgm_right_lim=LS_param_array[6];
+  Sgm_left_lim=LS_param_array[5]*(1+tolerance);
+  Sgm_right_lim=LS_param_array[6]*(1+tolerance);
   
   //function calculations
   float sgm_low=1-1/(1+exp(-((et+4)/Sgm_slope-Sgm_left_lim)));
   float sgm_up=1/(1+exp(-((et-4)/Sgm_slope-Sgm_right_lim)));
   float u=teta_ref+(MIN_ELBOW_ANGLE-teta_ref)*sgm_low+(MAX_ELBOW_ANGLE-teta_ref)*sgm_up;
+
 //    Serial.print(exp(et+3-Sgm_left_lim));
 //    Serial.print("|");
 //    Serial.print(teta_ref);
@@ -262,7 +289,7 @@ float collision_control(float teta_ref, float Tension_measure, float T_theorical
 //    Serial.print("|");
 //    Serial.println(u);
 //    Serial.print("|");
-
+      DCCangle_filter.input(u);
 return u;  
 }
 

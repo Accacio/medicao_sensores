@@ -9,11 +9,11 @@
 % end
 
 %settings
-cont_high=200;
+cont_high=225;
 cycles=3;
 
 Port_com='com4';
-serial_flag=0;
+
 s=serial(Port_com,'Baudrate',115200);
 if (strncmp(s.status,['closed'],4))
     ob=instrfind;
@@ -150,8 +150,8 @@ LS_parameters=inv(A_LS'*A_LS)*A_LS'*B_LS;   %LS parameters results
 Fc_LS=A_LS*LS_parameters;               % Force clamping LS equation calculation
 
 Error=Tc-Fc_LS;
-Sens_uplim=max(Error(20:end,1))*2;
-Sens_lowlim=min(Error(20:end,1))*1.25;
+Sens_uplim=max(Error(20:end,1));
+Sens_lowlim=min(Error(20:end,1));
 
 %Sending parameters to arduino
 aux_param=[num2str(LS_parameters(1))];

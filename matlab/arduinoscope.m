@@ -7,6 +7,12 @@ xmax=cycles*2*cont_high; %8000 Para 10 iterations % 2400 3
 Port_com='com4';
 
 s=serial(Port_com,'Baudrate',115200);
+if (strncmp(s.status,['closed'],4))
+    ob=instrfind;
+    fclose(ob);
+    delete(ob);
+    s=serial(Port_com,'Baudrate',115200);
+end
 fopen(s);
 
 %creation of class with principal data (is required first the transfer
@@ -136,14 +142,14 @@ end
     hold on
 
     subplot(2,2,3)
-    plot(axisx(end-11*sign(end-11):end),data2(end-11*sign(end-11):end),'b')
+    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data2(end-11*sign(end-11):end),'b')
 %    axis([0 xmax Rp_ymin Rp_ymax]);
     title('Angle')
     hold on
  
     subplot(2,2,4)
-    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data1(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end),'r',axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end)-data1(end-11*sign(end-11):end))
-    axis([0 xmax 0 50]);
+    plot(axisx(end-11*sign(end-11):end),data1(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end),'r',axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end)-data1(end-11*sign(end-11):end))
+    %axis([0 xmax 0 50]);
     title('Tension over the Load cell')
     hold on
     %plot loadcell
