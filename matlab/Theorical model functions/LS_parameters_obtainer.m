@@ -9,14 +9,25 @@
 % end
 
 %settings
-cont_high=120;
+cont_high=200;
 cycles=3;
-Port_com='com4';
 
+Port_com='com4';
+serial_flag=0;
 s=serial(Port_com,'Baudrate',115200);
+if (strncmp(s.status,['closed'],4))
+    ob=instrfind;
+    fclose(ob);
+    delete(ob);
+    s=serial(Port_com,'Baudrate',115200);
+end
+
+% if(serial_flag==0)
+%     display('Error opening the serial port, please release the serial port connected to the Arduino')
+      
 fopen(s);
 
-%initialization of variables
+%initialization of variablesis
 tmax=cycles*2*cont_high+1; %8000 Para 10 iterations % 2400 3
 t=zeros(tmax,1);
 amostra=[];
@@ -46,12 +57,18 @@ arduino_data=fscanf(s)
 fwrite(s,'Q');
 pause(1);
 
-arduino_data=fscanf(s)
-% while(arduino_data~=['Ready')
-% arduino_data=fscanf(s)
-% pause(1);
-% end
-    
+flag_exit=1;
+while(flag_exit==1)
+   
+    while(s.BytesAvailable==0)
+        pause(1)
+    end
+    arduino_data=fscanf(s);
+    if(strncmp(arduino_data,['Ready'],5))
+        flag_exit=0;
+    end
+end
+
 fprintf(s,num2str(cont_high));
 pause(1);
 
@@ -165,4 +182,3 @@ ylabel('Tension (Newtons)')
 %closing the comunication
 fclose(s);
 delete(s);
-

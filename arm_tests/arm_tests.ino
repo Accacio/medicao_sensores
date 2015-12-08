@@ -21,21 +21,21 @@
 #define CURRENT_GAIN 5.6
 #define PI 3.14
 #define G 9.8   //Gravidade
-#define const_time 100
+#define const_time 20
 //Definitions for the Load Cell
 #define LC_BIT_MIN  23
 #define LC_BIT_MAX  1023
 #define LC_NEWTON_MIN 1.475*G
 #define LC_NEWTON_MAX 50*G
 //Definitions for the elbow
-#define FULL_OPEN_ELBOW 41  // value in PWM to full open the elbow angle
-#define FULL_OPEN_COMPEN 3 // to compensante the Hysteresis in the elbow
+#define FULL_OPEN_ELBOW 42  // value in PWM to full open the elbow angle
+#define FULL_OPEN_COMPEN 2 // to compensante the Hysteresis in the elbow
 #define FULL_CLOSE_ELBOW 0  // value in PWM to close the elbow angle
 #define MAX_ELBOW_ANGLE 120*PI/180 // Max aperture of the elbow angle measure externally
 #define MIN_ELBOW_ANGLE 40*PI/180  // Min aperture of the elbow angle, measured exernally
-#define ANGLE_VPOT_MAX  165       // Value in bits of the vpot when is the maximum angle on the elbow
+#define ANGLE_VPOT_MAX  156       // Value in bits of the vpot when is the maximum angle on the elbow
 #define ANGLE_VPOT_COMPEN 6     // to compensate the Hysteresis no angle measure
-#define ANGLE_VPOT_MIN  23       // Value in bits of the vpot when is the min angle on the elbow
+#define ANGLE_VPOT_MIN  22       // Value in bits of the vpot when is the min angle on the elbow
 //Definitions for the Arm
 #define DCA 0.0575    //Distance of the arm clamping
 #define DCF 0.0475    //Distance of the forearm clamping
@@ -70,7 +70,7 @@ unsigned long angular_time[3] = {0,0,0};
 // Hysteresis function definitions
 float Pwm_array [3] = {0,0,0};
 float h1_array [3] = {0,0,0};
-float h2_array [3] = {0,0,0};
+float h2_array [3] = {1,1,1};
 //int Hyst_cont_h1=0;
 //int Hyst_cont_h2=0;
 //int Hyst_cont_down=2;
@@ -83,6 +83,7 @@ unsigned long t_time;
 unsigned long tfilter;
 int cont_high=100;
 int cont_low=100;
+int pos_actual;
 int percent_high=20;
 int flag=0;
 int cont_cycle=0;
@@ -113,17 +114,23 @@ float filter_frequency=0.25;
 FilterOnePole lowpassFilter( LOWPASS, filter_frequency );
 FilterOnePole lowpassLoadCell(LOWPASS,filter_frequency);
 
-float filter2=0.1;
-FilterOnePole vpot_filter( LOWPASS, filter2 );
-FilterOnePole loadcell_filter( LOWPASS, filter2 );
-FilterOnePole T_theorical_filter( LOWPASS, 1 );
-float fs_speed=0.05;
+//float fs_sensor=0.1;
+float fs_sensor=0.4;
+FilterOnePole vpot_filter( LOWPASS, fs_sensor );
+FilterOnePole loadcell_filter( LOWPASS, fs_sensor );
+
+float fs_angle=1;
+FilterOnePole angle_filter( LOWPASS, fs_angle );
+float fs_speed=0.25;
 FilterOnePole speed_filter( LOWPASS, fs_speed );
-float fs_accel=0.01;
+float fs_accel=0.1;
 FilterOnePole accel_filter( LOWPASS, fs_accel );
-float fs_hyster=0.05;
+float fs_hyster=0.5;
 FilterOnePole h1_filter( LOWPASS, fs_hyster );
 FilterOnePole h2_filter( LOWPASS, fs_hyster );
+//float fs_theorical=0.1;
+float fs_theorical=0.4;
+FilterOnePole T_theorical_filter( LOWPASS, fs_theorical );
 
 Servo servooldg;
 
@@ -139,6 +146,10 @@ void setup()
   servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
   Serial.begin(115200);
+  //initializing hysteresis function filters
+  h1_filter.input(0);
+  h2_filter.input(1);
+
 }
 
 void selection_menu()

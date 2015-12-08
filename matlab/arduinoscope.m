@@ -1,8 +1,9 @@
 clear
 %settings
-cont_high=120;
+cont_high=200;
+cycles=2;
 percent_high=95;
-xmax=3*120*2; %8000 Para 10 iterations % 2400 3
+xmax=cycles*2*cont_high; %8000 Para 10 iterations % 2400 3
 Port_com='com4';
 
 s=serial(Port_com,'Baudrate',115200);
@@ -98,9 +99,8 @@ data2(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
  data6(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
  position=7;
  data7(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
-%  position=8;
-%  data8(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
-sampl_time(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
+ position=8;
+ sampl_time(i,1)=str2double(out(commas(position)+1:commas(position+1)-1));
 
 
 %vref(i,1)=str2double(out(commas(1)+1:commas(2)-1));
@@ -142,7 +142,7 @@ end
     hold on
  
     subplot(2,2,4)
-    plot(axisx(end-11*sign(end-11):end),data1(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end),'r',axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end)-data1(end-11*sign(end-11):end))
+    plot(axisx(end-11*sign(end-11):end),PWM_value(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data1(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end),'r',axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end)-data1(end-11*sign(end-11):end))
     axis([0 xmax 0 50]);
     title('Tension over the Load cell')
     hold on

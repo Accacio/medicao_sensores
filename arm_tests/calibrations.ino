@@ -324,29 +324,106 @@ void elbow_calibration_menu2()
 
 void LS_parameters_finder ()
 {
+  int values_int[ar_last];
+  int equal_mean;
+  int register_vpot[comparador];
+  
   float angle_rawfilt;
   float loadcell_rawfilt;
   float angle_ant=0;
   cont_high = cont_low=0;
     
   //initializing the position of the test
-  do{    
-  angle_ant=angle_rawfilt;
-  servooldg.write(FULL_CLOSE_ELBOW);
-  delay(500);
-  readSensors_filteronly();
-  angle_rawfilt=read_elbow_angle(vpot_filter.output());
-  }while(angle_rawfilt!=angle_ant);
-  Serial.println("Ready");
+//  do{
+//    PWM_value=0;
+//    servooldg.write(PWM_value);
+//    delay(100);    
+//    angle_ant=angle_rawfilt;
+//    readSensors_filteronly();
+//    angle_rawfilt=read_elbow_angle(vpot_filter.output());
+//    hysteresis_function(PWM_value);
+//  }while(angle_rawfilt!=angle_ant);
+
+  do
+  {
+    PWM_value=0;
+    servooldg.write(PWM_value);
+    delay(100);
+    hysteresis_function(PWM_value);
+    readSensors(values_int);
+    equal_mean=0;
+    for(int i=0;i<comparador;i++)
+    {
+      equal_mean+=register_vpot[i];
+    }
+    equal_mean=equal_mean/comparador;
+
+    for(int i=1;i<comparador;i++)
+    {
+      register_vpot[i-1]=register_vpot[i];
+    }
+    register_vpot[comparador-1]=values_int[ar_vpot_mean];
+  }while(values_int[ar_vpot_mean]!=equal_mean);
+
   //initializing the speed and aceleration arrays
+  pos_actual=40;
   readSensors_filteronly();
   angular_measures(read_elbow_angle(vpot_filter.output()));
   readSensors_filteronly();
   angular_measures(read_elbow_angle(vpot_filter.output()));
 
+
+  cont_cycle=0;
+  cont_high=cont_low=20;
+  do{
+    openclosearmsquarewave();
+    cont_cycle++;
+    cont_frvar++;
+
+    readSensors_filteronly();
+    angle_filter.input(read_elbow_angle(vpot_filter.output()));
+    angular_measures(angle_filter.output());
+    hysteresis_function(PWM_value);
+    loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    
+    do{
+      delayMicroseconds(500);
+      t1_time=millis();
+      t_time=t1_time-t0_time;
+    }while(t_time<const_time);
+    
+    t0_time=t1_time;
+  }while(cont_cycle<41);
+
+  //repose cycle
+  cont_cycle=0;
+  cont_high=cont_low=20;
+  do{
+    cont_cycle++;
+
+    readSensors_filteronly();
+    angle_filter.input(read_elbow_angle(vpot_filter.output()));
+    angular_measures(angle_filter.output());
+    hysteresis_function(PWM_value);
+    loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    
+    do{
+      delayMicroseconds(500);
+      t1_time=millis();
+      t_time=t1_time-t0_time;
+    }while(t_time<const_time);
+    
+    t0_time=t1_time;
+  }while(cont_cycle<51);
+
+
+
+  //begin the measures to send for the LS procediment
+  Serial.println("Ready");
   cont_cycle=0;
   cont_frvar=0;
   t0_time=millis();
+  cont_high=0;
 
   //Runing cycles of measures
   do{
@@ -368,8 +445,8 @@ void LS_parameters_finder ()
 
       tfilter=millis();
       readSensors_filteronly();
-      angle_rawfilt=read_elbow_angle(vpot_filter.output());
-      angular_measures(angle_rawfilt);
+      angle_filter.input(read_elbow_angle(vpot_filter.output()));
+      angular_measures(angle_filter.output());
       hysteresis_function(PWM_value);
       loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
       tfilter=millis()-tfilter;
@@ -379,7 +456,7 @@ void LS_parameters_finder ()
       Serial.print(',');
       Serial.print(loadcell_rawfilt);
       Serial.print(',');
-      Serial.print(angle_rawfilt*180/PI);
+      Serial.print(angle_filter.output()*180/PI);
       Serial.print(',');
       Serial.print(speed_filter.output());
       Serial.print(',');

@@ -99,7 +99,7 @@ void set_elbow_angle(float angle_set)
   x_tensor=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(aux_angle))-Traj_x_min;
   PWM_value=(x_tensor*full_open_function)/Traj_x_max;
   servooldg.write(PWM_value);
-  //delay(20);
+  delay(5);
   }
   else
   {
