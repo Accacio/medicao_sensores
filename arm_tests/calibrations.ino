@@ -287,7 +287,7 @@ void elbow_calibration_menu2()
 
       int full_open_function=aux_full_open;
       vpot_max_function=aux_vpot_max;
-      
+
       readSensors(values_int);
       float xx_tensor_read=((values_int[ar_vpot_mean]-aux_vpot_min)*Traj_x_max)/(aux_vpot_max-aux_vpot_min)+Traj_x_min;
       float actual_angle=acos((pow(DCA,2)+pow(DCF,2)-pow(xx_tensor_read,2))/(2*DCA*DCF))*180/PI;
@@ -331,7 +331,7 @@ void LS_parameters_finder ()
   int values_int[ar_last];
   int equal_mean;
   int register_vpot[comparador];
-  
+
   float angle_rawfilt;
   float loadcell_rawfilt;
   float angle_ant=0;
@@ -342,7 +342,7 @@ void LS_parameters_finder ()
 //  do{
 //    PWM_value=0;
 //    servooldg.write(PWM_value);
-//    delay(100);    
+//    delay(100);
 //    angle_ant=angle_rawfilt;
 //    readSensors_filteronly();
 //    angle_rawfilt=read_elbow_angle(vpot_filter.output());
@@ -390,13 +390,13 @@ void LS_parameters_finder ()
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-    
+
     do{
       delayMicroseconds(500);
       t1_time=millis();
       t_time=t1_time-t0_time;
     }while(t_time<const_time);
-    
+
     t0_time=t1_time;
   }while(cont_cycle<41);
 
@@ -411,13 +411,13 @@ void LS_parameters_finder ()
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-    
+
     do{
       delayMicroseconds(500);
       t1_time=millis();
       t_time=t1_time-t0_time;
     }while(t_time<const_time);
-    
+
     t0_time=t1_time;
   }while(cont_cycle<51);
 
@@ -527,6 +527,111 @@ void LS_parameters_saver()
 
 }
 
+void LS_parameters_set_to_eeprom()
+{
+  LS_param_array[0] =   0;
+  float lsparam0;
+  float lsparam1;
+  float lsparam2;
+  float lsparam3;
+  float lsparam4;
+  float lsparam5;
+  float lsparam6;
+
+  //Ask user input to save in EEPROM
+  Serial.println("Enter the parameters of the theorical model Equation");
+  Serial.println("Order: I, F. Friction, F. Weight, H1, H2, Neg. collision limit, Posit. collision limit.");
+  do
+  {
+    // Treat input
+    if (Serial.available())
+    {
+      lsparam0 = Serial.parseFloat();
+      if(LS_param_array[0]<0)
+      {
+        break;
+      }
+      lsparam1 = Serial.parseFloat();
+      lsparam2 = Serial.parseFloat();
+      lsparam3 = Serial.parseFloat();
+      lsparam4 = Serial.parseFloat();
+      lsparam5 = Serial.parseFloat();
+      lsparam6 = Serial.parseFloat();
+
+      if (Serial.read()=='\n'){}
+      Serial.println("Are you certain these are the values you want to save in EEPROM? (Y/N)");
+      Serial.print(lsparam0);
+      Serial.print(',');
+      Serial.print(lsparam1);
+      Serial.print(',');
+      Serial.print(lsparam2);
+      Serial.print(',');
+      Serial.print(lsparam3);
+      Serial.print(',');
+      Serial.print(lsparam4);
+      Serial.print(',');
+      Serial.print(lsparam5);
+      Serial.print(',');
+      Serial.println(lsparam6);
+
+      while (menu_var!=89 && menu_var!=121 && menu_var!=78 && menu_var!=110)
+      {
+        menu_var=Serial.read();
+      }
+
+      if(menu_var==89 || menu_var==121)
+      {
+        // Save in EEPROM
+        EEPROM.updateInt(14, lsparam0);
+        EEPROM.updateInt(18, lsparam1);
+        EEPROM.updateInt(22, lsparam2);
+        EEPROM.updateInt(26, lsparam3);
+        EEPROM.updateInt(30, lsparam4);
+        EEPROM.updateInt(34, lsparam5);
+        EEPROM.updateInt(38, lsparam6);
+
+        Serial.println("New Data Saved");
+        // Read values saved in EEPROM
+        LS_param_array[0]  = EEPROM.readInt(14);
+        LS_param_array[1]  = EEPROM.readInt(18);
+        LS_param_array[3]  = EEPROM.readInt(22);
+        LS_param_array[2]  = EEPROM.readInt(26);
+        LS_param_array[4]  = EEPROM.readInt(30);
+        LS_param_array[5]  = EEPROM.readInt(34);
+        LS_param_array[6]  = EEPROM.readInt(38);
+        Serial.println("New Data Loaded");
+        Serial.println("");
+        break;
+      }
+
+      if(menu_var==78 || menu_var==110)
+      {
+        Serial.println("Enter the parameters of the theorical model Equation");
+        Serial.println("Order: I, F. Friction, F. Weight, H1, H2, Neg. collision limit, Posit. collision limit.");
+        continue;
+      }
+    }
+  }while(1);
+  menu_var=-1;
+  Serial.print(LS_param_array[0]);
+  Serial.print(',');
+  Serial.print(LS_param_array[1]);
+  Serial.print(',');
+  Serial.print(LS_param_array[2]);
+  Serial.print(',');
+  Serial.print(LS_param_array[3]);
+  Serial.print(',');
+  Serial.print(LS_param_array[4]);
+  Serial.print(',');
+  Serial.print(LS_param_array[5]);
+  Serial.print(',');
+  Serial.println(LS_param_array[6]);
+
+}
+
+
+
+
 
 void elbow_calibration_set_to_eeprom()
 {
@@ -560,7 +665,7 @@ void elbow_calibration_set_to_eeprom()
 
 
       if (Serial.read()=='\n'){}
-      Serial.println("Are you certain these are the values you want to save in EEPROM? (y/n)");
+      Serial.println("Are you certain these are the values you want to save in EEPROM? (Y/N)");
       Serial.print(full_open_elbow);
       Serial.print(',');
       Serial.print(full_open_compen);

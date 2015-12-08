@@ -106,7 +106,14 @@ float Lh=0.10;
 //definitions to calibrate control law
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law
-float LS_param_array[7] = {-2.4885,-0.20436,0.54144,0.11204,-0.4336,-7.259,8.8801};     //vector of parameters definitions obtained after LS calibration function
+float LS_param_array[7]   //= {-2.4885,-0.20436,0.54144,0.11204,-0.4336,-7.259,8.8801};     //vector of parameters definitions obtained after LS calibration function
+LS_param_array[0]=EEPROM.readFloat(14);
+LS_param_array[1]=EEPROM.readFloat(18);
+LS_param_array[2]=EEPROM.readFloat(22);
+LS_param_array[3]=EEPROM.readFloat(26);
+LS_param_array[4]=EEPROM.readFloat(30);
+LS_param_array[5]=EEPROM.readFloat(34);
+LS_param_array[6]=EEPROM.readFloat(38);
 float Sgm_slope=2.5;
 
 //initialization of x_max for the extension of the arm tensor
