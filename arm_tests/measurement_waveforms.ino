@@ -4,19 +4,19 @@ void openclosearmsquarewave()
 {
   if (cont_cycle%(cont_high+cont_low)<cont_high)
   {
-//    PWM_value=FULL_OPEN_ELBOW;
-//   set_elbow_angle(MAX_ELBOW_ANGLE);
+    //    PWM_value=FULL_OPEN_ELBOW;
+    //   set_elbow_angle(MAX_ELBOW_ANGLE);
      float pos_required=120;
      ramp(pos_required);
-     
+
   }
 
   if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
   {
      float pos_required=40;
      ramp(pos_required);
-//   set_elbow_angle(MIN_ELBOW_ANGLE);
-//    PWM_value=FULL_CLOSE_ELBOW;
+     //   set_elbow_angle(MIN_ELBOW_ANGLE);
+     //    PWM_value=FULL_CLOSE_ELBOW;
   }
 }
 
@@ -113,7 +113,7 @@ void measurement()
   angular_measures(read_elbow_angle(vpot_filter.output()));
   readSensors_filteronly();
   angular_measures(read_elbow_angle(vpot_filter.output()));
-// angular_measures(read_elbow_angle(values_int[ar_vpot_mean]));
+  // angular_measures(read_elbow_angle(values_int[ar_vpot_mean]));
   cont_cycle=0;
   cont_frvar=0;
   t0_time=millis();
@@ -126,7 +126,7 @@ void measurement()
     cont_frvar++;
 
     readSensors_filteronly();
-    
+
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
@@ -178,16 +178,16 @@ void measurement()
 
 
 
- //   tfilter=millis();
+    //   tfilter=millis();
     readSensors_filteronly();
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
     T_theor=Theorical_model(angle_filter.output());
     T_theor=T_theorical_filter.output();
-   
+
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-//    tfilter=millis()-tfilter;
+    //    tfilter=millis()-tfilter;
 
 
     //Sending information over serial

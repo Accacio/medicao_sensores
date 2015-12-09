@@ -14,7 +14,6 @@
 #define y_accel A9
 #define z_accel A10
 
-
 // Constants
 #define MPOS_DC 32//29// xxx
 #define MPOS_MAX 619//604 //668
@@ -32,20 +31,19 @@
 //Definitions for the elbow
 
 //Utilisar read
-int FULL_OPEN_ELBOW   = EEPROM.readInt(0);   // 41;  // value in PWM to full open the elbow angle
-int FULL_OPEN_COMPEN  = EEPROM.readInt(2);  // 3 ;// to compensante the Hysteresis in the elbow
-int FULL_CLOSE_ELBOW  = 0 ;           // value in PWM to close the elbow angle
+int   FULL_OPEN_ELBOW   = EEPROM.readInt(0);   // 41;  // value in PWM to full open the elbow angle
+int   FULL_OPEN_COMPEN  = EEPROM.readInt(2);  // 3 ;// to compensante the Hysteresis in the elbow
+int   FULL_CLOSE_ELBOW  = 0 ;           // value in PWM to close the elbow angle
 float MAX_ELBOW_ANGLE = EEPROM.readInt(4)*PI/180;  //120*PI/180;   // Max aperture of the elbow angle measure externally
 float MIN_ELBOW_ANGLE = EEPROM.readInt(6)*PI/180;  //40*PI/180;    // Min aperture of the elbow angle, measured exernally
-int ANGLE_VPOT_MAX    = EEPROM.readInt(8);  // 165 ;      // Value in bits of the vpot when is the maximum angle on the elbow
-int ANGLE_VPOT_COMPEN = EEPROM.readInt(10);  // 6 ;    // to compensate the Hysteresis no angle measure
-int ANGLE_VPOT_MIN    = EEPROM.readInt(12);  // 23  ;     // Value in bits of the vpot when is the min angle on the elbow
+int   ANGLE_VPOT_MAX    = EEPROM.readInt(8);  // 165 ;      // Value in bits of the vpot when is the maximum angle on the elbow
+int   ANGLE_VPOT_COMPEN = EEPROM.readInt(10);  // 6 ;    // to compensate the Hysteresis no angle measure
+int   ANGLE_VPOT_MIN    = EEPROM.readInt(12);  // 23  ;     // Value in bits of the vpot when is the min angle on the elbow
 
 //Definitions for the Arm
 #define DCA 0.0575    //Distance of the arm clamping
 #define DCF 0.0475    //Distance of the forearm clamping
 #define DCMF 0.682   //Forearm center of mass
-
 
 enum sensor_array
 {
@@ -65,7 +63,6 @@ enum sensor_array
   ar_last,
 };
 
-
 //angular definitions
 float angle_array [3] = {0,0,0};
 float speed_array [3] = {0,0,0};
@@ -81,7 +78,6 @@ float h2_array [3] = {1,1,1};
 //int Hyst_cont_down=2;
 //int Hyst_cont_up=2;
 
-
 unsigned long t0_time;
 unsigned long t1_time;
 unsigned long t_time;
@@ -96,7 +92,6 @@ int cont_frvar=0;
 float PWM_value=FULL_OPEN_ELBOW;
 int comparador=5;
 int menu_var=-1;
-
 
 //subject defintions
 float La=0.28;
@@ -146,14 +141,10 @@ FilterOnePole T_theorical_filter( LOWPASS, fs_theorical );
 
 Servo servooldg;
 
-
-
-
-
 void setup()
 {
 
-//analogReference(INTERNAL2V56);
+  //analogReference(INTERNAL2V56);
   servooldg.attach(2,MPOS_DC,970); //20, 965
   servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
