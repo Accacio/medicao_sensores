@@ -121,7 +121,7 @@ FilterOnePole lowpassFilter( LOWPASS, filter_frequency );
 FilterOnePole lowpassLoadCell(LOWPASS,filter_frequency);
 
 //float fs_sensor=0.1;
-float fs_sensor=0.2;
+float fs_sensor=0.1;
 FilterOnePole vpot_filter( LOWPASS, fs_sensor );
 FilterOnePole loadcell_filter( LOWPASS, fs_sensor );
 

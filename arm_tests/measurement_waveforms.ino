@@ -22,15 +22,17 @@ void openclosearmsquarewave()
 
 void ramp(int pos_required)
 {
-  if (pos_actual<pos_required)
+  pos_actual=int(angle_filter.output()*180/PI+0.5);
+  //Serial.println(pos_actual);
+  if (pos_actual+5<pos_required)
   {
-    pos_actual++;
+    pos_actual=pos_actual+20;
   }
   else
   {
-    if(pos_actual>pos_required)
+    if(pos_actual-5>pos_required)
     {
-      pos_actual--;
+      pos_actual=pos_actual-20;
     }
   }
   set_elbow_angle(pos_actual*PI/180);
@@ -90,7 +92,7 @@ void measurement()
   int equal_mean;
   do
   {
-    PWM_value=0;
+    PWM_value=MIN_ELBOW_ANGLE;
     servooldg.write(PWM_value);
     delay(100);
     hysteresis_function(PWM_value);
@@ -108,6 +110,7 @@ void measurement()
     }
     register_vpot[comparador-1]=values_int[ar_vpot_mean];
   }while(values_int[ar_vpot_mean]!=equal_mean);
+  
   pos_actual=40;
   readSensors_filteronly();
   angular_measures(read_elbow_angle(vpot_filter.output()));
@@ -118,7 +121,7 @@ void measurement()
   cont_frvar=0;
   t0_time=millis();
 
-  cont_high=20;
+  cont_high=100;
   do
   {
     openclosearmsquarewave();
@@ -205,6 +208,8 @@ void measurement()
     Serial.print(h2_filter.output());
     Serial.print(',');
     Serial.print(T_theor);
+    Serial.print(',');
+    Serial.print(pos_actual);
     Serial.print(',');
     Serial.print(t_time);
     Serial.println(',');

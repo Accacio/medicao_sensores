@@ -215,7 +215,7 @@ void elbow_calibration_menu1()
     readSensors_filteronly();
 //    readSensors(values_int);
     Serial.print("Vpot= ");
-    Serial.println(vpot_filter.output());
+    Serial.println(int(vpot_filter.output()+0.5));
 //    Serial.println(values_int[ar_vpot_mean]);
   }while(1);
 }
