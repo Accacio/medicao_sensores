@@ -331,6 +331,111 @@ void elbow_calibration_menu2()
   }while(1);
 }
 
+void elbow_calibration_set_to_eeprom()
+{
+  int full_open_elbow   ;
+  int full_open_compen  ;
+  int max_elbow_angle   ;
+  int min_elbow_angle   ;
+  int angle_vpot_max    ;
+  int angle_vpot_compen ;
+  int angle_vpot_min    ;
+
+  //Ask user input to save in EEPROM
+  Serial.println("Insert the values you want to save to EEPROM in the following order Or '-1' to exit:");
+  Serial.println("full_open_elbow,full_open_compen,max_elbow_angle(in degrees),min_elbow_angle(in degrees),angle_vpot_max,angle_vpot_compen,angle_vpot_min");
+  do
+  {
+    // Treat input
+    if (Serial.available())
+    {
+      full_open_elbow   = Serial.parseInt();
+      if(full_open_elbow<0)
+      {
+        break;
+      }
+      full_open_compen  = Serial.parseInt();
+      max_elbow_angle   = Serial.parseInt();
+      min_elbow_angle   = Serial.parseInt();
+      angle_vpot_max    = Serial.parseInt();
+      angle_vpot_compen = Serial.parseInt();
+      angle_vpot_min    = Serial.parseInt();
+
+
+      if (Serial.read()=='\n'){}
+      Serial.println("Are you certain these are the values you want to save in EEPROM? (Y/N)");
+      Serial.print(full_open_elbow);
+      Serial.print(',');
+      Serial.print(full_open_compen);
+      Serial.print(',');
+      Serial.print(max_elbow_angle);
+      Serial.print(',');
+      Serial.print(min_elbow_angle);
+      Serial.print(',');
+      Serial.print(angle_vpot_max);
+      Serial.print(',');
+      Serial.print(angle_vpot_compen);
+      Serial.print(',');
+      Serial.println(angle_vpot_min);
+
+      while (menu_var!=89 && menu_var!=121 && menu_var!=78 && menu_var!=110)
+      {
+        menu_var=Serial.read();
+      }
+      if(menu_var==89 || menu_var==121)
+      {
+        // Save in EEPROM
+        EEPROM.updateInt(0, full_open_elbow);
+        EEPROM.updateInt(2, full_open_compen-full_open_elbow);
+        EEPROM.updateInt(4, max_elbow_angle);
+        EEPROM.updateInt(6, min_elbow_angle);
+        EEPROM.updateInt(8, angle_vpot_max);
+        EEPROM.updateInt(10, angle_vpot_compen-angle_vpot_max);
+        EEPROM.updateInt(12, angle_vpot_min);
+
+        Serial.println("New Data Saved");
+        // Read values saved in EEPROM
+        FULL_OPEN_ELBOW   = EEPROM.readInt(0);
+        FULL_OPEN_COMPEN  = EEPROM.readInt(2);
+        MAX_ELBOW_ANGLE   = EEPROM.readInt(4)*PI/180;
+        MIN_ELBOW_ANGLE   = EEPROM.readInt(6)*PI/180;
+        ANGLE_VPOT_MAX    = EEPROM.readInt(8);
+        ANGLE_VPOT_COMPEN = EEPROM.readInt(10);
+        ANGLE_VPOT_MIN    = EEPROM.readInt(12);
+        Serial.println("New Data Loaded");
+        Serial.println("");
+        break;
+      }
+      if(menu_var==78 || menu_var==110)
+      {
+        Serial.println("Insert the values you want to save to EEPROM in the following order:");
+        Serial.println("full_open_elbow,full_open_compen,max_elbow_angle(in degrees),min_elbow_angle(in degrees),angle_vpot_max,angle_vpot_compen,angle_vpot_min");
+        menu_var=0;
+        continue;
+      }
+    }
+  }while(1);
+  menu_var=0;
+}
+
+void show_calibration_eeprom_values();
+{
+  Serial.println("Current Values for elbow calibration saved in EEPROM are:");
+  Serial.print(FULL_OPEN_ELBOW);
+  Serial.print(',');
+  Serial.print(FULL_OPEN_COMPEN);
+  Serial.print(',');
+  Serial.print(MAX_ELBOW_ANGLE);
+  Serial.print(',');
+  Serial.print(MIN_ELBOW_ANGLE);
+  Serial.print(',');
+  Serial.print(ANGLE_VPOT_MAX);
+  Serial.print(',');
+  Serial.print(ANGLE_VPOT_COMPEN);
+  Serial.print(',');
+  Serial.println(ANGLE_VPOT_MIN);
+}
+
 void LS_parameters_finder ()
 {
   int values_int[ar_last];
@@ -620,6 +725,7 @@ void LS_parameters_set_to_eeprom()
       {
         Serial.println("Enter the parameters of the theorical model Equation");
         Serial.println("Order: I, F. Friction, F. Weight, H1, H2, Neg. collision limit, Posit. collision limit.");
+        menu_var=-1;
         continue;
       }
     }
@@ -639,109 +745,4 @@ void LS_parameters_set_to_eeprom()
   Serial.print(',');
   Serial.println(LS_param_array[6]);
 
-}
-
-void elbow_calibration_set_to_eeprom()
-{
-  int full_open_elbow   ;
-  int full_open_compen  ;
-  int max_elbow_angle   ;
-  int min_elbow_angle   ;
-  int angle_vpot_max    ;
-  int angle_vpot_compen ;
-  int angle_vpot_min    ;
-
-  //Ask user input to save in EEPROM
-  Serial.println("Insert the values you want to save to EEPROM in the following order Or '-1' to exit:");
-  Serial.println("full_open_elbow,full_open_compen,max_elbow_angle(in degrees),min_elbow_angle(in degrees),angle_vpot_max,angle_vpot_compen,angle_vpot_min");
-  do
-  {
-    // Treat input
-    if (Serial.available())
-    {
-      full_open_elbow   = Serial.parseInt();
-      if(full_open_elbow<0)
-      {
-        break;
-      }
-      full_open_compen  = Serial.parseInt();
-      max_elbow_angle   = Serial.parseInt();
-      min_elbow_angle   = Serial.parseInt();
-      angle_vpot_max    = Serial.parseInt();
-      angle_vpot_compen = Serial.parseInt();
-      angle_vpot_min    = Serial.parseInt();
-
-
-      if (Serial.read()=='\n'){}
-      Serial.println("Are you certain these are the values you want to save in EEPROM? (Y/N)");
-      Serial.print(full_open_elbow);
-      Serial.print(',');
-      Serial.print(full_open_compen);
-      Serial.print(',');
-      Serial.print(max_elbow_angle);
-      Serial.print(',');
-      Serial.print(min_elbow_angle);
-      Serial.print(',');
-      Serial.print(angle_vpot_max);
-      Serial.print(',');
-      Serial.print(angle_vpot_compen);
-      Serial.print(',');
-      Serial.println(angle_vpot_min);
-
-      while (menu_var!=89 && menu_var!=121 && menu_var!=78 && menu_var!=110)
-      {
-        menu_var=Serial.read();
-      }
-      if(menu_var==89 || menu_var==121)
-      {
-        // Save in EEPROM
-        EEPROM.updateInt(0, full_open_elbow);
-        EEPROM.updateInt(2, full_open_compen-full_open_elbow);
-        EEPROM.updateInt(4, max_elbow_angle);
-        EEPROM.updateInt(6, min_elbow_angle);
-        EEPROM.updateInt(8, angle_vpot_max);
-        EEPROM.updateInt(10, angle_vpot_compen-angle_vpot_max);
-        EEPROM.updateInt(12, angle_vpot_min);
-
-        Serial.println("New Data Saved");
-        // Read values saved in EEPROM
-        FULL_OPEN_ELBOW   = EEPROM.readInt(0);
-        FULL_OPEN_COMPEN  = EEPROM.readInt(2);
-        MAX_ELBOW_ANGLE   = EEPROM.readInt(4)*PI/180;
-        MIN_ELBOW_ANGLE   = EEPROM.readInt(6)*PI/180;
-        ANGLE_VPOT_MAX    = EEPROM.readInt(8);
-        ANGLE_VPOT_COMPEN = EEPROM.readInt(10);
-        ANGLE_VPOT_MIN    = EEPROM.readInt(12);
-        Serial.println("New Data Loaded");
-        Serial.println("");
-        break;
-      }
-      if(menu_var==78 || menu_var==110)
-      {
-        Serial.println("Insert the values you want to save to EEPROM in the following order:");
-        Serial.println("full_open_elbow,full_open_compen,max_elbow_angle(in degrees),min_elbow_angle(in degrees),angle_vpot_max,angle_vpot_compen,angle_vpot_min");
-        menu_var=0;
-        continue;
-      }
-    }
-  }while(1);
-  menu_var=0;
-}
-
-void show_calibration_eeprom_values();
-{
-  Serial.println("Current Values for elbow calibration saved in EEPROM are:");
-  Serial.print(FULL_OPEN_ELBOW);
-  Serial.print(',');
-  Serial.print(FULL_OPEN_COMPEN);
-  Serial.print(',');
-  Serial.print(MAX_ELBOW_ANGLE);
-  Serial.print(',');
-  Serial.print(MIN_ELBOW_ANGLE);
-  Serial.print(',');
-  Serial.print(ANGLE_VPOT_MAX);
-  Serial.print(',');
-  Serial.print(ANGLE_VPOT_COMPEN);
-  Serial.print(',');
-  Serial.println(ANGLE_VPOT_MIN);
 }
