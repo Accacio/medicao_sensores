@@ -9,7 +9,7 @@
 % end
 
 %settings
-cont_high=500;
+cont_high=300;
 cycles=3;
 
 Port_com='com4';

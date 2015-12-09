@@ -1,6 +1,6 @@
 clear
 %settings
-cont_high=200;
+cont_high=300;
 cycles=2;
 percent_high=95;
 xmax=cycles*2*cont_high; %8000 Para 10 iterations % 2400 3
@@ -148,7 +148,7 @@ end
     hold on
  
     subplot(2,2,4)
-    plot(axisx(end-11*sign(end-11):end),data1(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end),'r',axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end)-data1(end-11*sign(end-11):end))
+    plot(axisx(end-11*sign(end-11):end),data1(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end),axisx(end-11*sign(end-11):end),data7(end-11*sign(end-11):end)-data1(end-11*sign(end-11):end))
     %axis([0 xmax 0 50]);
     title('Tension over the Load cell')
     hold on

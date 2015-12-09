@@ -6,15 +6,15 @@ void openclosearmsquarewave()
   {
 //    PWM_value=FULL_OPEN_ELBOW;
 //   set_elbow_angle(MAX_ELBOW_ANGLE);
-     float pos_required=120;
-     ramp(pos_required);
+     pos_required=120;
+//     ramp(pos_required);
      
   }
 
   if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
   {
-     float pos_required=40;
-     ramp(pos_required);
+     pos_required=40;
+//     ramp(pos_required);
 //   set_elbow_angle(MIN_ELBOW_ANGLE);
 //    PWM_value=FULL_CLOSE_ELBOW;
   }
@@ -22,17 +22,16 @@ void openclosearmsquarewave()
 
 void ramp(int pos_required)
 {
-  pos_actual=int(angle_filter.output()*180/PI+0.5);
   //Serial.println(pos_actual);
-  if (pos_actual+5<pos_required)
+  if (pos_actual<pos_required)
   {
-    pos_actual=pos_actual+20;
+      pos_actual++;
   }
   else
   {
-    if(pos_actual-5>pos_required)
+    if(pos_actual>pos_required)
     {
-      pos_actual=pos_actual-20;
+      pos_actual--;
     }
   }
   set_elbow_angle(pos_actual*PI/180);
@@ -111,11 +110,15 @@ void measurement()
     register_vpot[comparador-1]=values_int[ar_vpot_mean];
   }while(values_int[ar_vpot_mean]!=equal_mean);
   
-  pos_actual=40;
+
   readSensors_filteronly();
-  angular_measures(read_elbow_angle(vpot_filter.output()));
+  angle_filter.input(read_elbow_angle(vpot_filter.output()));
+  angular_measures(angle_filter.output());
   readSensors_filteronly();
-  angular_measures(read_elbow_angle(vpot_filter.output()));
+  angle_filter.input(read_elbow_angle(vpot_filter.output()));
+  angular_measures(angle_filter.output());
+  pos_actual=int(angle_filter.output()*180/PI+0.5);;
+
 // angular_measures(read_elbow_angle(values_int[ar_vpot_mean]));
   cont_cycle=0;
   cont_frvar=0;
@@ -178,9 +181,15 @@ void measurement()
     //loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
     //loadcell_mean=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
 
-
-
- //   tfilter=millis();
+    if(pos_actual<pos_required){
+      pos_actual++;
+    }
+    else{
+      if(pos_actual>pos_required){
+        pos_actual--;
+      }
+    }
+    
     readSensors_filteronly();
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
@@ -189,9 +198,10 @@ void measurement()
     T_theor=T_theorical_filter.output();
    
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-//    tfilter=millis()-tfilter;
 
+    set_elbow_angle(pos_actual*PI/180);
 
+  
     //Sending information over serial
     Serial.print(PWM_value);
     Serial.print(',');
@@ -208,8 +218,6 @@ void measurement()
     Serial.print(h2_filter.output());
     Serial.print(',');
     Serial.print(T_theor);
-    Serial.print(',');
-    Serial.print(pos_actual);
     Serial.print(',');
     Serial.print(t_time);
     Serial.println(',');
