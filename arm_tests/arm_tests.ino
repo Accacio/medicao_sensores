@@ -215,7 +215,7 @@ void loop()
       break;
     case 97:
     case 65:
-      arm_movement();
+      elbow_menu_movement();
       break;
     case 81:
     case 113:
