@@ -158,6 +158,7 @@ void calibrate_elbow_angle()
     Serial.println("  1) Free movement of elbow PWM bits, and measures");
     Serial.println("  2) Confirmation to test choosen values for elbow angle movement calibration");
     Serial.println("  3) Send Calibration values to EEPROM");
+    Serial.println("  4) Show values saved on EEPROM");
     Serial.println(" -1) To exit calibration tests");
     int menu_value=0;
     do
@@ -183,6 +184,9 @@ void calibrate_elbow_angle()
         break;
       case 3:
         elbow_calibration_set_to_eeprom();
+        break;
+      case 4:
+        show_calibration_eeprom_values();
         break;
     }
   }while(1);
@@ -213,10 +217,10 @@ void elbow_calibration_menu1()
       Serial.println("Enter -1 to exit to the calibration menu");
     }
     readSensors_filteronly();
-//    readSensors(values_int);
+    //    readSensors(values_int);
     Serial.print("Vpot= ");
-    Serial.println(int(vpot_filter.output()+0.5));
-//    Serial.println(values_int[ar_vpot_mean]);
+    Serial.println(vpot_filter.output());
+    //    Serial.println(values_int[ar_vpot_mean]);
   }while(1);
 }
 
@@ -250,7 +254,8 @@ void elbow_calibration_menu2()
     {
 
       aux_full_open= Serial.parseInt();
-      if(aux_full_open<0){
+      if(aux_full_open<0)
+      {
         break;
       }
       auxbit_compen= Serial.parseInt();
@@ -287,7 +292,7 @@ void elbow_calibration_menu2()
 
       int full_open_function=aux_full_open;
       vpot_max_function=aux_vpot_max;
-      
+
       readSensors(values_int);
       float xx_tensor_read=((values_int[ar_vpot_mean]-aux_vpot_min)*Traj_x_max)/(aux_vpot_max-aux_vpot_min)+Traj_x_min;
       float actual_angle=acos((pow(DCA,2)+pow(DCF,2)-pow(xx_tensor_read,2))/(2*DCA*DCF))*180/PI;
@@ -309,12 +314,12 @@ void elbow_calibration_menu2()
       Serial.println("Enter -1 to exit to the calibration menu");
     }
     delay(100);
-//    readSensors(values_int);
+    //    readSensors(values_int);
     readSensors_filteronly();
     //Calculation for measure the elbow angle
 
     x_tensor_read=((vpot_filter.output()-aux_vpot_min)*Traj_x_max)/(vpot_max_function-aux_vpot_min)+Traj_x_min;
-//    x_tensor_read=((values_int[ar_vpot_mean]-aux_vpot_min)*Traj_x_max)/(vpot_max_function-aux_vpot_min)+Traj_x_min;
+    //    x_tensor_read=((values_int[ar_vpot_mean]-aux_vpot_min)*Traj_x_max)/(vpot_max_function-aux_vpot_min)+Traj_x_min;
     angle_read=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor_read,2))/(2*DCA*DCF));
     Serial.print(Traj_angle);
     Serial.print(", ");
@@ -326,12 +331,117 @@ void elbow_calibration_menu2()
   }while(1);
 }
 
+void elbow_calibration_set_to_eeprom()
+{
+  int full_open_elbow   ;
+  int full_open_compen  ;
+  int max_elbow_angle   ;
+  int min_elbow_angle   ;
+  int angle_vpot_max    ;
+  int angle_vpot_compen ;
+  int angle_vpot_min    ;
+
+  //Ask user input to save in EEPROM
+  Serial.println("Insert the values you want to save to EEPROM in the following order Or '-1' to exit:");
+  Serial.println("full_open_elbow,full_open_compen,max_elbow_angle(in degrees),min_elbow_angle(in degrees),angle_vpot_max,angle_vpot_compen,angle_vpot_min");
+  do
+  {
+    // Treat input
+    if (Serial.available())
+    {
+      full_open_elbow   = Serial.parseInt();
+      if(full_open_elbow<0)
+      {
+        break;
+      }
+      full_open_compen  = Serial.parseInt();
+      max_elbow_angle   = Serial.parseInt();
+      min_elbow_angle   = Serial.parseInt();
+      angle_vpot_max    = Serial.parseInt();
+      angle_vpot_compen = Serial.parseInt();
+      angle_vpot_min    = Serial.parseInt();
+
+
+      if (Serial.read()=='\n'){}
+      Serial.println("Are you certain these are the values you want to save in EEPROM? (Y/N)");
+      Serial.print(full_open_elbow);
+      Serial.print(',');
+      Serial.print(full_open_compen);
+      Serial.print(',');
+      Serial.print(max_elbow_angle);
+      Serial.print(',');
+      Serial.print(min_elbow_angle);
+      Serial.print(',');
+      Serial.print(angle_vpot_max);
+      Serial.print(',');
+      Serial.print(angle_vpot_compen);
+      Serial.print(',');
+      Serial.println(angle_vpot_min);
+
+      while (menu_var!=89 && menu_var!=121 && menu_var!=78 && menu_var!=110)
+      {
+        menu_var=Serial.read();
+      }
+      if(menu_var==89 || menu_var==121)
+      {
+        // Save in EEPROM
+        EEPROM.updateInt(0, full_open_elbow);
+        EEPROM.updateInt(2, full_open_compen-full_open_elbow);
+        EEPROM.updateInt(4, max_elbow_angle);
+        EEPROM.updateInt(6, min_elbow_angle);
+        EEPROM.updateInt(8, angle_vpot_max);
+        EEPROM.updateInt(10, angle_vpot_compen-angle_vpot_max);
+        EEPROM.updateInt(12, angle_vpot_min);
+
+        Serial.println("New Data Saved");
+        // Read values saved in EEPROM
+        FULL_OPEN_ELBOW   = EEPROM.readInt(0);
+        FULL_OPEN_COMPEN  = EEPROM.readInt(2);
+        MAX_ELBOW_ANGLE   = EEPROM.readInt(4)*PI/180;
+        MIN_ELBOW_ANGLE   = EEPROM.readInt(6)*PI/180;
+        ANGLE_VPOT_MAX    = EEPROM.readInt(8);
+        ANGLE_VPOT_COMPEN = EEPROM.readInt(10);
+        ANGLE_VPOT_MIN    = EEPROM.readInt(12);
+        Serial.println("New Data Loaded");
+        Serial.println("");
+        break;
+      }
+      if(menu_var==78 || menu_var==110)
+      {
+        Serial.println("Insert the values you want to save to EEPROM in the following order:");
+        Serial.println("full_open_elbow,full_open_compen,max_elbow_angle(in degrees),min_elbow_angle(in degrees),angle_vpot_max,angle_vpot_compen,angle_vpot_min");
+        menu_var=0;
+        continue;
+      }
+    }
+  }while(1);
+  menu_var=0;
+}
+
+void show_calibration_eeprom_values();
+{
+  Serial.println("Current Values for elbow calibration saved in EEPROM are:");
+  Serial.print(FULL_OPEN_ELBOW);
+  Serial.print(',');
+  Serial.print(FULL_OPEN_COMPEN);
+  Serial.print(',');
+  Serial.print(MAX_ELBOW_ANGLE);
+  Serial.print(',');
+  Serial.print(MIN_ELBOW_ANGLE);
+  Serial.print(',');
+  Serial.print(ANGLE_VPOT_MAX);
+  Serial.print(',');
+  Serial.print(ANGLE_VPOT_COMPEN);
+  Serial.print(',');
+  Serial.println(ANGLE_VPOT_MIN);
+}
+
 void LS_parameters_finder ()
 {
   int values_int[ar_last];
   int equal_mean;
   int register_vpot[comparador];
-  
+
   float angle_rawfilt;
   float loadcell_rawfilt;
   float angle_ant=0;
@@ -339,15 +449,15 @@ void LS_parameters_finder ()
 
   //initializing the position of the test
 
-//  do{
-//    PWM_value=0;
-//    servooldg.write(PWM_value);
-//    delay(100);    
-//    angle_ant=angle_rawfilt;
-//    readSensors_filteronly();
-//    angle_rawfilt=read_elbow_angle(vpot_filter.output());
-//    hysteresis_function(PWM_value);
-//  }while(angle_rawfilt!=angle_ant);
+  //  do{
+  //    PWM_value=0;
+  //    servooldg.write(PWM_value);
+  //    delay(100);
+  //    angle_ant=angle_rawfilt;
+  //    readSensors_filteronly();
+  //    angle_rawfilt=read_elbow_angle(vpot_filter.output());
+  //    hysteresis_function(PWM_value);
+  //  }while(angle_rawfilt!=angle_ant);
 
   do
   {
@@ -371,19 +481,17 @@ void LS_parameters_finder ()
   }while(values_int[ar_vpot_mean]!=equal_mean);
 
   //initializing the speed and aceleration arrays
+  pos_actual=40;
   readSensors_filteronly();
-  angle_filter.input(read_elbow_angle(vpot_filter.output()));
-  angular_measures(angle_filter.output());
+  angular_measures(read_elbow_angle(vpot_filter.output()));
   readSensors_filteronly();
-  angle_filter.input(read_elbow_angle(vpot_filter.output()));
-  angular_measures(angle_filter.output());
-  pos_actual=int(angle_filter.output()*180/PI+0.5);;
-
+  angular_measures(read_elbow_angle(vpot_filter.output()));
 
 
   cont_cycle=0;
-  cont_high=cont_low=100;
-  do{
+  cont_high=cont_low=20;
+  do
+  {
     openclosearmsquarewave();
     cont_cycle++;
     cont_frvar++;
@@ -393,48 +501,37 @@ void LS_parameters_finder ()
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-    
-    do{
+
+    do
+    {
       delayMicroseconds(500);
       t1_time=millis();
       t_time=t1_time-t0_time;
     }while(t_time<const_time);
-    
+
     t0_time=t1_time;
   }while(cont_cycle<41);
 
   //repose cycle
   cont_cycle=0;
   cont_high=cont_low=20;
-  do{
+  do
+  {
     cont_cycle++;
 
-    if(pos_actual<pos_required){
-      pos_actual++;
-    }
-    else{
-      if(pos_actual>pos_required){
-        pos_actual--;
-      }
-    }
-    
     readSensors_filteronly();
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
-//    T_theor=Theorical_model(angle_filter.output());
-//    T_theor=T_theorical_filter.output();
-   
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
 
-    set_elbow_angle(pos_actual*PI/180);
-       
-    do{
+    do
+    {
       delayMicroseconds(500);
       t1_time=millis();
       t_time=t1_time-t0_time;
     }while(t_time<const_time);
-    
+
     t0_time=t1_time;
   }while(cont_cycle<51);
 
@@ -448,7 +545,8 @@ void LS_parameters_finder ()
   cont_high=0;
 
   //Runing cycles of measures
-  do{
+  do
+  {
     if (Serial.available())
     {
       cont_high = cont_low = Serial.parseInt();
@@ -463,27 +561,16 @@ void LS_parameters_finder ()
     {
       openclosearmsquarewave();
       cont_cycle++;
+      cont_frvar++;
 
-    if(pos_actual<pos_required){
-      pos_actual++;
-    }
-    else{
-      if(pos_actual>pos_required){
-        pos_actual--;
-      }
-    }
-    
-    readSensors_filteronly();
-    angle_filter.input(read_elbow_angle(vpot_filter.output()));
-    angular_measures(angle_filter.output());
-    hysteresis_function(PWM_value);
-//    T_theor=Theorical_model(angle_filter.output());
-//    T_theor=T_theorical_filter.output();
-   
-    loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+      tfilter=millis();
+      readSensors_filteronly();
+      angle_filter.input(read_elbow_angle(vpot_filter.output()));
+      angular_measures(angle_filter.output());
+      hysteresis_function(PWM_value);
+      loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+      tfilter=millis()-tfilter;
 
-    set_elbow_angle(pos_actual*PI/180);
-    
       //Sending information over serial
       Serial.print(PWM_value);
       Serial.print(',');
@@ -501,14 +588,16 @@ void LS_parameters_finder ()
       Serial.print(',');
       Serial.print(t_time);
       Serial.println(',');
-      do{
+      do
+      {
         delayMicroseconds(500);
         t1_time=millis();
         t_time=t1_time-t0_time;
       }while(t_time<const_time);
       t0_time=t1_time;
   }
-  else{
+  else
+  {
       delayMicroseconds(500);
   }
   }while(cont_high>=0);
@@ -555,90 +644,105 @@ void LS_parameters_saver()
 
 }
 
-
-void elbow_calibration_set_to_eeprom()
+void LS_parameters_set_to_eeprom()
 {
-  int full_open_elbow   ;
-  int full_open_compen  ;
-  int max_elbow_angle   ;
-  int min_elbow_angle   ;
-  int angle_vpot_max    ;
-  int angle_vpot_compen ;
-  int angle_vpot_min    ;
+  LS_param_array[0] =   0;
+  float lsparam0;
+  float lsparam1;
+  float lsparam2;
+  float lsparam3;
+  float lsparam4;
+  float lsparam5;
+  float lsparam6;
 
   //Ask user input to save in EEPROM
-  Serial.println("Insert the values you want to save to EEPROM in the following order Or '-1' to exit:");
-  Serial.println("full_open_elbow,full_open_compen,max_elbow_angle(in degrees),min_elbow_angle(in degrees),angle_vpot_max,angle_vpot_compen,angle_vpot_min");
+  Serial.println("Enter the parameters of the theorical model Equation");
+  Serial.println("Order: I, F. Friction, F. Weight, H1, H2, Neg. collision limit, Posit. collision limit.");
   do
   {
     // Treat input
     if (Serial.available())
     {
-      full_open_elbow   = Serial.parseInt();
-      if(full_open_elbow<0)
+      lsparam0 = Serial.parseFloat();
+      if(LS_param_array[0]<0)
       {
         break;
       }
-      full_open_compen  = Serial.parseInt();
-      max_elbow_angle   = Serial.parseInt();
-      min_elbow_angle   = Serial.parseInt();
-      angle_vpot_max    = Serial.parseInt();
-      angle_vpot_compen = Serial.parseInt();
-      angle_vpot_min    = Serial.parseInt();
-
+      lsparam1 = Serial.parseFloat();
+      lsparam2 = Serial.parseFloat();
+      lsparam3 = Serial.parseFloat();
+      lsparam4 = Serial.parseFloat();
+      lsparam5 = Serial.parseFloat();
+      lsparam6 = Serial.parseFloat();
 
       if (Serial.read()=='\n'){}
-      Serial.println("Are you certain these are the values you want to save in EEPROM? (y/n)");
-      Serial.print(full_open_elbow);
+      Serial.println("Are you certain these are the values you want to save in EEPROM? (Y/N)");
+      Serial.print(lsparam0);
       Serial.print(',');
-      Serial.print(full_open_compen);
+      Serial.print(lsparam1);
       Serial.print(',');
-      Serial.print(max_elbow_angle);
+      Serial.print(lsparam2);
       Serial.print(',');
-      Serial.print(min_elbow_angle);
+      Serial.print(lsparam3);
       Serial.print(',');
-      Serial.print(angle_vpot_max);
+      Serial.print(lsparam4);
       Serial.print(',');
-      Serial.print(angle_vpot_compen);
+      Serial.print(lsparam5);
       Serial.print(',');
-      Serial.println(angle_vpot_min);
+      Serial.println(lsparam6);
 
       while (menu_var!=89 && menu_var!=121 && menu_var!=78 && menu_var!=110)
       {
         menu_var=Serial.read();
       }
+
       if(menu_var==89 || menu_var==121)
       {
         // Save in EEPROM
-        EEPROM.updateInt(0, full_open_elbow);
-        EEPROM.updateInt(2, full_open_compen);
-        EEPROM.updateInt(4, max_elbow_angle);
-        EEPROM.updateInt(6, min_elbow_angle);
-        EEPROM.updateInt(8, angle_vpot_max);
-        EEPROM.updateInt(10, angle_vpot_compen);
-        EEPROM.updateInt(12, angle_vpot_min);
+        EEPROM.updateInt(14, lsparam0);
+        EEPROM.updateInt(18, lsparam1);
+        EEPROM.updateInt(22, lsparam2);
+        EEPROM.updateInt(26, lsparam3);
+        EEPROM.updateInt(30, lsparam4);
+        EEPROM.updateInt(34, lsparam5);
+        EEPROM.updateInt(38, lsparam6);
 
         Serial.println("New Data Saved");
         // Read values saved in EEPROM
-        FULL_OPEN_ELBOW   = EEPROM.readInt(0);
-        FULL_OPEN_COMPEN  = EEPROM.readInt(2);
-        MAX_ELBOW_ANGLE   = EEPROM.readInt(4)*PI/180;
-        MIN_ELBOW_ANGLE   = EEPROM.readInt(6)*PI/180;
-        ANGLE_VPOT_MAX    = EEPROM.readInt(8);
-        ANGLE_VPOT_COMPEN = EEPROM.readInt(10);
-        ANGLE_VPOT_MIN    = EEPROM.readInt(12);
+        LS_param_array[0]  = EEPROM.readInt(14);
+        LS_param_array[1]  = EEPROM.readInt(18);
+        LS_param_array[3]  = EEPROM.readInt(22);
+        LS_param_array[2]  = EEPROM.readInt(26);
+        LS_param_array[4]  = EEPROM.readInt(30);
+        LS_param_array[5]  = EEPROM.readInt(34);
+        LS_param_array[6]  = EEPROM.readInt(38);
         Serial.println("New Data Loaded");
         Serial.println("");
         break;
       }
+
       if(menu_var==78 || menu_var==110)
       {
-        Serial.println("Insert the values you want to save to EEPROM in the following order:");
-        Serial.println("full_open_elbow,full_open_compen,max_elbow_angle(in degrees),min_elbow_angle(in degrees),angle_vpot_max,angle_vpot_compen,angle_vpot_min");
-        menu_var=0;
+        Serial.println("Enter the parameters of the theorical model Equation");
+        Serial.println("Order: I, F. Friction, F. Weight, H1, H2, Neg. collision limit, Posit. collision limit.");
+        menu_var=-1;
         continue;
       }
     }
   }while(1);
-  menu_var=0;
+  menu_var=-1;
+  Serial.print(LS_param_array[0]);
+  Serial.print(',');
+  Serial.print(LS_param_array[1]);
+  Serial.print(',');
+  Serial.print(LS_param_array[2]);
+  Serial.print(',');
+  Serial.print(LS_param_array[3]);
+  Serial.print(',');
+  Serial.print(LS_param_array[4]);
+  Serial.print(',');
+  Serial.print(LS_param_array[5]);
+  Serial.print(',');
+  Serial.println(LS_param_array[6]);
+
 }

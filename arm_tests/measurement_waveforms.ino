@@ -4,28 +4,27 @@ void openclosearmsquarewave()
 {
   if (cont_cycle%(cont_high+cont_low)<cont_high)
   {
-//    PWM_value=FULL_OPEN_ELBOW;
-//   set_elbow_angle(MAX_ELBOW_ANGLE);
-     pos_required=120;
-//     ramp(pos_required);
-     
+    //    PWM_value=FULL_OPEN_ELBOW;
+    //   set_elbow_angle(MAX_ELBOW_ANGLE);
+     float pos_required=120;
+     ramp(pos_required);
+
   }
 
   if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
   {
-     pos_required=40;
-//     ramp(pos_required);
-//   set_elbow_angle(MIN_ELBOW_ANGLE);
-//    PWM_value=FULL_CLOSE_ELBOW;
+     float pos_required=40;
+     ramp(pos_required);
+     //   set_elbow_angle(MIN_ELBOW_ANGLE);
+     //    PWM_value=FULL_CLOSE_ELBOW;
   }
 }
 
 void ramp(int pos_required)
 {
-  //Serial.println(pos_actual);
   if (pos_actual<pos_required)
   {
-      pos_actual++;
+    pos_actual++;
   }
   else
   {
@@ -91,7 +90,7 @@ void measurement()
   int equal_mean;
   do
   {
-    PWM_value=MIN_ELBOW_ANGLE;
+    PWM_value=0;
     servooldg.write(PWM_value);
     delay(100);
     hysteresis_function(PWM_value);
@@ -109,22 +108,17 @@ void measurement()
     }
     register_vpot[comparador-1]=values_int[ar_vpot_mean];
   }while(values_int[ar_vpot_mean]!=equal_mean);
-  
-
+  pos_actual=40;
   readSensors_filteronly();
-  angle_filter.input(read_elbow_angle(vpot_filter.output()));
-  angular_measures(angle_filter.output());
+  angular_measures(read_elbow_angle(vpot_filter.output()));
   readSensors_filteronly();
-  angle_filter.input(read_elbow_angle(vpot_filter.output()));
-  angular_measures(angle_filter.output());
-  pos_actual=int(angle_filter.output()*180/PI+0.5);;
-
-// angular_measures(read_elbow_angle(values_int[ar_vpot_mean]));
+  angular_measures(read_elbow_angle(vpot_filter.output()));
+  // angular_measures(read_elbow_angle(values_int[ar_vpot_mean]));
   cont_cycle=0;
   cont_frvar=0;
   t0_time=millis();
 
-  cont_high=100;
+  cont_high=20;
   do
   {
     openclosearmsquarewave();
@@ -132,6 +126,7 @@ void measurement()
     cont_frvar++;
 
     readSensors_filteronly();
+
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
@@ -181,27 +176,20 @@ void measurement()
     //loadcell=((values_int[ar_vloadcell]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
     //loadcell_mean=((values_int[ar_vloadcell_mean]-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
 
-    if(pos_actual<pos_required){
-      pos_actual++;
-    }
-    else{
-      if(pos_actual>pos_required){
-        pos_actual--;
-      }
-    }
-    
+
+
+    //   tfilter=millis();
     readSensors_filteronly();
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
     T_theor=Theorical_model(angle_filter.output());
     T_theor=T_theorical_filter.output();
-   
+
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    //    tfilter=millis()-tfilter;
 
-    set_elbow_angle(pos_actual*PI/180);
 
-  
     //Sending information over serial
     Serial.print(PWM_value);
     Serial.print(',');

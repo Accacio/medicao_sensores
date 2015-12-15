@@ -205,7 +205,7 @@ void elbow_continuos_control()
     T_theor=T_theorical_filter.output();
     loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
   
-    Controlled_elbow_angle=collision_control(pos_actual,loadcell_rawfilt,T_theor);
+    Controlled_elbow_angle=collision_control2(pos_actual,loadcell_rawfilt,T_theor);
     Controlled_elbow_angle=DCCangle_filter.output()*PI/180;
     set_elbow_angle(Controlled_elbow_angle);
     force_outbound_flag=force_tolerance(pos_actual,loadcell_rawfilt,T_theor);
@@ -538,6 +538,45 @@ float collision_control(float teta_ref, float Tension_measure, float T_theorical
   float sgm_low=1-1/(1+exp(-((et+4)/Sgm_slope-Sgm_left_lim)));
   float sgm_up=1/(1+exp(-((et-4)/Sgm_slope-Sgm_right_lim)));
   float u=teta_ref+(MIN_ELBOW_ANGLE*180/PI-teta_ref)*sgm_low+(MAX_ELBOW_ANGLE*180/PI-teta_ref)*sgm_up;
+
+//    Serial.print(exp(et+3-Sgm_left_lim));
+//    Serial.print("|");
+//    Serial.print(teta_ref);
+//    Serial.print("|");
+//    
+//    Serial.print(et);
+//    Serial.print("|");
+//    Serial.print(sgm_low*1000);
+//    Serial.print("|");
+//    Serial.print(sgm_up*1000);
+//    Serial.print("|");
+//    Serial.print((MIN_ELBOW_ANGLE-teta_ref)*sgm_low);
+//    Serial.print("|");
+//    Serial.print((MAX_ELBOW_ANGLE-teta_ref)*sgm_up);
+//    Serial.print("|");
+//    Serial.println(u);
+//    Serial.print("|");
+      DCCangle_filter.input(u);
+return u;  
+}
+
+//---- Damping control by colision function
+
+float collision_control2(float teta_ref, float Tension_measure, float T_theorical)
+{
+//  float Tension_theoric=0;  //Place where a function returns the value of the theoric tension
+
+  //definitions
+  float et=Tension_measure-T_theorical;
+  Sgm_left_lim=LS_param_array[5]*(1+tolerance);
+  Sgm_right_lim=LS_param_array[6]*(1+tolerance);
+  
+  //function calculations
+  float sgm_low=1-1/(1+exp(-((et+4)/Sgm_slope2-Sgm_left_lim)));
+  float sgm_up=1/(1+exp(-((et-4)/Sgm_slope2-Sgm_right_lim)));
+  float u_aux=teta_ref-30*sgm_low+30*sgm_up;
+  float u=max(MIN_ELBOW_ANGLE*180/PI,min(MAX_ELBOW_ANGLE*180/PI,u_aux));
+  //float u=teta_ref+(MIN_ELBOW_ANGLE*180/PI-teta_ref)*sgm_low+(MAX_ELBOW_ANGLE*180/PI-teta_ref)*sgm_up;
 
 //    Serial.print(exp(et+3-Sgm_left_lim));
 //    Serial.print("|");

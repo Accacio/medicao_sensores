@@ -108,7 +108,8 @@ float Lh=0.10;
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law
 float LS_param_array[7] = {0.068796,-0.041852,0.50591,0.28639,-0.39691,-6.1495,3.9878};     //vector of parameters definitions obtained after LS calibration function
-float Sgm_slope=2.5;
+float Sgm_slope=2.5; //2.5;
+float Sgm_slope2=0.5; //2.5;
 float tolerance;
 
 //initialization of x_max for the extension of the arm tensor
