@@ -14,7 +14,6 @@
 #define y_accel A9
 #define z_accel A10
 
-
 // Constants
 #define MPOS_DC 32//29// xxx
 #define MPOS_MAX 619//604 //668
@@ -32,20 +31,19 @@
 //Definitions for the elbow
 
 //Utilisar read
-int FULL_OPEN_ELBOW   = EEPROM.readInt(0);   // 41;  // value in PWM to full open the elbow angle
-int FULL_OPEN_COMPEN  = EEPROM.readInt(2);  // 3 ;// to compensante the Hysteresis in the elbow
-int FULL_CLOSE_ELBOW  = 0 ;           // value in PWM to close the elbow angle
+int   FULL_OPEN_ELBOW   = EEPROM.readInt(0);   // 41;  // value in PWM to full open the elbow angle
+int   FULL_OPEN_COMPEN  = EEPROM.readInt(2);  // 3 ;// to compensante the Hysteresis in the elbow
+int   FULL_CLOSE_ELBOW  = 0 ;           // value in PWM to close the elbow angle
 float MAX_ELBOW_ANGLE = EEPROM.readInt(4)*PI/180;  //120*PI/180;   // Max aperture of the elbow angle measure externally
 float MIN_ELBOW_ANGLE = EEPROM.readInt(6)*PI/180;  //40*PI/180;    // Min aperture of the elbow angle, measured exernally
-int ANGLE_VPOT_MAX    = EEPROM.readInt(8);  // 165 ;      // Value in bits of the vpot when is the maximum angle on the elbow
-int ANGLE_VPOT_COMPEN = EEPROM.readInt(10);  // 6 ;    // to compensate the Hysteresis no angle measure
-int ANGLE_VPOT_MIN    = EEPROM.readInt(12);  // 23  ;     // Value in bits of the vpot when is the min angle on the elbow
+int   ANGLE_VPOT_MAX    = EEPROM.readInt(8);  // 165 ;      // Value in bits of the vpot when is the maximum angle on the elbow
+int   ANGLE_VPOT_COMPEN = EEPROM.readInt(10);  // 6 ;    // to compensate the Hysteresis no angle measure
+int   ANGLE_VPOT_MIN    = EEPROM.readInt(12);  // 23  ;     // Value in bits of the vpot when is the min angle on the elbow
 
 //Definitions for the Arm
 #define DCA 0.0575    //Distance of the arm clamping
 #define DCF 0.0475    //Distance of the forearm clamping
 #define DCMF 0.682   //Forearm center of mass
-
 
 enum sensor_array
 {
@@ -65,7 +63,6 @@ enum sensor_array
   ar_last,
 };
 
-
 //angular definitions
 float angle_array [3] = {0,0,0};
 float speed_array [3] = {0,0,0};
@@ -80,7 +77,6 @@ float h2_array [3] = {1,1,1};
 //int Hyst_cont_h2=0;
 //int Hyst_cont_down=2;
 //int Hyst_cont_up=2;
-
 
 unsigned long t0_time;
 unsigned long t1_time;
@@ -98,7 +94,6 @@ float PWM_value=FULL_OPEN_ELBOW;
 int comparador=5;
 int menu_var=-1;
 
-
 //subject defintions
 float La=0.28;
 float Lf=0.26;
@@ -107,10 +102,18 @@ float Lh=0.10;
 //definitions to calibrate control law
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law
-float LS_param_array[7] = {0.068796,-0.041852,0.50591,0.28639,-0.39691,-6.1495,3.9878};     //vector of parameters definitions obtained after LS calibration function
-float Sgm_slope=2.5; //2.5;
+float LS_param_array[7]   //= {-2.4885,-0.20436,0.54144,0.11204,-0.4336,-7.259,8.8801}; //{0.068796,-0.041852,0.50591,0.28639,-0.39691,-6.1495,3.9878};    //vector of parameters definitions obtained after LS calibration function
+LS_param_array[0]=EEPROM.readFloat(14);
+LS_param_array[1]=EEPROM.readFloat(18);
+LS_param_array[2]=EEPROM.readFloat(22);
+LS_param_array[3]=EEPROM.readFloat(26);
+LS_param_array[4]=EEPROM.readFloat(30);
+LS_param_array[5]=EEPROM.readFloat(34);
+LS_param_array[6]=EEPROM.readFloat(38);
+float Sgm_slope=2.5;
 float Sgm_slope2=0.5; //2.5;
 float tolerance;
+
 
 //initialization of x_max for the extension of the arm tensor
 const float  Traj_x_min=sqrt(pow(DCA,2)+pow(DCF,2)-2*DCA*DCF*cos(MIN_ELBOW_ANGLE));
@@ -133,7 +136,7 @@ float fs_speed=0.25;
 FilterOnePole speed_filter( LOWPASS, fs_speed );
 float fs_accel=0.05;
 FilterOnePole accel_filter( LOWPASS, fs_accel );
-float fs_hyster=0.08; 
+float fs_hyster=0.08;
 FilterOnePole h1_filter( LOWPASS, fs_hyster );
 FilterOnePole h2_filter( LOWPASS, fs_hyster );
 float fs_theorical=1;
@@ -145,14 +148,10 @@ FilterOnePole DCCangle_filter( LOWPASS, fs_DCCangle );
 
 Servo servooldg;
 
-
-
-
-
 void setup()
 {
 
-//analogReference(INTERNAL2V56);
+  //analogReference(INTERNAL2V56);
   servooldg.attach(2,MPOS_DC,970); //20, 965
   servooldg.write(PWM_value);
   // initialize serial communication at 9600 bits per second:
