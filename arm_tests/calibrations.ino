@@ -418,7 +418,7 @@ void elbow_calibration_set_to_eeprom()
   menu_var=0;
 }
 
-void show_calibration_eeprom_values();
+void show_calibration_eeprom_values()
 {
   Serial.println("Current Values for elbow calibration saved in EEPROM are:");
   Serial.print(FULL_OPEN_ELBOW);

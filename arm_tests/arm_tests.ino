@@ -102,14 +102,16 @@ float Lh=0.10;
 //definitions to calibrate control law
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law
-float LS_param_array[7]   //= {-2.4885,-0.20436,0.54144,0.11204,-0.4336,-7.259,8.8801}; //{0.068796,-0.041852,0.50591,0.28639,-0.39691,-6.1495,3.9878};    //vector of parameters definitions obtained after LS calibration function
-LS_param_array[0]=EEPROM.readFloat(14);
-LS_param_array[1]=EEPROM.readFloat(18);
-LS_param_array[2]=EEPROM.readFloat(22);
-LS_param_array[3]=EEPROM.readFloat(26);
-LS_param_array[4]=EEPROM.readFloat(30);
-LS_param_array[5]=EEPROM.readFloat(34);
-LS_param_array[6]=EEPROM.readFloat(38);
+float LS_param_array[7]=
+{ EEPROM.readFloat(14),
+  EEPROM.readFloat(18),
+  EEPROM.readFloat(22),
+  EEPROM.readFloat(26),
+  EEPROM.readFloat(30),
+  EEPROM.readFloat(34),
+  EEPROM.readFloat(38)
+};   //= {-2.4885,-0.20436,0.54144,0.11204,-0.4336,-7.259,8.8801}; //{0.068796,-0.041852,0.50591,0.28639,-0.39691,-6.1495,3.9878};    //vector of parameters definitions obtained after LS calibration function
+
 float Sgm_slope=2.5;
 float Sgm_slope2=0.5; //2.5;
 float tolerance;
