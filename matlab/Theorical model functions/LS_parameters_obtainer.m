@@ -9,10 +9,10 @@
 % end
 
 %settings
-cont_high=70;
+cont_high=200;
 cycles=3;
 
-Port_com='com4';
+Port_com='com3';
 serial_flag=0;
 s=serial(Port_com,'Baudrate',115200);
 if (strncmp(s.status,['closed'],4))
