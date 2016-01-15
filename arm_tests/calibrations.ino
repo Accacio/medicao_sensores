@@ -677,19 +677,19 @@ void LS_parameters_set_to_eeprom()
 
       if (Serial.read()=='\n'){}
       Serial.println("Are you certain these are the values you want to save in EEPROM? (Y/N)");
-      Serial.print(lsparam0);
+      Serial.print(lsparam0,4);
       Serial.print(',');
-      Serial.print(lsparam1);
+      Serial.print(lsparam1,4);
       Serial.print(',');
-      Serial.print(lsparam2);
+      Serial.print(lsparam2,4);
       Serial.print(',');
-      Serial.print(lsparam3);
+      Serial.print(lsparam3,4);
       Serial.print(',');
-      Serial.print(lsparam4);
+      Serial.print(lsparam4,4);
       Serial.print(',');
-      Serial.print(lsparam5);
+      Serial.print(lsparam5,4);
       Serial.print(',');
-      Serial.println(lsparam6);
+      Serial.println(lsparam6,4);
 
       while (menu_var!=89 && menu_var!=121 && menu_var!=78 && menu_var!=110)
       {
@@ -699,23 +699,23 @@ void LS_parameters_set_to_eeprom()
       if(menu_var==89 || menu_var==121)
       {
         // Save in EEPROM
-        EEPROM.updateInt(14, lsparam0);
-        EEPROM.updateInt(18, lsparam1);
-        EEPROM.updateInt(22, lsparam2);
-        EEPROM.updateInt(26, lsparam3);
-        EEPROM.updateInt(30, lsparam4);
-        EEPROM.updateInt(34, lsparam5);
-        EEPROM.updateInt(38, lsparam6);
+        EEPROM.updateFloat(14, lsparam0);
+        EEPROM.updateFloat(18, lsparam1);
+        EEPROM.updateFloat(22, lsparam2);
+        EEPROM.updateFloat(26, lsparam3);
+        EEPROM.updateFloat(30, lsparam4);
+        EEPROM.updateFloat(34, lsparam5);
+        EEPROM.updateFloat(38, lsparam6);
 
         Serial.println("New Data Saved");
         // Read values saved in EEPROM
-        LS_param_array[0]  = EEPROM.readInt(14);
-        LS_param_array[1]  = EEPROM.readInt(18);
-        LS_param_array[3]  = EEPROM.readInt(22);
-        LS_param_array[2]  = EEPROM.readInt(26);
-        LS_param_array[4]  = EEPROM.readInt(30);
-        LS_param_array[5]  = EEPROM.readInt(34);
-        LS_param_array[6]  = EEPROM.readInt(38);
+        LS_param_array[0]  = EEPROM.readFloat(14);
+        LS_param_array[1]  = EEPROM.readFloat(18);
+        LS_param_array[3]  = EEPROM.readFloat(22);
+        LS_param_array[2]  = EEPROM.readFloat(26);
+        LS_param_array[4]  = EEPROM.readFloat(30);
+        LS_param_array[5]  = EEPROM.readFloat(34);
+        LS_param_array[6]  = EEPROM.readFloat(38);
         Serial.println("New Data Loaded");
         Serial.println("");
         break;
@@ -731,18 +731,18 @@ void LS_parameters_set_to_eeprom()
     }
   }while(1);
   menu_var=-1;
-  Serial.print(LS_param_array[0]);
+  Serial.print(LS_param_array[0],4);
   Serial.print(',');
-  Serial.print(LS_param_array[1]);
+  Serial.print(LS_param_array[1],4);
   Serial.print(',');
-  Serial.print(LS_param_array[2]);
+  Serial.print(LS_param_array[2],4);
   Serial.print(',');
-  Serial.print(LS_param_array[3]);
+  Serial.print(LS_param_array[3],4);
   Serial.print(',');
-  Serial.print(LS_param_array[4]);
+  Serial.print(LS_param_array[4],4);
   Serial.print(',');
-  Serial.print(LS_param_array[5]);
+  Serial.print(LS_param_array[5],4);
   Serial.print(',');
-  Serial.println(LS_param_array[6]);
+  Serial.println(LS_param_array[6],4);
 
 }
