@@ -67,14 +67,13 @@ void calibrate_pot()
   servooldg.write(0);
   delay(200);
 
-
   for(int i=0;i<num_measures;i++)
   {
 //*change    get_pot_value(i);
     servooldg.write(pospot);
-    pospot=pospot+fraction;
     readSensors_filteronly();
-    for(int j=0;i<COMPARADOR;j++)
+
+    for(int j=0;j<COMPARADOR;j++)
     {
       adder_array[j]=int(vpot_filter.output()+0.5);
     }
@@ -86,17 +85,20 @@ void calibrate_pot()
     for(int j=1;j<COMPARADOR;j++)
     {
       adder_array[j-1]=adder_array[j];
-      adder=+adder_array[j];
+      adder+=adder_array[j];
     }
     adder=int(adder/COMPARADOR+0.5);
     readSensors_filteronly();
     adder_array[COMPARADOR-1]=int(vpot_filter.output()+0.5);
+    Serial.println(adder);
+    Serial.println(adder_array[COMPARADOR-1]);
     }while( adder_array[COMPARADOR-1]!=adder);
 
     Serial.print("Measure of position ");
-    Serial.print(fraction);
+    Serial.print(100*pospot/180);
     Serial.print(" is: ");
     Serial.println(vpot_filter.output());
+    pospot=pospot+fraction;
   }
   Serial.println("End of monitoring Motor potentiometer position");
 }
@@ -669,8 +671,8 @@ void LS_parameters_set_to_eeprom()
         // Read values saved in EEPROM
         LS_param_array[0]  = EEPROM.readFloat(14);
         LS_param_array[1]  = EEPROM.readFloat(18);
-        LS_param_array[3]  = EEPROM.readFloat(22);
-        LS_param_array[2]  = EEPROM.readFloat(26);
+        LS_param_array[2]  = EEPROM.readFloat(22);
+        LS_param_array[3]  = EEPROM.readFloat(26);
         LS_param_array[4]  = EEPROM.readFloat(30);
         LS_param_array[5]  = EEPROM.readFloat(34);
         LS_param_array[6]  = EEPROM.readFloat(38);

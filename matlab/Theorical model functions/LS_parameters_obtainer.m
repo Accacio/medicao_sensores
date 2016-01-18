@@ -9,8 +9,8 @@
 % end
 
 %settings
-cont_high=200;
-cycles=3;
+cont_high=250;
+cycles=5;
 
 Port_com='com3';
 serial_flag=0;

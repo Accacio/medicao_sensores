@@ -56,7 +56,7 @@
 //Utilisar read
 int   FULL_OPEN_ELBOW   = EEPROM.readInt(0);   // 41;  // value in PWM to full open the elbow angle
 int   FULL_OPEN_COMPEN  = EEPROM.readInt(2);  // 3 ;// to compensante the Hysteresis in the elbow
-int   FULL_CLOSE_ELBOW  = 0 ;           // value in PWM to close the elbow angle
+int   FULL_CLOSE_ELBOW  = 0;           // value in PWM to close the elbow angle
 float MAX_ELBOW_ANGLE = EEPROM.readInt(4)*PI/180;  //120*PI/180;   // Max aperture of the elbow angle measure externally
 float MIN_ELBOW_ANGLE = EEPROM.readInt(6)*PI/180;  //40*PI/180;    // Min aperture of the elbow angle, measured exernally
 int   ANGLE_VPOT_MAX    = EEPROM.readInt(8);  // 165 ;      // Value in bits of the vpot when is the maximum angle on the elbow
