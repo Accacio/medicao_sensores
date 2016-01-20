@@ -117,6 +117,14 @@ float La=0.28;
 float Lf=0.26;
 float Lh=0.10;
 
+//elbow movement global variables
+float loadcell_value=0;
+float T_theor=0;
+float Controlled_elbow_angle=0;
+float elbow_angle_required=FULL_OPEN_ELBOW/2;
+int force_outbound_flag=1;
+int angle_step=1;
+
 //definitions to calibrate control law
 float Sgm_left_lim=-2;    //defintion about the left limit of the sigmoid function on the control law
 float Sgm_right_lim=3;    //defintion about the right limit of the sigmoid function on the control law

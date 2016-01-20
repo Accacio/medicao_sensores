@@ -44,29 +44,26 @@ void elbow_menu_movement(){
 //---- Function Elbow Movement without DCC control -------------------
 void elbow_freemovement()
 {
-  // Local Variables
-  float elbow_angle_required=FULL_OPEN_ELBOW/2;
-  float angle_rawfilt;
-  float loadcell_rawfilt;
-  float Tension_measured;
-  float Controlled_elbow_angle;
-  float T_theor;
-  float angle_ref;
-  int angle_step=1;
-  int force_outbound_flag=1;
+  Serial.println("**Entering in the Elbow Movement Function, without control. Free movement**");
+  Serial.println("Notice: In this mode collisions are no took in acount, if exist an obstacle the user can be injured, ");
+  Serial.println("or the mechanical part can be broken.");
+  Serial.println("");
+
+/*change readSensors_byfilters();
+  angle_filter.input(read_elbow_angle(vpot_filter.output()));
+  angular_measures(angle_filter.output());
+  readSensors_byfilters();
+  angle_filter.input(read_elbow_angle(vpot_filter.output()));
+  angular_measures(angle_filter.output());
+  */
 
 //Initialization of the angle, speed and acceleration over the angular measures function
-  readSensors_filteronly();
-  angle_filter.input(read_elbow_angle(vpot_filter.output()));
-  angular_measures(angle_filter.output());
-  readSensors_filteronly();
-  angle_filter.input(read_elbow_angle(vpot_filter.output()));
-  angular_measures(angle_filter.output());
-
+  updatePosition();
   pos_actual=int(angle_filter.output()*180/PI+0.5);;
   set_elbow_angle(pos_actual*PI/180);
+  updatePosition();
 
-  Serial.println("Enter the aperture of the elbow angle desired");
+  Serial.println("->Enter the aperture of the elbow angle desired: ");
   do{
     if (Serial.available())
     {
@@ -90,55 +87,47 @@ void elbow_freemovement()
       }
     }
 
-    readSensors_filteronly();
-    angle_filter.input(read_elbow_angle(vpot_filter.output()));
-    angular_measures(angle_filter.output());
-    hysteresis_function(PWM_value);
+//*change    readSensors_byfilters();
+//*change    angle_filter.input(read_elbow_angle(vpot_filter.output()));
+//*change    angular_measures(angle_filter.output());
+//*change    hysteresis_function(PWM_value);
+    updatePosition();
     Theorical_Model_fun(angle_filter.output());
     T_theor=T_theorical_filter.output();
-    loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-
-//*change    DCC_v1(pos_actual,loadcell_rawfilt,T_theor);
-//*change    Controlled_elbow_angle=DCCv1_angle_filter.output()*PI/180;
+    loadcell_value=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    Controlled_elbow_angle=0;
     set_elbow_angle(pos_actual*PI/180);
-    force_outbound_flag=force_tolerance(pos_actual,loadcell_rawfilt,T_theor);
+    force_outbound_flag=force_tolerance(pos_actual,loadcell_value,T_theor);
 
-    Serial.print(pos_actual);
+    print_Movementinfo();
+/*change    Serial.print(pos_actual);
     Serial.print(",");
     Serial.print(PWM_value);
     Serial.print(",");
-    Serial.print(loadcell_rawfilt);
+    Serial.print(loadcell_value);
     Serial.print(",");
     Serial.print(angle_filter.output()*180/PI);
     Serial.print(",");
 //    Serial.print(T_theor);
 //    Serial.print(",");
-    Serial.print(loadcell_rawfilt-T_theor);
+    Serial.print(loadcell_value-T_theor);
     Serial.print(",");
     Serial.print(force_outbound_flag);
     Serial.print(",");
     Serial.println(Controlled_elbow_angle*180/PI);
+    */
   }while(1);
-
 }
 
 
 //---- Function Elbow Movement with Continuos Control-------------------
 void elbow_continuos_control()
 {
-  float elbow_angle_required=FULL_OPEN_ELBOW/2;
-  float angle_rawfilt;
-  float loadcell_rawfilt;
-  float Tension_measured;
-  float Controlled_elbow_angle;
-  float T_theor;
-  float angle_ref;
-  int angle_step=1;
-  int force_outbound_flag=1;
-
-  Serial.println("Enter the tolerance deviation (percentage increment) value recomended 20:");
-  Serial.println("Tolerance Deviation is the tolerance of disturbance took as normal by the DCC control");
-  Serial.println("higher the value more force is required to stop the movement, and lower the value more suceptible to mechanical noise");
+  Serial.println("**Entering in the Elbow Movement Function, with Damping control by collision**");
+  Serial.println("");
+  Serial.println("(Tolerance Deviation is the tolerance of disturbance took as normal by the DCC control, higher the value");
+  Serial.println(" more force is required to stop the movement, and lower the value more suceptible to mechanical noise)");
+  Serial.println("->Enter the tolerance deviation (percentage increment) value recomended 20: ");
   tolerance=0;
   do
   {
@@ -156,17 +145,19 @@ void elbow_continuos_control()
     }
   }while(tolerance==0);
 
-  readSensors_filteronly();
+  /*change readSensors_byfilters();
   angle_filter.input(read_elbow_angle(vpot_filter.output()));
   angular_measures(angle_filter.output());
-  readSensors_filteronly();
+  readSensors_byfilters();
   angle_filter.input(read_elbow_angle(vpot_filter.output()));
   angular_measures(angle_filter.output());
-
+  */
+  updatePosition();
   pos_actual=int(angle_filter.output()*180/PI+0.5);;
   set_elbow_angle(pos_actual*PI/180);
+  updatePosition();
 
-  Serial.println("Enter the aperture of the elbow angle desired");
+  Serial.println("->Enter the aperture of the elbow angle desired: ");
   do
   {
     if (Serial.available())
@@ -195,37 +186,37 @@ void elbow_continuos_control()
       }
     }
 
-    readSensors_filteronly();
-    angle_filter.input(read_elbow_angle(vpot_filter.output()));
-    angular_measures(angle_filter.output());
-
-    hysteresis_function(PWM_value);
+//*change    readSensors_byfilters();
+//*change    angle_filter.input(read_elbow_angle(vpot_filter.output()));
+//*change    angular_measures(angle_filter.output());
+//*change    hysteresis_function(PWM_value);
+    updatePosition();
     Theorical_Model_fun(angle_filter.output());
     T_theor=T_theorical_filter.output();
-    loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    loadcell_value=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
 
-    DCC_v2(pos_actual,loadcell_rawfilt,T_theor);
+    DCC_v2(pos_actual,loadcell_value,T_theor);
     Controlled_elbow_angle=DCCv2_angle_filter.output()*PI/180;
     set_elbow_angle(Controlled_elbow_angle);
+    force_outbound_flag=force_tolerance(pos_actual,loadcell_value,T_theor);
 
-    force_outbound_flag=force_tolerance(pos_actual,loadcell_rawfilt,T_theor);
-
-    Serial.print(pos_actual);
+    print_Movementinfo();
+/*change    Serial.print(pos_actual);
     Serial.print(",");
     Serial.print(PWM_value);
     Serial.print(",");
-    Serial.print(loadcell_rawfilt);
+    Serial.print(loadcell_value);
     Serial.print(",");
     Serial.print(angle_filter.output()*180/PI);
     Serial.print(",");
 //    Serial.print(T_theor);
 //    Serial.print(",");
-    Serial.print(loadcell_rawfilt-T_theor);
+    Serial.print(loadcell_value-T_theor);
     Serial.print(",");
     Serial.print(force_outbound_flag);
     Serial.print(",");
     Serial.println(Controlled_elbow_angle*180/PI);
-
+    */
   }while(1);
 
 }
@@ -234,18 +225,11 @@ void elbow_continuos_control()
 //---- Function Elbow Movement with Stop Control-------------------
 void elbow_control_stop()
 {
-  Serial.println("Entering in the Elbow Movement Function, with stop control by collision");
-  float elbow_angle_required=FULL_OPEN_ELBOW/2;
-  float angle_rawfilt;
-  float loadcell_rawfilt;
-  float Tension_measured;
-  float Controlled_elbow_angle;
-  float T_theor;
-  float angle_ref;
-  int angle_step=1;
-  int force_outbound_flag=1;
-
-  Serial.println("Enter the tolerance deviation (percentage increment)");
+  Serial.println("**Entering in the Elbow Movement Function, with stop control by collision**");
+  Serial.println("");
+  Serial.println("(Tolerance Deviation is the tolerance of disturbance took as normal by the DCC control, higher the value");
+  Serial.println(" more force is required to stop the movement, and lower the value more suceptible to mechanical noise)");
+  Serial.println("->Enter the tolerance deviation (percentage increment): ");
   tolerance=0;
   do
   {
@@ -262,19 +246,21 @@ void elbow_control_stop()
       Serial.println(tolerance);
     }
   }while(tolerance==0);
-
   tolerance=tolerance+1;
-  readSensors_filteronly();
+
+/*change  readSensors_byfilters();
   angle_filter.input(read_elbow_angle(vpot_filter.output()));
   angular_measures(angle_filter.output());
-  readSensors_filteronly();
+  readSensors_byfilters();
   angle_filter.input(read_elbow_angle(vpot_filter.output()));
   angular_measures(angle_filter.output());
+  */
+  updatePosition();
   pos_actual=int(angle_filter.output()*180/PI+0.5);;
   set_elbow_angle(pos_actual*PI/180);
+  updatePosition();
 
-  Serial.println("Enter the aperture of the elbow angle desired");
- // Serial.println("Ready");
+  Serial.println("->Enter the aperture of the elbow angle desired ");
   do
   {
     if (Serial.available())
@@ -301,44 +287,68 @@ void elbow_control_stop()
       }
     }
 
-    readSensors_filteronly();
+/*change    readSensors_byfilters();
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
+    */
+    updatePosition();
     Theorical_Model_fun(angle_filter.output());
     T_theor=T_theorical_filter.output();
-    loadcell_rawfilt=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+    loadcell_value=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
 
-    DCC_v1(pos_actual,loadcell_rawfilt,T_theor);
+    DCC_v1(pos_actual,loadcell_value,T_theor);
     Controlled_elbow_angle=DCCv1_angle_filter.output()*PI/180;
     set_elbow_angle(Controlled_elbow_angle);
-    force_outbound_flag=force_tolerance(pos_actual,loadcell_rawfilt,T_theor);
+    force_outbound_flag=force_tolerance(pos_actual,loadcell_value,T_theor);
 
     if(force_outbound_flag==0)
     {
       elbow_angle_required=Controlled_elbow_angle*180/PI;
       Serial.println("Obstacle over the trajectory detected, the movement stops");
     }
-
-    Serial.print(pos_actual);
+    print_Movementinfo();
+/*change    Serial.print(pos_actual);
     Serial.print(",");
     Serial.print(PWM_value);
     Serial.print(",");
-    Serial.print(loadcell_rawfilt);
+    Serial.print(loadcell_value);
     Serial.print(",");
     Serial.print(angle_filter.output()*180/PI);
     Serial.print(",");
 //    Serial.print(T_theor);
 //    Serial.print(",");
-    Serial.print(loadcell_rawfilt-T_theor);
+    Serial.print(loadcell_value-T_theor);
     Serial.print(",");
     Serial.print(force_outbound_flag);
     Serial.print(",");
     Serial.print(elbow_angle_required);
     Serial.print(",");
     Serial.println(Controlled_elbow_angle*180/PI);
+    */
   }while(1);
+}
 
+
+//---- Function Print Movement Information to monitoring the behavior or the algorithm
+void print_Movementinfo()
+{
+  Serial.print("Ang. Set: ");
+  Serial.print(pos_actual);
+//*change  Serial.print(PWM_value);
+//*change  Serial.print(",");
+  Serial.print(", Ang. Msr: ");
+  Serial.print(angle_filter.output()*180/PI);
+  Serial.print(", L.C. Msr: ");
+  Serial.print(loadcell_value);
+  Serial.print(", Tens. Calc: ");
+  Serial.print(T_theor);
+  Serial.print(", Tens. Error: ");
+  Serial.print(loadcell_value-T_theor);
+  Serial.print(", Force Outbound Flag: ");
+  Serial.print(force_outbound_flag);
+  Serial.print(", Ang. Controlled: ");
+  Serial.println(Controlled_elbow_angle*180/PI);
 }
 
 
@@ -377,59 +387,6 @@ float read_elbow_angle(int Pot_value)
   float x_tensor=(Pot_value-ANGLE_VPOT_MIN)*Traj_x_max/Traj_angle+Traj_x_min;
   float angle_elbow=acos((pow(DCA,2)+pow(DCF,2)-pow(x_tensor,2))/(2*DCA*DCF));
   return angle_elbow;
-}
-
-
-//---- Function Angular Measure used to update the values of Speed, and Acceleration in the system
-void angular_measures (float angle)
-{
-  for (int i=0;i<2;i++)
-  {
-    angular_time[2-i]=angular_time[1-i];
-    angle_array[2-i]=angle_array[1-i];
-    speed_array[2-i]=speed_array[1-i];
-    accel_array[2-i]=accel_array[1-i];
-  }
-  angular_time[0]=millis();
-  angle_array[0]=angle;
-  speed_array[0]= (angle_array[0]-angle_array[1])*1000/(angular_time[0]-angular_time[1]);
-  accel_array[0]= (speed_array[0]-speed_array[1])*1000/(angular_time[0]-angular_time[1]);
-  speed_filter.input(speed_array[0]);
-  accel_filter.input(accel_array[0]);
-}
-
-
-//---- Function Hysteresis Values Calculation
-void hysteresis_function(float Pwm_value)
-{
-  for (int i=0;i<2;i++)
-  {
-    Pwm_array[2-i]=Pwm_array[1-i];
-    h1_array[2-i]=h1_array[1-i];
-    h2_array[2-i]=h2_array[1-i];
-  }
-  Pwm_array[0]=Pwm_value;
-
-  if (Pwm_array[0]<Pwm_array[1])
-  {
-    h1_array[0]=1;
-    h2_array[0]=0;
-  }
-  else
-  {
-    if(Pwm_array[0]>Pwm_array[1])
-    {
-      h1_array[0]=0;
-      h2_array[0]=1;
-    }
-    else
-    {
-      h1_array[0]=h1_array[1];
-      h2_array[0]=h2_array[1];
-    }
-  }
-  h1_filter.input(h1_array[0]);
-  h2_filter.input(h2_array[0]);
 }
 
 
