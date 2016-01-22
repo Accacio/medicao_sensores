@@ -23,12 +23,6 @@
 // Hardware Pins over Arduino
 #define VPOT_IN A11
 #define LOADCELL_IN A15
-//*change #define VREF_IN A10
-//*change #define VIM_IN A12
-//*change #define POTREF_IN A13
-//*change #define x_accel A8
-//*change #define y_accel A9
-//*change #define z_accel A10
 
 // Geral Constants definition
 #define PI 3.14
@@ -38,8 +32,6 @@
 #define MPOS_DC 32//29// xxx
 #define MPOS_MAX 970//604 //668
 #define const_time 20
-//*change #define CURRENTBIT_DC 109//218//109
-//*change #define CURRENT_GAIN 5.6
 
 
 // Load Cell Constant Definitions
@@ -63,24 +55,6 @@ int   ANGLE_VPOT_MAX    = EEPROM.readInt(8);  // 165 ;      // Value in bits of 
 int   ANGLE_VPOT_COMPEN = EEPROM.readInt(10); // 6 ;    // to compensate the Hysteresis no angle measure
 int   ANGLE_VPOT_MIN    = EEPROM.readInt(12); // 23  ;     // Value in bits of the vpot when is the min angle on the elbow
 
-//*change posible to delete
-//enum sensor_array
-//{
-//  ar_vref=1,
-//  ar_vref_mean,
-//  ar_vpot,
-//  ar_vpot_mean,
-//  ar_vim,
-//  ar_vim_mean,
-//  ar_potref,
-//  ar_potref_mean,
-//  ar_vloadcell,
-//  ar_vloadcell_mean,
-//  ar_xaccel_mean,
-//  ar_yaccel_mean,
-//  ar_zaccel_mean,
-//  ar_last,
-//};
 
 
 //----- Global Variables-------

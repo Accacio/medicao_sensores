@@ -4,7 +4,6 @@ void calibrate_loadcell()
   int aux_lcbit_max=LC_BIT_MAX;
   float aux_lcnewton_min=LC_NEWTON_MIN;
   float aux_lcnewton_max=LC_NEWTON_MAX;
-//*change  int values_int[ar_last];
   float aux_lc;
 
   Serial.println("For calibration of the Load Cell enter: Max Measure (bits), Min Measure (bits), Max Weight (N), Min Weight (N)");
@@ -29,10 +28,6 @@ void calibrate_loadcell()
       Serial.println(aux_lcnewton_min);
       if (Serial.read()=='\n'){}
       }
-//*change    readSensors(values_int);
-//*change    aux_lc=((values_int[ar_vloadcell_mean]-aux_lcbit_min)*(aux_lcnewton_max-aux_lcnewton_min))/(aux_lcbit_max-aux_lcbit_min)+aux_lcnewton_min;
-//*change    Serial.print("Load Cell bit: ");
-//*change    Serial.print(values_int[ar_vloadcell_mean]);
 
     readSensors_byfilters();
     aux_lc=((loadcell_filter.output()-aux_lcbit_min)*(aux_lcnewton_max-aux_lcnewton_min))/(aux_lcbit_max-aux_lcbit_min)+aux_lcnewton_min;
@@ -69,7 +64,6 @@ void calibrate_pot()
 
   for(int i=0;i<num_measures;i++)
   {
-//*change    get_pot_value(i);
     servooldg.write(pospot);
     readSensors_byfilters();
 
@@ -155,7 +149,6 @@ void calibrate_elbow_angle()
 void elbow_calibration_menu1()
 {
   int arm_pos;
-//*change  int values_int[ar_last];
   Serial.println("Enter the value that is required to move from 0 to 180 (bits). Always take count the position of the motor's piston:");
   Serial.println("Enter -1 to exit to the calibration menu");
   do
@@ -402,7 +395,6 @@ void show_calibration_eeprom_values()
 
 void LS_parameters_finder ()
 {
-//*change  int values_int[ar_last];
   int equal_mean;
   int register_vpot[COMPARADOR];
 

@@ -81,7 +81,6 @@ void sine_wave_fqvar()
 
 void measurement()
 {
-//*change  int values_int[ar_last];
   float vref, vpot, vim, potref ,vref_mean, vpot_mean, vim_mean, potref_mean;
   float pot_raw, im, im_mean, loadcell, loadcell_mean, angle;
   float total_accel, angle_filt, angle_rawfilt, loadcell_filt;
