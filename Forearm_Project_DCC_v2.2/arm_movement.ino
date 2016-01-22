@@ -336,8 +336,8 @@ void Theorical_Model_fun(float angle)
 }
 
 
-//---- Function Damping Control by Colision function first version
-void DCC_v1(float teta_ref, float Tension_measure, float T_theorical)
+//---- Function Damping Control by Colision function second version
+void DCC_v2(float teta_ref, float Tension_measure, float T_theorical)
 {
   //definitions
   float et=Tension_measure-T_theorical;
@@ -349,12 +349,12 @@ void DCC_v1(float teta_ref, float Tension_measure, float T_theorical)
   float sgm_up=1/(1+exp(-((et-4)/Sgm_slope2-Sgm_right_lim)));
   float u_aux=teta_ref-30*sgm_low+30*sgm_up;
   float u=max(MIN_ELBOW_ANGLE*180/PI,min(MAX_ELBOW_ANGLE*180/PI,u_aux));
-  DCCv1_angle_filter.input(u);
+  DCCv2_angle_filter.input(u);
 }
 
 
-//---- Function Damping Control by Colision function second version
-void DCC_v2(float teta_ref, float Tension_measure, float T_theorical)
+//---- Function Damping Control by Colision function first version
+void DCC_v1(float teta_ref, float Tension_measure, float T_theorical)
 {
   //definitions
   float et=Tension_measure-T_theorical;
@@ -365,7 +365,7 @@ void DCC_v2(float teta_ref, float Tension_measure, float T_theorical)
   float sgm_low=1-1/(1+exp(-((et+4)/Sgm_slope-Sgm_left_lim)));
   float sgm_up=1/(1+exp(-((et-4)/Sgm_slope-Sgm_right_lim)));
   float u=teta_ref+(MIN_ELBOW_ANGLE*180/PI-teta_ref)*sgm_low+(MAX_ELBOW_ANGLE*180/PI-teta_ref)*sgm_up;
-  DCCv2_angle_filter.input(u);
+  DCCv1_angle_filter.input(u);
 }
 
 
