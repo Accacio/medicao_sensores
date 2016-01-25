@@ -70,12 +70,17 @@ void elbow_freemovement()
       if (Serial.read()=='\n'){}
     }
 
-    if(pos_actual<elbow_angle_required){
+    if(pos_actual<elbow_angle_required)
+    {
       pos_actual=pos_actual+force_outbound_flag*angle_step;
+      pos_actual=min(pos_actual,angle_filter.output()+10);
     }
-    else{
-      if(pos_actual>elbow_angle_required){
+    else
+    {
+      if(pos_actual>elbow_angle_required)
+      {
         pos_actual=pos_actual-force_outbound_flag*angle_step;
+        pos_actual=max(pos_actual,angle_filter.output()+10);
       }
     }
 
@@ -145,12 +150,14 @@ void elbow_continuos_control()
     if(pos_actual<elbow_angle_required)
     {
       pos_actual=pos_actual+force_outbound_flag*angle_step;
+      pos_actual=min(pos_actual,angle_filter.output()+10);
     }
     else
     {
       if(pos_actual>elbow_angle_required)
       {
         pos_actual=pos_actual-force_outbound_flag*angle_step;
+        pos_actual=max(pos_actual,angle_filter.output()+10);
       }
     }
 
@@ -222,12 +229,14 @@ void elbow_control_stop()
     if(pos_actual<elbow_angle_required)
     {
       pos_actual=pos_actual+force_outbound_flag*angle_step;
+      pos_actual=min(pos_actual,angle_filter.output()+10);
     }
     else
     {
       if(pos_actual>elbow_angle_required)
       {
         pos_actual=pos_actual-force_outbound_flag*angle_step;
+        pos_actual=max(pos_actual,angle_filter.output()+10);
       }
     }
 
