@@ -147,22 +147,35 @@ void elbow_continuos_control()
       if (Serial.read()=='\n'){}
     }
 
-    if(pos_actual<elbow_angle_required)
+/*change    if(pos_actual<elbow_angle_required)
     {
-      pos_actual=pos_actual+force_outbound_flag*angle_step;
-      pos_actual=min(pos_actual,angle_filter.output()+10);
+      pos_actual=pos_actual+angle_step;
+      pos_actual=min(pos_actual,angle_filter.output()+20);
     }
     else
     {
       if(pos_actual>elbow_angle_required)
       {
-        pos_actual=pos_actual-force_outbound_flag*angle_step;
-        pos_actual=max(pos_actual,angle_filter.output()+10);
+        pos_actual=pos_actual-angle_step;
+        pos_actual=max(pos_actual,angle_filter.output()-20);
       }
-    }
+      else
+      {
+        if(force_outbound_flag==0)
+        {
+          pos_actual=angle_filter.output()*180/PI;
+        }
+      }
+    }*/
 
+/*change    if(pos_actual+10<angle_filter.output()*180/PI || pos_actual-10>angle_filter.output()*180/PI)
+    {
+      pos_actual=int(angle_filter.output()*180/PI+0.5);
+    }
+*/
 
     updatePosition();
+    ramp_waveform(elbow_angle_required);          //generates the pos_actual value
     Theorical_Model_fun(angle_filter.output());
     T_theor=T_theorical_filter.output();
     loadcell_value=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;

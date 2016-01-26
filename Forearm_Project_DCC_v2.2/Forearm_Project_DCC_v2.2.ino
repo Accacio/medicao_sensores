@@ -82,7 +82,7 @@ int pos_required;
 int percent_high=20;
 int flag=0;
 int cont_cycle=0;
-int cont_frvar=0;
+//*chante int cont_frvar=0;
 float PWM_value=FULL_OPEN_ELBOW;
 int menu_var=-1;
 

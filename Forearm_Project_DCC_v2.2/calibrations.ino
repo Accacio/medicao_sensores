@@ -397,6 +397,7 @@ void LS_parameters_finder ()
 {
   int equal_mean;
   int register_vpot[COMPARADOR];
+  int aux_pos=0;
 
   float angle_rawfilt;
   float angle_ant=0;
@@ -411,9 +412,12 @@ void LS_parameters_finder ()
 
   do
   {
-    PWM_value=0;
+    /*change PWM_value=FULL_CLOSE_ELBOW;
     servooldg.write(PWM_value);
     delay(200);
+    */
+    pos_actual=MIN_ELBOW_ANGLE;
+    set_elbow_angle(pos_actual*PI/180);
     hysteresis_function(PWM_value);
     equal_mean=0;
     for(int i=0;i<COMPARADOR;i++)
@@ -431,27 +435,30 @@ void LS_parameters_finder ()
   }while(register_vpot[COMPARADOR-1]!=equal_mean);
 
   //initializing the speed and aceleration arrays
-  pos_actual=40;
-  readSensors_byfilters();
+
+  //*chage pos_actual=40;
+  /*change readSensors_byfilters();
   angular_measures(read_elbow_angle(vpot_filter.output()));
   readSensors_byfilters();
   angular_measures(read_elbow_angle(vpot_filter.output()));
+  */
+  updatePosition();
+  updatePosition();
 
 
   cont_cycle=0;
   cont_high=cont_low=20;
   do
   {
-    openclosearmsquarewave();
+    opencloseelbowcycle();
     cont_cycle++;
-    cont_frvar++;
-
-    readSensors_byfilters();
+/*change    readSensors_byfilters();
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
     loadcell_value=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-
+    */
+    updatePosition();
     do
     {
       delayMicroseconds(500);
@@ -468,13 +475,13 @@ void LS_parameters_finder ()
   do
   {
     cont_cycle++;
-
-    readSensors_byfilters();
+/*change    readSensors_byfilters();
     angle_filter.input(read_elbow_angle(vpot_filter.output()));
     angular_measures(angle_filter.output());
     hysteresis_function(PWM_value);
     loadcell_value=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-
+    */
+    updatePosition();
     do
     {
       delayMicroseconds(500);
@@ -483,16 +490,14 @@ void LS_parameters_finder ()
     }while(t_time<const_time);
 
     t0_time=t1_time;
-  }while(cont_cycle<51);
-
-
+  }while(cont_cycle<41);
 
   //begin the measures to send for the LS procediment
   Serial.println("Ready");
   cont_cycle=0;
-  cont_frvar=0;
+  cont_high=cont_low=0;
   t0_time=millis();
-  cont_high=0;
+
 
   //Runing cycles of measures
   do
@@ -509,18 +514,24 @@ void LS_parameters_finder ()
     }
     if(cont_high>0)
     {
-      openclosearmsquarewave();
+      opencloseelbowcycle();
       cont_cycle++;
-      cont_frvar++;
 
-      tfilter=millis();
-      readSensors_byfilters();
+//*change      tfilter=millis();
+/*change      readSensors_byfilters();
       angle_filter.input(read_elbow_angle(vpot_filter.output()));
       angular_measures(angle_filter.output());
       hysteresis_function(PWM_value);
-      loadcell_value=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
-      tfilter=millis()-tfilter;
+      */
 
+      // functions just to count the time spend in each interaction
+      Theorical_Model_fun(angle_filter.output());
+      T_theor=T_theorical_filter.output();
+      loadcell_value=((loadcell_filter.output()-LC_BIT_MIN)*(LC_NEWTON_MAX-LC_NEWTON_MIN))/(LC_BIT_MAX-LC_BIT_MIN)+LC_NEWTON_MIN;
+      DCC_v2(aux_pos,loadcell_value,T_theor);
+      aux_pos=force_tolerance(pos_actual,loadcell_value,T_theor);
+      t_time=millis()-t0_time;
+      t0_time=millis();
       //Sending information over serial
       Serial.print(PWM_value);
       Serial.print(',');
@@ -538,20 +549,20 @@ void LS_parameters_finder ()
       Serial.print(',');
       Serial.print(t_time);
       Serial.println(',');
-      do
+/*change      do
       {
         delayMicroseconds(500);
         t1_time=millis();
         t_time=t1_time-t0_time;
       }while(t_time<const_time);
       t0_time=t1_time;
-  }
-  else
-  {
+      */
+    }
+    else
+    {
       delayMicroseconds(500);
-  }
+    }
   }while(cont_high>=0);
-
 }
 
 void LS_parameters_saver()

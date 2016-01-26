@@ -1,39 +1,54 @@
 
 
-void openclosearmsquarewave()
+void opencloseelbowcycle()
 {
   if (cont_cycle%(cont_high+cont_low)<cont_high)
   {
-    //    PWM_value=FULL_OPEN_ELBOW;
-    //   set_elbow_angle(MAX_ELBOW_ANGLE);
-     float pos_required=120;
-     ramp(pos_required);
-
+     float pos_required=MAX_ELBOW_ANGLE;
+//*change     float pos_required=120;
+//*change     ramp(pos_required);
+      //    PWM_value=FULL_OPEN_ELBOW;
+     //   set_elbow_angle(MAX_ELBOW_ANGLE);
   }
 
   if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
   {
-     float pos_required=40;
-     ramp(pos_required);
+      float pos_required=MIN_ELBOW_ANGLE;
+//*change     float pos_required=40;
+//*change     ramp(pos_required);
      //   set_elbow_angle(MIN_ELBOW_ANGLE);
      //    PWM_value=FULL_CLOSE_ELBOW;
   }
+  updatePosition();
+  force_outbound_flag=1;
+  ramp_waveform(pos_required);        //generates de pos_actual value
+  set_elbow_angle(pos_actual*PI/180);
 }
 
-void ramp(int pos_required)
+void ramp_waveform(int pos_required)
 {
   if (pos_actual<pos_required)
   {
-    pos_actual++;
+//*change      pos_actual++;
+    pos_actual=pos_actual+angle_step;
+    pos_actual=min(pos_actual,angle_filter.output()+20);
   }
   else
   {
     if(pos_actual>pos_required)
     {
-      pos_actual--;
+//*change      pos_actual--;
+    pos_actual=pos_actual-angle_step;
+    pos_actual=max(pos_actual,angle_filter.output()-20);
+    }
+    else
+    {
+      if(force_outbound_flag==0)
+      {
+        pos_actual=angle_filter.output()*180/PI;
+      }
     }
   }
-  set_elbow_angle(pos_actual*PI/180);
 }
 
 void square_wave()
@@ -60,24 +75,6 @@ void sine_wave()
     PWM_value=(1.8/2)*percent_high*(1-cos(cont_cycle*PI/cont_high));
   }
 }
-
-void sine_wave_fqvar()
-{
-  if (cont_high==0)
-  {
-    PWM_value=0;
-  }
-  else
-  {
-    PWM_value=(1.8/2)*percent_high*(1-cos(cont_cycle*PI/cont_high));
-    if(cont_frvar>=2*cont_high)
-    {
-      cont_high=cont_high/2;
-      cont_frvar=0;
-    }
-  }
-}
-
 
 void measurement()
 {
@@ -121,15 +118,13 @@ void measurement()
   angular_measures(read_elbow_angle(vpot_filter.output()));
   // angular_measures(read_elbow_angle(values_int[ar_vpot_mean]));
   cont_cycle=0;
-  cont_frvar=0;
   t0_time=millis();
 
   cont_high=20;
   do
   {
-    openclosearmsquarewave();
+    opencloseelbowcycle();
     cont_cycle++;
-    cont_frvar++;
 
     readSensors_byfilters();
 
@@ -147,20 +142,18 @@ void measurement()
     t0_time=t1_time;
   }while(cont_cycle<41);
   cont_cycle=0;
-  cont_frvar=0;
   t0_time=millis();
   cont_high=0;
 
   do
   {
     //square_wave();
-    openclosearmsquarewave();
+    opencloseelbowcycle();
     //sine_wave();
     //sine_wave_fqvar();
 
    // servooldg.write(PWM_value);
     cont_cycle++;
-    cont_frvar++;
 
     //readSensors(values_int);
     //lowpassFilter.input(values_int[ar_vpot_mean]);
