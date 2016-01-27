@@ -2,9 +2,10 @@
 
 void opencloseelbowcycle()
 {
+  float pos_required;
   if (cont_cycle%(cont_high+cont_low)<cont_high)
   {
-     float pos_required=MAX_ELBOW_ANGLE;
+     pos_required=MAX_ELBOW_ANGLE*180/PI;
 //*change     float pos_required=120;
 //*change     ramp(pos_required);
       //    PWM_value=FULL_OPEN_ELBOW;
@@ -13,7 +14,7 @@ void opencloseelbowcycle()
 
   if (cont_cycle==0||cont_cycle%(cont_high+cont_low)>=cont_high)
   {
-      float pos_required=MIN_ELBOW_ANGLE;
+      pos_required=MIN_ELBOW_ANGLE*180/PI;
 //*change     float pos_required=40;
 //*change     ramp(pos_required);
      //   set_elbow_angle(MIN_ELBOW_ANGLE);
@@ -31,7 +32,7 @@ void ramp_waveform(int pos_required)
   {
 //*change      pos_actual++;
     pos_actual=pos_actual+angle_step;
-    pos_actual=min(pos_actual,angle_filter.output()+20);
+    pos_actual=min(pos_actual,angle_filter.output()*180/PI+20);
   }
   else
   {
@@ -39,7 +40,7 @@ void ramp_waveform(int pos_required)
     {
 //*change      pos_actual--;
     pos_actual=pos_actual-angle_step;
-    pos_actual=max(pos_actual,angle_filter.output()-20);
+    pos_actual=max(pos_actual,angle_filter.output()*180/PI-20);
     }
     else
     {

@@ -416,9 +416,10 @@ void LS_parameters_finder ()
     servooldg.write(PWM_value);
     delay(200);
     */
-    pos_actual=MIN_ELBOW_ANGLE;
+    pos_actual=MIN_ELBOW_ANGLE*180/PI;
     set_elbow_angle(pos_actual*PI/180);
     hysteresis_function(PWM_value);
+    delay(500);
     equal_mean=0;
     for(int i=0;i<COMPARADOR;i++)
     {
