@@ -6,7 +6,7 @@ void elbow_menu_movement(){
   do{
     //menu of elbow movement
     Serial.println("Choose an action for Forearm movement:");
-    Serial.println("  1) Trejectory without control");
+    Serial.println("  1) Trajectory without control");
     Serial.println("  2) Trajectory with continuos control");
     Serial.println("  3) Trajectory with control and collision stop");
     Serial.println(" -1) To exit Forearm tests");

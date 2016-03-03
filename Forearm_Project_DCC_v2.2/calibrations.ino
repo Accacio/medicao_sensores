@@ -617,9 +617,35 @@ void LS_parameters_set_to_eeprom()
   float lsparam4;
   float lsparam5;
   float lsparam6;
+  //Show Data in EEPROM
+        
+  LS_param_array[0]  = EEPROM.readFloat(14);
+  LS_param_array[1]  = EEPROM.readFloat(18);
+  LS_param_array[2]  = EEPROM.readFloat(22);
+  LS_param_array[3]  = EEPROM.readFloat(26);
+  LS_param_array[4]  = EEPROM.readFloat(30);
+  LS_param_array[5]  = EEPROM.readFloat(34);
+  LS_param_array[6]  = EEPROM.readFloat(38);
+  
+  Serial.println("Data in EEPROM is:");
+  Serial.print(LS_param_array[0],4);
+  Serial.print(',');
+  Serial.print(LS_param_array[1],4);
+  Serial.print(',');
+  Serial.print(LS_param_array[2],4);
+  Serial.print(',');
+  Serial.print(LS_param_array[3],4);
+  Serial.print(',');
+  Serial.print(LS_param_array[4],4);
+  Serial.print(',');
+  Serial.print(LS_param_array[5],4);
+  Serial.print(',');
+  Serial.println(LS_param_array[6],4);
+  Serial.println("");
 
+        
   //Ask user input to save in EEPROM
-  Serial.println("Enter the parameters of the theorical model Equation");
+  Serial.println("Enter the parameters of the theorical model Equation or write -1 to exit");
   Serial.println("Order: I, F. Friction, F. Weight, H1, H2, Neg. collision limit, Posit. collision limit.");
   do
   {
@@ -627,7 +653,7 @@ void LS_parameters_set_to_eeprom()
     if (Serial.available())
     {
       lsparam0 = Serial.parseFloat();
-      if(LS_param_array[0]<0)
+      if(lsparam0==-1)
       {
         break;
       }
@@ -686,7 +712,7 @@ void LS_parameters_set_to_eeprom()
 
       if(menu_var==78 || menu_var==110)
       {
-        Serial.println("Enter the parameters of the theorical model Equation");
+        Serial.println("Enter the parameters of the theorical model Equation or write -1 to exit");
         Serial.println("Order: I, F. Friction, F. Weight, H1, H2, Neg. collision limit, Posit. collision limit.");
         menu_var=-1;
         continue;

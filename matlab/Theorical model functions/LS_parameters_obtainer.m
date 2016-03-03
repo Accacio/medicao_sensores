@@ -8,9 +8,9 @@
 % ob=instrfind
 % end
 
-%settings
-cont_high=250;
-cycles=5;
+%% Settings
+cont_high=350;
+cycles=1;
 
 Port_com='com3';
 serial_flag=0;
@@ -24,10 +24,10 @@ end
 
 % if(serial_flag==0)
 %     display('Error opening the serial port, please release the serial port connected to the Arduino')
-      
+
 fopen(s);
 
-%initialization of variablesis
+%% Initialization of variablesis
 tmax=cycles*2*cont_high+1; %8000 Para 10 iterations % 2400 3
 t=zeros(tmax,1);
 amostra=[];
@@ -41,7 +41,7 @@ h1=zeros(tmax,1);
 h2=zeros(tmax,1);
 sampl_time=zeros(tmax,1);
 
-%data of the forearm
+%% Data of the forearm
 Lf=0.26; %length of the forearm
 Lh=0.10; %0.10; %lenght of the hand
 Dcf=0.0475;   %clamping of the forearm distance
@@ -52,14 +52,14 @@ g=9.8;
 
 
 
-%choosing the parameters of menu on de arduino
-arduino_data=fscanf(s)
+%% Choosing the parameters of menu on de arduino
+arduino_data=fscanf(s);
 fwrite(s,'Q');
 pause(1);
 
 flag_exit=1;
 while(flag_exit==1)
-   
+    
     while(s.BytesAvailable==0)
         pause(1)
     end
@@ -73,11 +73,11 @@ fprintf(s,num2str(cont_high));
 pause(1);
 
 
-%Collecting data
+%% Collecting data
 for i=1:tmax;
     arduino_data=fscanf(s);
     commas=strfind(arduino_data,',');
-
+    
     PWM_value(i,1)=str2double(arduino_data(1:commas(1)-1));
     position=1;
     tension(i,1)=str2double(arduino_data(commas(position)+1:commas(position+1)-1));
@@ -97,13 +97,13 @@ for i=1:tmax;
 end
 t=t(2:end,1);
 
-%closing the movement over the arduino
+%% Closing the movement over the arduino
 aux='-1';
 fwrite(s,num2str(aux));
 pause(1);
 flushinput(s);
 
-%ploting the curves
+%% Ploting the curves
 figure
 subplot(3,1,1)
 plot(t,PWM_value,t,h1,t,h2)
@@ -117,11 +117,11 @@ subplot(3,1,3)
 plot(t,tension)
 title('Tension over the Load cell and Angle')
 
-%------calculation of the LS the model
+%% Calculation of the LS the model
 
 %----- Trigonometrics to calculate the Beta angle
 x=sqrt(Dca^2+Dcf^2-2*Dca*Dcf*cos(angle));  %tensor calculation
-Beta=asin((Dcf*sin(angle))./x);            %Angle beta calculation        
+Beta=asin((Dcf*sin(angle))./x);            %Angle beta calculation
 
 %----Clamping Tension measured adequacy
 Tc=tension;
@@ -136,7 +136,7 @@ ls3=g*sin(angle)*(Lf+Lh)*dcmf./(Dcf.*sin(Beta));   %Weight force over the forear
 ls4=h1./(Dcf.*sin(Beta));                           %negative hysteresis offset
 ls5=h2./(Dcf.*sin(Beta));                           %positive hysteresis offset
 
-% ls1=ang_accel;    %Inertia force            
+% ls1=ang_accel;    %Inertia force
 % ls2=g*sin(angle).*lin_speed; %Friction force
 % ls3=g*sin(angle)*dist_cmf;  %Weight force over the forearm
 % ls4=h1;                    %negative hysteresis offset
@@ -153,32 +153,50 @@ Error=Tc-Fc_LS;
 Sens_uplim=max(Error(20:end,1))*2;
 Sens_lowlim=min(Error(20:end,1))*1.25;
 
-%Sending parameters to arduino
-aux_param=[num2str(LS_parameters(1))];
-for i=2:size(LS_parameters)
-    aux_param=[aux_param,',',num2str(LS_parameters(i))];
-end
-aux_param=[aux_param,',',num2str(Sens_lowlim),',',num2str(Sens_uplim)]        
-
-% fprintf(s,aux_param);
-% pause(1);
-% arduino_data=fscanf(s)
-
-%ploting the clamping force
+%% ploting the clamping force
 figure
 
 plot(t,Tc,t,Fc_LS,t,Error,'r',t,Sens_uplim,'k',t,Sens_lowlim,'k')
 title('Tension measured vs Clamping force Calculation')
 xlabel('Time')
 ylabel('Tension (Newtons)')
+legend('Tension measured','LS Calculated','Calculated Error')
+%% Sending parameters to arduino
+aux_param=[num2str(LS_parameters(1))];
+for i=2:size(LS_parameters)
+    aux_param=[aux_param,',',num2str(LS_parameters(i))];
+end
+aux_param=[aux_param,',',num2str(Sens_lowlim),',',num2str(Sens_uplim)]
+
+%% 
+
+while true
+    prompt = 'Would you like to save the parameters in the arduino? (y/n))\n\n';
+    y_n = input(prompt,'s');
+    if strcmp('y',y_n)
+        %fprint(s,'-1');
+        fprintf(s,char('w'));
+        pause(1);
+        fprintf(s,char(aux_param));
+        pause(1);
+        flushinput(s);
+        fprintf(s,char(y_n));
+        arduino_data=fscanf(s);
+        disp(arduino_data)
+        arduino_data=fscanf(s);
+        disp(arduino_data)
+        % pause(1);
+        % arduino_data=fscanf(s)
+        break
+    elseif strcmp('n',y_n)
+        break
+    else 
+        disp('Sorry, you must answer y or n.')
+    end
+end
 
 
 
-
-
-
-
-
-%closing the comunication
+%% Closing the comunication
 fclose(s);
 delete(s);
