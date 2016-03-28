@@ -102,10 +102,10 @@ void elbow_freemovement()
 //---- Function Elbow Movement with Continuos Control-------------------
 void elbow_continuos_control()
 {
-  Serial.println("**Entering in the Elbow Movement Function, with Damping control by collision**");
-  Serial.println("");
-  Serial.println("(Tolerance Deviation is the tolerance of disturbance took as normal by the DCC control, higher the value");
-  Serial.println(" more force is required to stop the movement, and lower the value more suceptible to mechanical noise)");
+  //Serial.println("**Entering in the Elbow Movement Function, with Damping control by collision**");
+  //Serial.println("");
+  //Serial.println("(Tolerance Deviation is the tolerance of disturbance took as normal by the DCC control, higher the value");
+  //Serial.println(" more force is required to stop the movement, and lower the value more suceptible to mechanical noise)");
   Serial.println("->Enter the tolerance deviation (percentage increment) value recomended 20: ");
   tolerance=0;
   do
@@ -130,7 +130,7 @@ void elbow_continuos_control()
   set_elbow_angle(pos_actual*PI/180);
   updatePosition();
 
-  Serial.println("->Enter the aperture of the elbow angle desired: ");
+  //Serial.println("->Enter the aperture of the elbow angle desired: ");
   do
   {
     if (Serial.available())
@@ -278,20 +278,21 @@ void elbow_control_stop()
 //---- Function Print Movement Information to monitoring the behavior or the algorithm
 void print_Movementinfo()
 {
-  Serial.print("Ang. Set: ");
+  // Ang. Set , Ang. Msr , L.C Msr , Tens. Calc , Tens. Error , Force Outbound Flag , Ang. Controlled,
   Serial.print(pos_actual);
-  Serial.print(", Ang. Msr: ");
+  Serial.print(",");
   Serial.print(angle_filter.output()*180/PI);
-  Serial.print(", L.C. Msr: ");
+  Serial.print(",");
   Serial.print(loadcell_value);
-  Serial.print(", Tens. Calc: ");
+  Serial.print(",");
   Serial.print(T_theor);
-  Serial.print(", Tens. Error: ");
+  Serial.print(",");
   Serial.print(loadcell_value-T_theor);
-  Serial.print(", Force Outbound Flag: ");
+  Serial.print(",");
   Serial.print(force_outbound_flag);
-  Serial.print(", Ang. Controlled: ");
-  Serial.println(Controlled_elbow_angle*180/PI);
+  Serial.print(",");
+  Serial.print(Controlled_elbow_angle*180/PI);
+  Serial.println(",");
 }
 
 
