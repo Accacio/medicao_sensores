@@ -3,6 +3,12 @@ close all
 clc
 %% Serial Settings
 
+Dados='..\Dados\';
+plots_exp='..\plots\experimentais\';
+if ~exist(plots_exp, 'dir')
+    mkdir(plots_exp);
+end
+
 Port_com='com3';
 s=serial(Port_com,'Baudrate',115200);
 fopen(s);
@@ -127,8 +133,10 @@ end
     hold on
     plot(axisx(i-11*sign(i-11):i),Ang_Msr(i-11*sign(i-11):i),'b','LineWidth',2)
     hold on
-    title('Angle')
+    title('Angle Measurement')
     legend('Reference Angle','Measured Angle')
+    xlabel('Samples')
+    ylabel('Angle')
     axis([0 xmax 0 200 ]);% rever
 
     % samples x
@@ -139,8 +147,10 @@ end
     hold on
     plot(axisx(i-11*sign(i-11):i),Tens_Error(i-11*sign(i-11):i),'r','LineWidth',2)
     hold on
-    title('Tension')
+    title('Tension Measurement')
     legend('Measured Tension','Calculated Tension','Error')
+    xlabel('Samples')
+    ylabel('Tension')
     axis([0 xmax -200 200 ]);% rever
 
 
@@ -153,3 +163,14 @@ toc
 fwrite(s,'-1');
 fclose(s);
 delete(s);
+
+figure(1)
+set(gcf, 'PaperPosition', [0 0 8 8]);
+set(gcf, 'PaperSize', [8 8]);
+saveas(gcf,[plots_exp 'Angle.pdf']);
+
+figure(2)
+set(gcf, 'PaperPosition', [0 0 8 8]);
+set(gcf, 'PaperSize', [8 8]);
+saveas(gcf,[plots_exp 'tension.pdf']);
+
