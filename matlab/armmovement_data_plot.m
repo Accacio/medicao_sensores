@@ -8,6 +8,15 @@ plots_exp='..\plots\experimentais\';
 if ~exist(plots_exp, 'dir')
     mkdir(plots_exp);
 end
+Nome=input('Com ou Sem obstáculo? (C/S)','s')
+switch Nome
+    case {'C','c'}
+        Nome='_com_obstaculo'
+    case {'S','s'}
+        Nome='_sem_obstaculo'
+end
+
+deviation='30'
 
 Port_com='com3';
 s=serial(Port_com,'Baudrate',115200);
@@ -69,7 +78,7 @@ disp(['Continuos Control - 2'])
 fwrite(s,char('2'));% continuos control
 pause(5)
 disp(['Deviation - 20'])
-fwrite(s,char('20'));% 20% of deviation
+fwrite(s,char(deviation));% 20% of deviation
 flushinput(s)
 pause(1)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,19 +89,22 @@ figure2=figure(2);
 for i=2:xmax+1;
 
 
-if i==50
+if i==2
   disp(['110 degrees'])
   fwrite(s,char('110'));% Set angle as 110 degrees
 end
 
-if i==300 %% rever valor
-  disp(['45 degrees - Put some obstacle'])
-  fwrite(s,'45')
+if i==500 %% rever valor
+  disp(['50 degrees - Put some obstacle'])
+  fwrite(s,'50')
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 axisx(i,1)=i;
 %pause(1)
+if s.BytesAvailable>52%34
+    flushinput(s)
+end
 out=fscanf(s)
 commas=strfind(out,',');
  if numel(commas)<7
@@ -167,10 +179,12 @@ delete(s);
 figure(1)
 set(gcf, 'PaperPosition', [0 0 8 8]);
 set(gcf, 'PaperSize', [8 8]);
-saveas(gcf,[plots_exp 'Angle.pdf']);
+saveas(gcf,[plots_exp 'Angle' Nome '.pdf']);
 
 figure(2)
 set(gcf, 'PaperPosition', [0 0 8 8]);
 set(gcf, 'PaperSize', [8 8]);
-saveas(gcf,[plots_exp 'tension.pdf']);
+saveas(gcf,[plots_exp 'tension' Nome '.pdf']);
+
+save([plots_exp '\dados' Nome '.mat'])
 
