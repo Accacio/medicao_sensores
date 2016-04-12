@@ -186,5 +186,20 @@ set(gcf, 'PaperPosition', [0 0 8 8]);
 set(gcf, 'PaperSize', [8 8]);
 saveas(gcf,[plots_exp 'tension' Nome '.pdf']);
 
+figure(3)
+    plot(axisx,LC_Msr,'g','LineWidth',2)
+    hold on
+    plot(axisx,Tens_Calc,'b','LineWidth',2)
+    hold on
+    plot(axisx,Tens_Error,'r','LineWidth',2)
+    hold on
+    plot(axisx,Ang_set,'c','LineWidth',2)
+    hold on
+    plot(axisx,Ang_Msr,'m','LineWidth',2)
+    hold on
+    set(gcf, 'PaperPosition', [0 0 8 8]);
+    set(gcf, 'PaperSize', [8 8]);
+    saveas(gcf,[plots_exp 'tension_and_angle' Nome '.pdf']);  
+
 save([plots_exp '\dados' Nome '.mat'])
 

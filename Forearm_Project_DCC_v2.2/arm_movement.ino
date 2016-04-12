@@ -1,4 +1,4 @@
-//----------- Functions Related to the Elbow---------------------
+//-----------Functions Related to the Elbow---------------------
 
 
 //---- Function Elbow Movement----------------

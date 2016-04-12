@@ -1,4 +1,4 @@
-
+//-----------Functions Related to Signal Acquisition---------------------
 
 void opencloseelbowcycle()
 {

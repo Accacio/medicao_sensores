@@ -1,3 +1,6 @@
+//----------- Functions Related to Calibration of Sensors and Actuators---------------------
+
+//-------- Calibrate LoadCell-----------
 void calibrate_loadcell()
 {
   int aux_lcbit_min=LC_BIT_MIN;
@@ -41,6 +44,7 @@ void calibrate_loadcell()
     }while(1);
 }
 
+//--------- calibrate Potentiometer----------
 void calibrate_pot()
 {
   int num_measures=5;
@@ -618,7 +622,7 @@ void LS_parameters_set_to_eeprom()
   float lsparam5;
   float lsparam6;
   //Show Data in EEPROM
-        
+
   LS_param_array[0]  = EEPROM.readFloat(14);
   LS_param_array[1]  = EEPROM.readFloat(18);
   LS_param_array[2]  = EEPROM.readFloat(22);
@@ -626,7 +630,7 @@ void LS_parameters_set_to_eeprom()
   LS_param_array[4]  = EEPROM.readFloat(30);
   LS_param_array[5]  = EEPROM.readFloat(34);
   LS_param_array[6]  = EEPROM.readFloat(38);
-  
+
   Serial.println("Data in EEPROM is:");
   Serial.print(LS_param_array[0],4);
   Serial.print(',');
@@ -643,7 +647,7 @@ void LS_parameters_set_to_eeprom()
   Serial.println(LS_param_array[6],4);
   Serial.println("");
 
-        
+
   //Ask user input to save in EEPROM
   Serial.println("Enter the parameters of the theorical model Equation or write -1 to exit");
   Serial.println("Order: I, F. Friction, F. Weight, H1, H2, Neg. collision limit, Posit. collision limit.");
